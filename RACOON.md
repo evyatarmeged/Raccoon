@@ -4,6 +4,8 @@
 * DNS
 * TLS versions
 * Ciphers
-* Nikto
-* Nessus ?
+* Nikto / Other vuln scanner ?
+* Tor / Proxy routing
+* Rate limit evasion
+* Detect known WAFs
 * More
