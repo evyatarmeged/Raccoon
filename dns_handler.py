@@ -1,6 +1,5 @@
 from dns import resolver, reversename
 from ipaddress import ip_address
-from pprint import pprint
 
 
 class DNSHandlerException(Exception):
@@ -67,6 +66,7 @@ class DNSHandler(resolver.Resolver):
                         # Add value to record type
                         results.get(record).add(answer)
                 except resolver.NoAnswer:
+                    # Type of record doesn't fit domain or no answer from ns
                     pass
         return {k: None if not v else v for k, v in results.items()}
 

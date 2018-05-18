@@ -1,0 +1,2 @@
+dnspython=1.15.0
+requests=2.18.4
