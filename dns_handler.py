@@ -17,6 +17,7 @@ class DNSHandler(resolver.Resolver):
     def __init__(self, host):
         super().__init__()
         self.host = host.strip()
+        self.cnames = None
 
     @staticmethod
     def _is_ip(ip):
@@ -67,9 +68,9 @@ class DNSHandler(resolver.Resolver):
                         results.get(record).add(answer)
                 except resolver.NoAnswer:
                     # Type of record doesn't fit domain or no answer from ns
-                    pass
+                    continue
         return {k: None if not v else v for k, v in results.items()}
 
-    def detect_waf(self, cnames):
+    def detect_waf(self):
         """Detects WAF protection by CNAME"""
         pass
