@@ -60,7 +60,3 @@ class TLSVersionChecker:
         else:
             result = str(result, encoding='ascii').split('\n')
             return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line])
-
-
-a = TLSVersionChecker('www.walla.co.il')
-a.test_supported_versions()

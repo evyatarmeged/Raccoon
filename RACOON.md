@@ -4,7 +4,6 @@
 * DNS
 * TLS versions
 * Ciphers
-* Nikto / Other vuln scanner ?
 * Tor / Proxy routing
 * Rate limit evasion
 * WHOIS records
