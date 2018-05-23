@@ -17,6 +17,8 @@ class DNSHandler(resolver.Resolver):
     def __init__(self, host):
         super().__init__()
         self.host = host.strip()
+        self.naked = None
+        self.full = None
         self.cnames = None
 
     @staticmethod
@@ -48,9 +50,13 @@ class DNSHandler(resolver.Resolver):
             host = self.host[self.host.index("://") + 3:]
 
         if "www" in host:
-            naked_and_full.append(host.split('www.')[1])
+            naked = host.split('www.')[1]
+            naked_and_full.append(naked)
+            self.naked = naked
         else:
-            naked_and_full.append("www.{}".format(host))
+            full = "www.{}".format(host)
+            naked_and_full.append(full)
+            self.full = full
 
         naked_and_full.append(host) if len(naked_and_full) == 1 else None
         return naked_and_full
