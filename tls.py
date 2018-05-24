@@ -22,6 +22,10 @@ class TLSCipherSuiteChecker:
             result = str(result, encoding='ascii').split('\n')
             return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line])
 
+    def run(self):
+        # Thread Method
+        pass
+
 
 class TLSVersionChecker:
 
@@ -67,6 +71,10 @@ class TLSVersionChecker:
                         ver = line.strip().split(':')[1].strip()
                         is_supported[ver] = True
         return is_supported
+
+    def run(self):
+        # Thread Method
+        pass
 
 
 a = TLSVersionChecker('www.israelpost.co.il')
