@@ -1,13 +1,13 @@
 #### Stuffz that should be performed by Racoon
-* Port scanning (NMAP)
-* URL fuzzing
-* DNS
-* TLS versions
-* Ciphers
-* Tor / Proxy routing
-* Rate limit evasion
-* WHOIS records
-* SQL / NoSQL map
-* robots.txt
-* Detect known WAFs
-* More
+- [ ] Port scanning (NMAP)
+- [ ] URL fuzzing
+- [x] DNS
+- [ ] TLS versions
+- [x] Ciphers
+- [ ] Tor / Proxy routing
+- [ ] Rate limit evasion
+- [ ] WHOIS records
+- [ ] SQL / NoSQL map
+- [ ] robots.txt
+- [ ] Detect known WAFs
+- [ ] More

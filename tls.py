@@ -24,22 +24,18 @@ class TLSCipherSuiteChecker:
 
 
 class TLSVersionChecker:
+
     def __init__(self, host):
         self.host = host
         self.versions = ("tls1", "tls1_1", "tls1_2")
-        self.supported_versions = {
-            "SNI": {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False},
-            "non-SNI": {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
-        }
         self.base_script = "openssl s_client -connect {}:443 ".format(self.host)
 
     def test_supported_versions(self):
         # TODO: should be threaded
-        sni = self._test_sni()
-        non_sni = self._test_non_sni()
-        self.supported_versions["SNI"].update(sni)
-        self.supported_versions["non-SNI"].update(non_sni)
-        return self.supported_versions
+        return {
+            "SNI": self._test_sni(),
+            "non-SNI": self._test_non_sni()
+        }
 
     def _exec_openssl(self, script):
         procs = []
@@ -71,3 +67,7 @@ class TLSVersionChecker:
                         ver = line.strip().split(':')[1].strip()
                         is_supported[ver] = True
         return is_supported
+
+
+a = TLSVersionChecker('www.israelpost.co.il')
+print(a.test_supported_versions())

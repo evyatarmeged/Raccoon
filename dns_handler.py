@@ -76,7 +76,3 @@ class DNSHandler(resolver.Resolver):
                     # Type of record doesn't fit domain or no answer from ns
                     continue
         return {k: None if not v else v for k, v in results.items()}
-
-    def detect_waf(self):
-        """Detects WAF protection by CNAME"""
-        pass
