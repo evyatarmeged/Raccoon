@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE
+import re
 
 
 class TLSCipherSuiteChecker:
@@ -33,13 +34,20 @@ class TLSVersionChecker:
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
         self._base_script = "timeout 7 openssl s_client -connect {}:443 ".format(self.host)
+        self.begin = "-----BEGIN CERTIFICATE-----"
+        self.end = "-----END CERTIFICATE-----"
 
     def test_supported_versions(self):
         # TODO: should be threaded
         return {
-            "SNI": self._test_sni(),
-            "non-SNI": self._test_non_sni()
+            "SNI": self._get_sni_data(),
+            "non-SNI": self._get_non_sni_data()
         }
+
+    def is_certificate(self, text):
+        if self.begin in text and self.end in text:
+            return True
+        return
 
     def _exec_openssl(self, script):
         procs = []
@@ -53,18 +61,37 @@ class TLSVersionChecker:
             outputs.append(str(result, encoding='ascii'))
         return outputs
 
-    def _test_sni(self):
-        outputs = self._exec_openssl(self._base_script + ' -servername {}'.format(self.host))
-        return self._parse_openssl_output(outputs)
+    def _get_sni_data(self):
+        responses = self._exec_openssl(self._base_script + ' -servername {}'.format(self.host))
+        tls_version_dict = self._parse_sclient_output(responses)
+        sans = self._get_sans(responses)
 
-    def _test_non_sni(self):
-        outputs = self._exec_openssl(self._base_script)
-        return self._parse_openssl_output(outputs)
+        # return parsed_results
 
-    def _parse_openssl_output(self, results):
+    def _get_non_sni_data(self):
+        responses = self._exec_openssl(self._base_script)
+        tls_version_dict = self._parse_sclient_output(responses)
+        sans = self._get_sans(responses)
+        # return parsed_results
+
+    def _get_sans(self, responses):
+        sans = set()
+        for res in responses:
+            if self.is_certificate(res):
+                sans = self._parse_san_output(res)
+                break
+        return sans
+
+    def _parse_san_output(self, data):
+        process = Popen(("openssl", "x509", "-noout", "-text"), stdin=PIPE, stderr=PIPE, stdout=PIPE)
+        result, err = process.communicate(input=bytes(data, encoding='ascii'))
+        # TODO: add regex to grep SANs
+        return
+
+    def _parse_sclient_output(self, results):
         is_supported = {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
         for res in results:
-            if "no peer certificate available" in res:
+            if not self.is_certificate(res):
                 continue
             for line in res.split('\n'):
                 if "Protocol" in line:
@@ -75,3 +102,8 @@ class TLSVersionChecker:
     def run(self):
         # Thread Method
         pass
+
+
+from pprint import pprint
+a = TLSVersionChecker("testing site here")
+pprint(a.test_supported_versions())
