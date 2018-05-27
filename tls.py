@@ -27,6 +27,7 @@ class TLSCipherSuiteChecker:
         pass
 
 
+# noinspection PyTypeChecker
 class TLSVersionChecker:
 
     def __init__(self, host):
@@ -36,12 +37,12 @@ class TLSVersionChecker:
         self._base_script = "timeout 7 openssl s_client -connect {}:443 ".format(self.host)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
+        self.cert_pattern = re.compile("{}(.*?){}".format(self.begin, self.end, re.MULTILINE))
 
     def test_supported_versions(self):
-        # TODO: should be threaded
         return {
-            "SNI": self._get_sni_data(),
-            "non-SNI": self._get_non_sni_data()
+            "SNI": self.extract_ssl_data(True),
+            "non-SNI": self.extract_ssl_data()
         }
 
     def is_certificate(self, text):
@@ -49,9 +50,26 @@ class TLSVersionChecker:
             return True
         return
 
-    def _exec_openssl(self, script):
+    def get_certificate(self, text):
+        # TODO: add certificate to extracted data ?
+        pass
+
+    def extract_ssl_data(self, sni=False):
+        # Do for all responses
+        responses = self._exec_openssl(self._base_script, sni)
+        tls_dict = self._parse_sclient_output(responses)
+        # Do for any successful SSL response
+        for res in responses:
+            if self.is_certificate(res):
+                tls_dict["SANs"] = self._parse_san_output(res)
+                break
+        return tls_dict
+
+    def _exec_openssl(self, script, sni=False):
         procs = []
         outputs = []
+        if sni:
+            script += " -servername {}".format(self.host)
         for v in self._versions:
             curr = script + ' -{}'.format(v)
             procs.append(Popen(curr.split(), stdout=PIPE, stderr=PIPE))
@@ -61,32 +79,13 @@ class TLSVersionChecker:
             outputs.append(str(result, encoding='ascii'))
         return outputs
 
-    def _get_sni_data(self):
-        responses = self._exec_openssl(self._base_script + ' -servername {}'.format(self.host))
-        tls_version_dict = self._parse_sclient_output(responses)
-        sans = self._get_sans(responses)
 
-        # return parsed_results
-
-    def _get_non_sni_data(self):
-        responses = self._exec_openssl(self._base_script)
-        tls_version_dict = self._parse_sclient_output(responses)
-        sans = self._get_sans(responses)
-        # return parsed_results
-
-    def _get_sans(self, responses):
-        sans = set()
-        for res in responses:
-            if self.is_certificate(res):
-                sans = self._parse_san_output(res)
-                break
-        return sans
-
-    def _parse_san_output(self, data):
+    @staticmethod
+    def _parse_san_output(data):
         process = Popen(("openssl", "x509", "-noout", "-text"), stdin=PIPE, stderr=PIPE, stdout=PIPE)
         result, err = process.communicate(input=bytes(data, encoding='ascii'))
-        # TODO: add regex to grep SANs
-        return
+        sans = re.findall(r"DNS:\S*\b", str(result, encoding='ascii'))
+        return {san.replace("DNS:", '') for san in sans}
 
     def _parse_sclient_output(self, results):
         is_supported = {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
@@ -98,12 +97,3 @@ class TLSVersionChecker:
                     ver = line.strip().split(':')[1].strip()
                     is_supported[ver] = True
         return is_supported
-
-    def run(self):
-        # Thread Method
-        pass
-
-
-from pprint import pprint
-a = TLSVersionChecker("testing site here")
-pprint(a.test_supported_versions())

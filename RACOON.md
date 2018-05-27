@@ -2,7 +2,7 @@
 - [ ] Port scanning (NMAP)
 - [ ] URL fuzzing
 - [x] DNS
-- [ ] TLS versions
+- [x] TLS versions
 - [x] Ciphers
 - [ ] Tor / Proxy routing
 - [ ] Rate limit evasion
