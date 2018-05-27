@@ -1,4 +1,5 @@
 import re
+# noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 
 
@@ -74,16 +75,17 @@ class TLSVersionChecker:
         if sni:
             script += " -servername {}".format(self.host)
         for v in self._versions:
-            curr = script + ' -{}'.format(v)
+            curr = (script + ' -{}'.format(v)).split()
             procs.append(
                 await create_subprocess_exec(
-                    *curr.split(),
+                    *curr,
                     stdout=PIPE,
                     stderr=PIPE
                 )
             )
         for p in procs:
             result, err = await p.communicate()
+
             outputs.append(result.decode().strip())
         return outputs
 
@@ -96,7 +98,7 @@ class TLSVersionChecker:
             stdout=PIPE
         )
         result, err = await process.communicate(input=bytes(data, encoding='ascii'))
-        sans = re.findall(r"DNS:\S*\b", str(result, encoding='ascii'))
+        sans = re.findall(r"DNS:\S*\b", result.decode().strip())
         return {san.replace("DNS:", '') for san in sans}
 
     def _parse_sclient_output(self, results):
