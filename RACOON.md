@@ -4,6 +4,8 @@
 - [x] DNS
 - [x] TLS versions
 - [x] Ciphers
+- [x] AsyncIO for improved performance
+- [ ] All subdomains
 - [ ] Tor / Proxy routing
 - [ ] Rate limit evasion
 - [ ] WHOIS records

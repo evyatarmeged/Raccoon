@@ -1,5 +1,5 @@
-from subprocess import Popen, PIPE
 import re
+from asyncio.subprocess import PIPE, create_subprocess_exec
 
 
 class TLSCipherSuiteChecker:
@@ -7,24 +7,25 @@ class TLSCipherSuiteChecker:
     def __init__(self, host):
         self.host = host
 
-    def scan_ciphers(self, port=443):
-        script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.host)
-        process = Popen(script.split(), stdout=PIPE, stderr=PIPE)
-        result, err = process.communicate()
-        parsed = self.parse_nmap_outpt(result, err)
+    async def scan_ciphers(self, port=443):
+        print("Started Scanning Ciphers")
+        script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.host).split()
+        process = await create_subprocess_exec(
+            *script,
+            stdout=PIPE,
+            stderr=PIPE
+        )
+        result, err = await process.communicate()
+        if process.returncode != 0:
+            parsed = err.decode().strip()
+        else:
+            parsed = self._parse_nmap_outpt(result)
         return parsed
 
     @staticmethod
-    def parse_nmap_outpt(result, err):
-        if err:
-            return str(err, encoding='ascii')
-        else:
-            result = str(result, encoding='ascii').split('\n')
-            return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line])
-
-    def run(self):
-        # Thread Method
-        pass
+    def _parse_nmap_outpt(result):
+        result = result.decode().strip().split('\n')
+        return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line])
 
 
 # noinspection PyTypeChecker
@@ -39,10 +40,11 @@ class TLSVersionChecker:
         self.end = "-----END CERTIFICATE-----"
         self.cert_pattern = re.compile("{}(.*?){}".format(self.begin, self.end, re.MULTILINE))
 
-    def test_supported_versions(self):
+    async def test_supported_versions(self):
+        print("Started Testing Versions")
         return {
-            "SNI": self.extract_ssl_data(True),
-            "non-SNI": self.extract_ssl_data()
+            "SNI": await self._extract_ssl_data(True),
+            "non-SNI": await self._extract_ssl_data()
         }
 
     def is_certificate(self, text):
@@ -54,36 +56,46 @@ class TLSVersionChecker:
         # TODO: add certificate to extracted data ?
         pass
 
-    def extract_ssl_data(self, sni=False):
+    async def _extract_ssl_data(self, sni=False):
+        """Test for version support (SNI/non-SNI), get all SANs, get certificate"""
         # Do for all responses
-        responses = self._exec_openssl(self._base_script, sni)
+        responses = await self._exec_openssl(self._base_script, sni)
         tls_dict = self._parse_sclient_output(responses)
-        # Do for any successful SSL response
+        # Do for one successful SSL response
         for res in responses:
             if self.is_certificate(res):
-                tls_dict["SANs"] = self._parse_san_output(res)
+                tls_dict["SANs"] = await self._parse_san_output(res)
                 break
         return tls_dict
 
-    def _exec_openssl(self, script, sni=False):
+    async def _exec_openssl(self, script, sni=False):
         procs = []
         outputs = []
         if sni:
             script += " -servername {}".format(self.host)
         for v in self._versions:
             curr = script + ' -{}'.format(v)
-            procs.append(Popen(curr.split(), stdout=PIPE, stderr=PIPE))
+            procs.append(
+                await create_subprocess_exec(
+                    *curr.split(),
+                    stdout=PIPE,
+                    stderr=PIPE
+                )
+            )
         for p in procs:
-            p.wait()
-            result, err = p.communicate()
-            outputs.append(str(result, encoding='ascii'))
+            result, err = await p.communicate()
+            outputs.append(result.decode().strip())
         return outputs
 
-
     @staticmethod
-    def _parse_san_output(data):
-        process = Popen(("openssl", "x509", "-noout", "-text"), stdin=PIPE, stderr=PIPE, stdout=PIPE)
-        result, err = process.communicate(input=bytes(data, encoding='ascii'))
+    async def _parse_san_output(data):
+        process = await create_subprocess_exec(
+            "openssl", "x509", "-noout", "-text",
+            stdin=PIPE,
+            stderr=PIPE,
+            stdout=PIPE
+        )
+        result, err = await process.communicate(input=bytes(data, encoding='ascii'))
         sans = re.findall(r"DNS:\S*\b", str(result, encoding='ascii'))
         return {san.replace("DNS:", '') for san in sans}
 
