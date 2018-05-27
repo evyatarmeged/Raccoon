@@ -9,7 +9,7 @@ class TLSCipherSuiteChecker:
         self.host = host
 
     async def scan_ciphers(self, port=443):
-        print("Started Scanning Ciphers")
+        print("Scanning supported ciphers")
         script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.host).split()
         process = await create_subprocess_exec(
             *script,
@@ -21,6 +21,7 @@ class TLSCipherSuiteChecker:
             parsed = err.decode().strip()
         else:
             parsed = self._parse_nmap_outpt(result)
+        print("Done scanning ciphers")
         return parsed
 
     @staticmethod
@@ -30,23 +31,34 @@ class TLSCipherSuiteChecker:
 
 
 # noinspection PyTypeChecker
-class TLSVersionChecker:
+class TLSDataCollector(TLSCipherSuiteChecker):
 
-    def __init__(self, host):
+    def __init__(self, host, port=443):
+        super().__init__(host)
         self.host = host
+        self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
         self._base_script = "timeout 7 openssl s_client -connect {}:443 ".format(self.host)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
-        self.cert_pattern = re.compile("{}(.*?){}".format(self.begin, self.end, re.MULTILINE))
+        self.sni_data = {}
+        self.non_sni_data = {}
+        self.ciphers = ""
 
-    async def test_supported_versions(self):
-        print("Started Testing Versions")
-        return {
-            "SNI": await self._extract_ssl_data(True),
-            "non-SNI": await self._extract_ssl_data()
-        }
+    async def collect_all(self):
+        print("Collecting TLS data")
+        self.ciphers = await self.scan_ciphers()
+        self.sni_data = await self._extract_ssl_data(True)
+        self.non_sni_data = await self._extract_ssl_data()
+        print("Finished gathering TLS data")
+
+    def are_sans_identical(self):
+        try:
+            if self.sni_data["SANs"] or self.non_sni_data["SANs"]:
+                return self.sni_data["SANs"] == self.non_sni_data["SANs"]
+        except KeyError:
+            return
 
     def is_certificate(self, text):
         if self.begin in text and self.end in text:

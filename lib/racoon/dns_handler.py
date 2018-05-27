@@ -8,20 +8,21 @@ class DNSHandler(resolver.Resolver):
     _resolver = resolver.Resolver()
 
     @classmethod
-    def query_dns(cls, domain, records=("A", "MX", "NS", "CNAME", "SOA")):
+    def query_dns(cls, domains, records=("A", "MX", "NS", "CNAME", "SOA")):
         """
         Query DNS records for host.
-        :param domain: Domain to get DNS Records for
+        :param domains: Iterable of domains to get DNS Records for
         :param records: Iterable of DNS records to get from domain.
         """
         results = {k: set() for k in records}
         for record in records:
-            try:
-                answers = cls._resolver.query(domain, record)
-                for answer in answers:
-                    # Add value to record type
-                    results.get(record).add(answer)
-            except resolver.NoAnswer:
-                # Type of record doesn't fit domain or no answer from ns
-                continue
+            for domain in domains:
+                try:
+                    answers = cls._resolver.query(domain, record)
+                    for answer in answers:
+                        # Add value to record type
+                        results.get(record).add(answer)
+                except resolver.NoAnswer:
+                    # Type of record doesn't fit domain or no answer from ns
+                    continue
         return {k: None if not v else v for k, v in results.items()}
