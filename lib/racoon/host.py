@@ -18,11 +18,12 @@ class Host:
     """
     def __init__(self, host):
         self.host = host.strip()
-        self.naked = None
         self.full = None
+        self.naked = None
+        self.protocol = None
         self._parse_host()
 
-    def _is_ip(self, ip=None):
+    def is_ip(self, ip=None):
         if not ip:
             ip = self.host
         try:
@@ -49,7 +50,7 @@ class Host:
     def _is_proto(self, domain=None):
         if not domain:
             domain = self.host
-        if any(proto in domain for proto in ("https", "http")):
+        if any(domain.startswith(proto) for proto in ("https", "http")):
             return True
 
     def _parse_host(self):
@@ -58,7 +59,7 @@ class Host:
         Many IPs don't have reverse lookup zones associated, so PTRs might fail more often than not
         """
 
-        if self._is_ip(self.host):
+        if self.is_ip(self.host):
             try:
                 rev_name = reversename.from_address(self.host)
                 self.host = str(resolver.query(rev_name, "PTR")[0])
@@ -67,9 +68,11 @@ class Host:
                 raise HostHandlerException("Could not resolve domain from IP. Will not query DNS")
 
         if self._is_proto(self.host):
-            self.host = self.host[self.host.index("://") + 3:]
+            try:
+                self.protocol, self.host = self.host.split("://")
+            except ValueError:
+                print("Could not make domain and protocol from host")
 
-        # Feels like this part needs tweaking due to sub-domains having www
         if self.host.startswith("www"):
             # Extract naked from full and assign
             try:
@@ -77,9 +80,11 @@ class Host:
                 self.full = self.host
             except IndexError:
                 # Got sub-domain
-                print("{} seems to be a sub-domain".format(self.host))
+                print("Detected {} as a sub-domain".format(self.host))
         else:
             # If we have a sub-domain, naked and full relations are irrelevant
             if not self._is_subdomain(self.host):
                 self.full = "www.{}".format(self.host)
                 self.naked = self.host
+            else:
+                print("Detected {} as a sub-domain".format(self.host))

@@ -1,11 +1,13 @@
 #### Stuffz that should be performed by Racoon
 - [ ] Port scanning (NMAP)
-- [ ] URL fuzzing
+- [ ] Aiohttp URL fuzzing
 - [x] DNS
 - [x] TLS versions
 - [x] Ciphers
 - [x] AsyncIO for improved performance
 - [ ] All subdomains
+- [ ] CMS detection
+- [ ] Known Vulns Alert
 - [ ] Tor / Proxy routing
 - [ ] Rate limit evasion
 - [ ] WHOIS records
