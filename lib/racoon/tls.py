@@ -49,7 +49,7 @@ class TLSDataCollector(TLSCipherSuiteChecker):
     async def collect_all(self):
         print("Collecting TLS data")
         self.ciphers = await self.scan_ciphers()
-        self.sni_data = await self._extract_ssl_data(True)
+        self.sni_data = await self._extract_ssl_data(sni=True)
         self.non_sni_data = await self._extract_ssl_data()
         print("Finished gathering TLS data")
 
