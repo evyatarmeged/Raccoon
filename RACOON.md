@@ -14,4 +14,5 @@
 - [ ] SQL / NoSQL map
 - [ ] robots.txt
 - [ ] Detect known WAFs
+- [ ] SNMP scan ?
 - [ ] More

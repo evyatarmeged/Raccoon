@@ -1,55 +1,72 @@
 import random
 import requests
-from requests.exceptions import ProxyError, ConnectTimeout
-from multiprocessing.pool import ThreadPool
+import aiohttp
+import asyncio
+from aiohttp.client_exceptions import ClientProxyConnectionError, ClientHttpProxyError, TooManyRedirects
+from asyncio import TimeoutError
+from fake_useragent import UserAgent
 
 
-# Threaded version. Still considering aiohttp
+USER_AGENT = UserAgent()
 
 
-class URLFuzzer:
+class AsyncURLFuzzer:
+    # TODO: Add proto, edit host to a legit one
+    # TODO: Add sub-domain grabbing for SANs, sub-domain fuzzing in general(?)
 
-    def __init__(self, host, tls_data_collector, threads=50):
+    def __init__(self, host, tls_data_collector):
         self.host = host
         self.tls_data = tls_data_collector
-        self.pool = ThreadPool(threads)
-        self.proxies = []
+        self.proxies = self.get_proxy_list()
+        self.user_agents = self.get_user_agents()
         self.get_proxy_list()
 
-    def get_proxy_list(self):
+    @staticmethod
+    def get_proxy_list():
+        #
+        proxies = []
         response = requests.get('https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list.txt')
         for line in response.text.split('\n')[3:]:
-            # Get only HTTPS and Google passing proxies
-            if "-S" in line and "+" in line:
-                self.proxies.append(line.split()[0])
+            # Get only HTTP (aiohttp doesn't play nice with HTTPS) and Goggle passing proxies
+            if "-S" not in line and "+" in line:
+                proxies.append(line.split()[0])
+        return proxies
 
-    def fetch(self, url, proto="http"):
-        time.sleep(random.uniform(0.05, 0.25))
+    @staticmethod
+    def get_user_agents():
+        user_agents = set()
+        for i in range(10):
+            user_agents.add(USER_AGENT.random)
+        return user_agents
+
+    @staticmethod
+    def print_response(code, url):
+        print("[{}] {}".format(code, url))
+
+    async def _fetch(self, url):
+        asyncio.sleep(random.uniform(0.025, 0.15))
         prx = random.choice(self.proxies)
         try:
-            response = requests.head(
-                "{}://{}/{}".format(proto, self.host, url),
-                proxies={"https": prx},
-                timeout=10
-            )
-            if response.status_code != 404:
-                print("[{}] {}".format(str(response.status_code), url))
-        except (ProxyError, ConnectTimeout):
-            # Bad proxy, remove it from list to save future requests the trouble of failing
-            bad_prx = self.proxies.index(prx)
-            try:
-                self.proxies.remove(bad_prx)
-            # Prevent race condition
-            except ValueError:
-                pass
-            finally:
-                self.fetch(url)
+            async with aiohttp.ClientSession() as session:
+                async with session.head(url, proxy="http://{}".format(prx)) as response:
+                    if response.status != 404:
+                        self.print_response(response.status, url)
+        except (TooManyRedirects, TimeoutError, ClientHttpProxyError, ClientProxyConnectionError) as e:
+            print("Error fuzzing {} through proxy {}".format(url, prx))
+            print(e)
 
-    def fuzz_urls(self, wordlist='/home/mr_evya/PycharmProjects/racoon/lib/utils/fuzzlist'):
-        with open(wordlist, "r") as fuzz_list:
-            fuzz_list = fuzz_list.readlines()
-            self.pool.map(self.fetch, fuzz_list)
+    def fuzz_all(self, wordlist):
+        tasks = []
 
-    def find_subdomains(self, sans):
-        """Extracts all sub-domains from TLSVersionChecker SAN list"""
-        pass
+        with open(wordlist, 'r') as fuzzlist:
+            fuzzlist = fuzzlist.readlines()
+
+        for url in fuzzlist:
+            task = asyncio.ensure_future(self._fetch("http://88.198.233.174:56392{}/".format(url)))
+            tasks.append(task)
+
+        return tasks
+
+# Random time considered, of course
+# 6K Async request fuzzing (no proxies): 133 seconds
+# 6K Async request fuzzing (proxies included): 300 seconds with timeout err (should be caught)
