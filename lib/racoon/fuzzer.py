@@ -34,38 +34,51 @@ class AsyncURLFuzzer:
 
     @staticmethod
     def get_user_agents():
-        user_agents = set()
+        user_agents = []
         for i in range(10):
-            user_agents.add(USER_AGENT.random)
+            user_agents.append(USER_AGENT.random)
         return user_agents
 
     @staticmethod
     def print_response(code, url):
         print("[{}] {}".format(code, url))
 
-    async def _fetch(self, url):
+    async def _fetch(self, url, session, tries=0):
         asyncio.sleep(random.uniform(0.025, 0.15))
         prx = random.choice(self.proxies)
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.head(url, proxy="http://{}".format(prx)) as response:
-                    if response.status != 404:
-                        self.print_response(response.status, url)
+            async with session.head(
+                    "{}/{}".format(self.host, url),
+                    proxy="http://{}".format(prx),
+                    headers={"User-Agent": random.choice(self.user_agents)}
+            ) as response:
+                if response.status != 404 and response.status != 504:
+                    self.print_response(response.status, url)
         except (TooManyRedirects, TimeoutError, ClientHttpProxyError, ClientProxyConnectionError) as e:
-            print("Error fuzzing {} through proxy {}".format(url, prx))
-            print(e)
+            # Some retry mechanism
+            if tries > 2:
+                print("Error fuzzing {} through proxy {}".format(url, prx))
+                print(e)
+            else:
+                await self._fetch(url, session, tries+1)
 
-    def fuzz_all(self, wordlist):
+    async def fuzz_all(self, wordlist="../utils/fuzzlist"):
         tasks = []
 
         with open(wordlist, 'r') as fuzzlist:
             fuzzlist = fuzzlist.readlines()
 
-        for url in fuzzlist:
-            task = asyncio.ensure_future(self._fetch("http://88.198.233.174:56392{}/".format(url)))
-            tasks.append(task)
+        async with aiohttp.ClientSession() as session:
+            for url in fuzzlist:
+                asyncio.ensure_future(self._fetch(url, session))
 
-        return tasks
+        # return tasks
+
+
+a = AsyncURLFuzzer("88.198.233.174:56818", "213")
+runnable = a.fuzz_all()
+loop = asyncio.get_event_loop()
+loop.run_until_complete(a.fuzz_all())
 
 # Random time considered, of course
 # 6K Async request fuzzing (no proxies): 133 seconds
