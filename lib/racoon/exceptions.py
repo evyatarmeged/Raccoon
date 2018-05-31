@@ -1,0 +1,1 @@
+# TODO: Put all exceptions here with a general Racoon exception class
