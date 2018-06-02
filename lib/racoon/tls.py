@@ -31,7 +31,7 @@ class TLSCipherSuiteChecker:
 
 
 # noinspection PyTypeChecker
-class TLSDataCollector(TLSCipherSuiteChecker):
+class TLSInfoScanner(TLSCipherSuiteChecker):
 
     def __init__(self, host, port=443):
         super().__init__(host)
@@ -39,7 +39,7 @@ class TLSDataCollector(TLSCipherSuiteChecker):
         self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
-        self._base_script = "timeout 7 openssl s_client -connect {}:443 ".format(self.host)
+        self._base_script = "timeout 10 openssl s_client -connect {}:443 ".format(self.host)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
         self.sni_data = {}
@@ -51,7 +51,6 @@ class TLSDataCollector(TLSCipherSuiteChecker):
         self.ciphers = await self.scan_ciphers()
         self.sni_data = await self._extract_ssl_data(sni=True)
         self.non_sni_data = await self._extract_ssl_data()
-        print("Finished gathering TLS data")
 
     def are_sans_identical(self):
         try:
@@ -123,3 +122,15 @@ class TLSDataCollector(TLSCipherSuiteChecker):
                     ver = line.strip().split(':')[1].strip()
                     is_supported[ver] = True
         return is_supported
+
+from pprint import pprint
+import asyncio
+
+loop = asyncio.get_event_loop()
+tls = TLSInfoScanner("www.walla.co.il")
+loop.run_until_complete(tls.collect_all())
+loop.close()
+pprint(tls.ciphers)
+pprint(tls.non_sni_data)
+pprint(tls.sni_data)
+pprint(tls.are_sans_identical())

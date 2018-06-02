@@ -1,4 +1,6 @@
-#### Stuffz that should be performed by Racoon
+![Racoon](Raccoon.png)
+### WORK IN PROGRESS
+#### Stuffz that should be performed by Raccoon
 - [ ] Port scan
 - [ ] Service scan
 - [x] URL fuzzing
