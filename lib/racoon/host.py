@@ -3,15 +3,6 @@ from dns import reversename, resolver
 from .dns_handler import DNSHandler
 
 
-class HostHandlerException(Exception):
-    """Host base exception class"""
-    def __init__(self, message='Host Handler Exception'):
-        self._message = message
-
-    def __str__(self):
-        return self._message
-
-
 class Host:
     """
     Host parsing, IP to host resolution (and vice verse), etc

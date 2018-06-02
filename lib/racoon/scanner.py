@@ -1,1 +1,4 @@
-# Scanning goes here
+
+
+class Scanner:
+    pass

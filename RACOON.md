@@ -1,7 +1,7 @@
 #### Stuffz that should be performed by Racoon
 - [ ] Port scan
 - [ ] Service scan
-- [ ] URL fuzzing
+- [x] URL fuzzing
 - [x] DNS
 - [x] TLS versions
 - [x] Ciphers

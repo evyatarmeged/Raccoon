@@ -123,6 +123,3 @@ class TLSDataCollector(TLSCipherSuiteChecker):
                     ver = line.strip().split(':')[1].strip()
                     is_supported[ver] = True
         return is_supported
-
-
-
