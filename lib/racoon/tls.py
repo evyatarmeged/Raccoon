@@ -27,7 +27,7 @@ class TLSCipherSuiteChecker:
     @staticmethod
     def _parse_nmap_outpt(result):
         result = result.decode().strip().split('\n')
-        return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line])
+        return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line]).strip().rstrip()
 
 
 # noinspection PyTypeChecker
@@ -52,13 +52,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
-
-    def are_sans_identical(self):
-        try:
-            if self.sni_data["SANs"] or self.non_sni_data["SANs"]:
-                return self.sni_data["SANs"] == self.non_sni_data["SANs"]
-        except KeyError:
-            return
+        print("Done collecting data")
 
     def is_certificate(self, text):
         if self.begin in text and self.end in text:

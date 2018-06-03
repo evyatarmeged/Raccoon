@@ -22,7 +22,7 @@ class DNSHandler(resolver.Resolver):
                     for answer in answers:
                         # Add value to record type
                         results.get(record).add(answer)
-                except resolver.NoAnswer:
+                except (resolver.NoAnswer, resolver.NXDOMAIN):
                     # Type of record doesn't fit domain or no answer from ns
                     continue
         return {k: None if not v else v for k, v in results.items()}

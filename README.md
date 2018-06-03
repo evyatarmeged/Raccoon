@@ -1,4 +1,5 @@
 ![Racoon](Raccoon.png)
+
 ### WORK IN PROGRESS
 #### Stuffz that should be performed by Raccoon
 - [ ] Port scan
@@ -8,14 +9,13 @@
 - [x] TLS versions
 - [x] Ciphers
 - [x] AsyncIO for improved performance
-- [ ] Sub-domain enumeration
+- [x] Sub-domain enumeration
 - [ ] CMS detection
 - [ ] Known Vulns Alert
 - [x] Tor / Proxy routing
 - [ ] Rate limit evasion
-- [ ] WHOIS records
+- [x] WHOIS records
 - [ ] SQL / NoSQL map
 - [ ] robots.txt
 - [ ] Detect known WAFs
-- [ ] SNMP scan ?
 - [ ] More
