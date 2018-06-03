@@ -46,11 +46,12 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.non_sni_data = {}
         self.ciphers = ""
 
-    async def collect_all(self):
+    async def run_scan(self, sni=True):
         print("Collecting TLS data")
         self.ciphers = await self.scan_ciphers()
-        self.sni_data = await self._extract_ssl_data(sni=True)
         self.non_sni_data = await self._extract_ssl_data()
+        if sni:
+            self.sni_data = await self._extract_ssl_data(sni=sni)
 
     def are_sans_identical(self):
         try:
@@ -122,15 +123,3 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
                     ver = line.strip().split(':')[1].strip()
                     is_supported[ver] = True
         return is_supported
-
-from pprint import pprint
-import asyncio
-
-loop = asyncio.get_event_loop()
-tls = TLSInfoScanner("www.walla.co.il")
-loop.run_until_complete(tls.collect_all())
-loop.close()
-pprint(tls.ciphers)
-pprint(tls.non_sni_data)
-pprint(tls.sni_data)
-pprint(tls.are_sans_identical())

@@ -18,14 +18,18 @@ class SubDomainEnumerator:
 
     def find_subdomains_in_sans(self):
         print("Trying to find sub-domains in certificate SANs")
+
         pass
 
     def google_dork(self):
         print("Looking for sub-domains in Google")
+
         pass
 
     def bruteforce(self):
+        print("Trying to detect sub-domains bruteforce")
         sub_domain_fuzzer = URLFuzzer(self.host, wordlist=self.domain_list, tor_routing=self.tor_routing)
-        print("Trying to detect sub-domains by bruteforce")
+        sub_domain_fuzzer.fuzz_all(sub_domain=True)
+
         pass
 

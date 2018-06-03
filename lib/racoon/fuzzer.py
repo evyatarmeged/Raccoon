@@ -80,15 +80,12 @@ class URLFuzzer:
             if res.status_code not in self.ignored_error_codes:
                 self.print_response(res.status_code, url)
 
-        except ProxyError as e:
+        except ProxyError:
             # Basic fail over and proxy sanity check. If proxy is down after 5 tries, remove it
             if tries > 4:
                 if not self.tor_routing:
                     to_drop = list(proxies.values())[0]
                     print("Failed to connect to proxy {} 5 times. Dropping it from list".format(to_drop))
-                    # DEBUG:
-                    print(e)
-
                     try:
                         # Handles race conditions
                         self.proxies.remove(to_drop)
@@ -98,14 +95,14 @@ class URLFuzzer:
                     raise FuzzerException("Cannot seem to connect to TOR. Stopping URL fuzzing...")
             else:
                 # Recursive fail-over attempt
-                self.fetch(url=url, prx_dict=proxies, tries=tries + 1)
-        except ConnectionError as e:
+                self.fetch(url=url, prx_dict=proxies, tries=tries+1)
+        except ConnectionError:
             if not sub_domain:
                 if refuse_count > 25:
                     raise FuzzerException("Connections are being actively refused by the target.\n"
                                           "Maybe add a greater sleep interval ?\nStopping URL fuzzing...")
                 else:
-                    self.fetch(url=url, prx_dict=prx_dict, tries=tries, refuse_count=refuse_count + 1)
+                    self.fetch(url=url, prx_dict=proxies, tries=tries, refuse_count=refuse_count+1)
 
     def fuzz_all(self, sub_domain=False):
         if self.tor_routing:
@@ -117,8 +114,7 @@ class URLFuzzer:
             try:
                 with open(self.proxy_list, "r") as file:
                     file = file.readlines()
-                    file = [x.replace("\n", "") for x in file]
-                    self.proxies = file
+                    self.proxies = [x.replace("\n", "") for x in file]
             except FileNotFoundError:
                 raise FuzzerException("Cannot read proxies from {}. Will not perform Fuzzing".format(self.proxy_list))
 
