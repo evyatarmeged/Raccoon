@@ -17,7 +17,7 @@ USER_AGENT = UserAgent()
 
 class URLFuzzer:
 
-    def __init__(self, target, threads=100, proxy_list=None, wordlist="../utils/fuzzlist",
+    def __init__(self, target, threads=100, proxy_list=None, wordlist="../wordlists/fuzzlist",
                  tor_routing=False, ignored_error_codes=(404, 504)):
         self.target = target
         self.threads = threads
@@ -36,7 +36,7 @@ class URLFuzzer:
         return user_agents
 
     @staticmethod
-    def print_response(code, url):
+    def _print_response(code, url):
         if 300 > code >= 200:
             color = COLOR.GREEN
         elif 400 > code >= 300:
@@ -47,7 +47,7 @@ class URLFuzzer:
             color = COLOR.RESET
         print("{} [{}] {} {}".format(color, code, url, COLOR.RESET))
 
-    def fetch(self, uri, proto="http", sub_domain=False, prx_dict=None, tries=0, refuse_count=0):
+    def _fetch(self, uri, proto="http", sub_domain=False, prx_dict=None, tries=0, refuse_count=0):
         """
         Send a HEAD request to URL and print response code if it's not in ignored_error_codes
 
@@ -82,7 +82,7 @@ class URLFuzzer:
                 headers={"User-Agent": random.choice(self.user_agents)},
                 proxies=proxies, allow_redirects=True)
             if res.status_code not in self.ignored_error_codes:
-                self.print_response(res.status_code, url)
+                self._print_response(res.status_code, url)
 
         except ProxyError:
             # Basic fail over and proxy sanity check. If proxy is down after 5 tries, remove it
@@ -99,21 +99,21 @@ class URLFuzzer:
                     raise FuzzerException("Cannot seem to connect to TOR. Stopping URL fuzzing...")
             else:
                 # Recursive fail-over attempt
-                self.fetch(uri=uri,
-                           proto=proto,
-                           prx_dict=proxies,
-                           tries=tries + 1)
+                self._fetch(uri=uri,
+                            proto=proto,
+                            prx_dict=proxies,
+                            tries=tries + 1)
         except ConnectionError:
             if not sub_domain:
                 if refuse_count > 25:
                     raise FuzzerException("Connections are being actively refused by the target.\n"
                                           "Maybe add a greater sleep interval ?\nStopping URL fuzzing...")
                 else:
-                    self.fetch(uri=uri,
-                               proto=proto,
-                               prx_dict=proxies,
-                               tries=tries,
-                               refuse_count=refuse_count+1)
+                    self._fetch(uri=uri,
+                                proto=proto,
+                                prx_dict=proxies,
+                                tries=tries,
+                                refuse_count=refuse_count+1)
 
     def fuzz_all(self, proto="http", sub_domain=False):
         if self.tor_routing:
@@ -129,7 +129,6 @@ class URLFuzzer:
             except FileNotFoundError:
                 raise FuzzerException("Cannot read proxies from {}. Will not perform Fuzzing".format(self.proxy_list))
 
-        print("Fuzzing URLs from {}".format(self.wordlist))
         try:
             with open(self.wordlist, "r") as file:
                 fuzzlist = file.readlines()
@@ -137,5 +136,7 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
+        print("Fuzzing URLs from {}".format(self.wordlist))
+
         pool = ThreadPool(self.threads)
-        pool.map(partial(self.fetch, proto=proto, sub_domain=sub_domain), fuzzlist)
+        pool.map(partial(self._fetch, proto=proto, sub_domain=sub_domain), fuzzlist)

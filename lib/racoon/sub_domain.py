@@ -6,9 +6,16 @@ from fuzzer import URLFuzzer
 
 class SubDomainEnumerator:
 
-    def __init__(self, target, sans, tor_routing, proxy_list=None,
-                 domain_list="../utils/subdomains", sans_lookup=True,
-                 google_dork_lookup=True, bruteforce_lookup=True):
+    def __init__(self,
+                 target,
+                 sans,
+                 tor_routing,
+                 proxy_list=None,
+                 domain_list="../wordlists/subdomains",
+                 sans_lookup=True,
+                 google_dork_lookup=True,
+                 bruteforce_lookup=True):
+
         self.target = target
         self.sans = sans
         self.proxy_list = proxy_list

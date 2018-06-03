@@ -11,9 +11,9 @@
 - [x] AsyncIO for improved performance
 - [x] Sub-domain enumeration
 - [ ] CMS detection
-- [ ] Known Vulns Alert
+- [ ] Web Vulnerabilities Detection
 - [x] Tor / Proxy routing
-- [ ] Rate limit evasion
+- [ ] Rate limit evasion support
 - [x] WHOIS records
 - [ ] SQL / NoSQL map
 - [ ] robots.txt

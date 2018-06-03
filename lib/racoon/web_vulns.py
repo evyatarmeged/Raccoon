@@ -20,3 +20,10 @@ class WebAppVulnerabilityScanner:
     def xss_exists(self):
         pass
 
+    def cors_wildcard(self):
+        pass
+
+    def get_robots_txt(self):
+        pass
+
+

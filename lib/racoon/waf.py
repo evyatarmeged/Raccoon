@@ -12,32 +12,41 @@ class WAFApplicationMethods:
         service = "CloudFront"
         waf_headers = ("Via", "X-cache")
         if any(h in headers.keys() for h in waf_headers) and any(service.lower() in val for val in headers.values()):
-            return True
+            return "CloudFront"
 
         if headers.get(SERVER) == service:
-            return True
+            return "CloudFront"
+        return
 
     @staticmethod
     def detect_incapsula(headers):
         if "X-Iinfo" in headers.keys() or headers.get("X-CDN") == "Incapsula":
-            return True
+            return "Incapsula"
+        return
 
     @staticmethod
     def detect_distil( headers):
         if headers.get("x-distil-cs"):
-            return True
+            return "Distil Networks"
+        return
 
     @staticmethod
     def detect_cloudflare(headers):
-        return "CF-RAY" in headers.keys() or headers.get(SERVER) == "cloudfront"
+        if "CF-RAY" in headers.keys() or headers.get(SERVER) == "cloudflare":
+            return "Cloudflare"
+        return
 
     @staticmethod
     def detect_edgecast(headers):
-        return SERVER in headers.keys() and "ECD" in headers[SERVER]
+        if SERVER in headers.keys() and "ECD" in headers[SERVER]:
+            return "Edgecast"
+        return
 
     @staticmethod
     def detect_maxcdn(headers):
-        return SERVER in headers.keys() and "NetDNA-cache" in headers[SERVER]
+        if SERVER in headers.keys() and "NetDNA-cache" in headers[SERVER]:
+            return "MaxCDN"
+        return
 
 
 class WAF:
@@ -56,8 +65,13 @@ class WAF:
         self.cnames = dns_records.get('CNAME')
         self.ua = UserAgent()
 
+    @staticmethod
+    def waf_detected(name):
+        print("Detected {} WAF presence in web application".format(name))
+
     def detect(self):
-        self._detect_by_cname()
+        if self.cnames:
+            self._detect_by_cname()
         self._detect_by_application(self.ua.random)
 
     def _detect_by_cname(self):
@@ -67,8 +81,9 @@ class WAF:
 
     def _detect_by_application(self, ua):
         # TODO: Add HTTP status code sanitation
-        ua = ua.random
-        response = requests.head('http://{}'.format(self.host), headers={'User-Agent': ua})
+        response = requests.head('http://{}'.format(self.host), headers={'User-Agent': ua}, allow_redirects=True)
         for method in WAFApplicationMethods.__dict__:
             if callable(getattr(WAFApplicationMethods, method)):
-                print(getattr(WAFApplicationMethods, method)(response.headers))
+                result = getattr(WAFApplicationMethods, method)(response.headers)
+                if result:
+                    self.waf_detected(result)
