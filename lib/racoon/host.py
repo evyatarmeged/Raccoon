@@ -85,4 +85,3 @@ class Host:
             print("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target
             self.naked = ".".join(self.fqdn.split('.')[1:])
-

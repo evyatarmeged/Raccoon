@@ -17,9 +17,9 @@ USER_AGENT = UserAgent()
 
 class URLFuzzer:
 
-    def __init__(self, host, threads=100, proxy_list=None, wordlist="../utils/fuzzlist",
+    def __init__(self, target, threads=100, proxy_list=None, wordlist="../utils/fuzzlist",
                  tor_routing=False, ignored_error_codes=(404, 504)):
-        self.host = host
+        self.target = target
         self.threads = threads
         self.proxy_list = proxy_list
         self.wordlist = wordlist
@@ -73,9 +73,9 @@ class URLFuzzer:
 
         try:
             if not sub_domain:
-                url = "{}://{}/{}".format(proto, self.host, uri)
+                url = "{}://{}/{}".format(proto, self.target, uri)
             else:
-                url = "{}://{}.{}".format(proto, uri, self.host)
+                url = "{}://{}.{}".format(proto, uri, self.target)
 
             res = requests.head(
                 url,
