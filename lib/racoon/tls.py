@@ -60,8 +60,17 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         return
 
     def get_certificate(self, text):
-        # TODO: add certificate to extracted data ?
+        ######
         pass
+
+    # TODO: finish
+    async def heartbleed_vulnerable(self):
+        script = self._base_script + "-tlsextdebug"
+        proc = await create_subprocess_exec(
+            script.split(),
+            stdout=PIPE,
+            stderr=PIPE
+        )
 
     async def _extract_ssl_data(self, sni=False):
         """Test for version support (SNI/non-SNI), get all SANs, get certificate"""

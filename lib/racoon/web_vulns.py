@@ -1,11 +1,14 @@
+import requests
+from bs4 import BeautifulSoup
 
 
-class WebAppVulnerabilityScanner:
+class WebAppVulnDetector:
 
-    def __init__(self):
-        pass
+    def __init__(self, target):
+        self.target = target
 
     def detect_cms(self):
+        # Headless browser ? oh man
         pass
 
     def find_login_page(self):
@@ -25,5 +28,4 @@ class WebAppVulnerabilityScanner:
 
     def get_robots_txt(self):
         pass
-
 
