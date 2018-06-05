@@ -3,9 +3,8 @@ import time
 import requests
 from functools import partial
 from multiprocessing.pool import ThreadPool
-from requests.exceptions import ProxyError, ConnectionError
+from requests.exceptions import ProxyError, ConnectionError, TooManyRedirects
 from fake_useragent import UserAgent
-from urllib3.exceptions import ProxySchemeUnknown
 from exceptions import FuzzerException
 from coloring import COLOR
 
@@ -36,16 +35,17 @@ class URLFuzzer:
         return user_agents
 
     @staticmethod
-    def _print_response(code, url):
+    def _print_response(code, url, headers):
         if 300 > code >= 200:
             color = COLOR.GREEN
         elif 400 > code >= 300:
             color = COLOR.BLUE
+            url += " redirects to {}".format(headers.get("Location"))
         elif 510 > code >= 400:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        print("{} [{}] {} {}".format(color, code, url, COLOR.RESET))
+        print("{}{} [{}] {} ".format(color, COLOR.RESET, code, url))
 
     def _fetch(self, uri, proto="http", sub_domain=False, prx_dict=None, tries=0, refuse_count=0):
         """
@@ -80,16 +80,16 @@ class URLFuzzer:
             res = requests.head(
                 url,
                 headers={"User-Agent": random.choice(self.user_agents)},
-                proxies=proxies, allow_redirects=True)
+                proxies=proxies)
             if res.status_code not in self.ignored_error_codes:
-                self._print_response(res.status_code, url)
+                self._print_response(res.status_code, url, res.headers)
 
         except ProxyError:
             # Basic fail over and proxy sanity check. If proxy is down after 5 tries, remove it
             if tries > 4:
                 if not self.tor_routing:
                     to_drop = list(proxies.values())[0]
-                    print("Failed to connect to proxy {} 5 times. Dropping it from list".format(to_drop))
+                    print("5 connection errors received from {}.\n Dropping it from proxy list".format(to_drop))
                     try:
                         # Handles race conditions
                         self.proxies.remove(to_drop)
@@ -114,6 +114,8 @@ class URLFuzzer:
                                 prx_dict=proxies,
                                 tries=tries,
                                 refuse_count=refuse_count+1)
+        except TooManyRedirects:
+            pass
 
     def fuzz_all(self, proto="http", sub_domain=False):
         if self.tor_routing:
@@ -135,6 +137,11 @@ class URLFuzzer:
                 fuzzlist = [x.replace("\n", "") for x in fuzzlist]
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
+
+        #
+        if sub_domain:
+            if len(self.target.split('.')) > 2:
+                self.target = '.'.join(self.target.split('.')[1:])
 
         print("Fuzzing URLs from {}".format(self.wordlist))
 

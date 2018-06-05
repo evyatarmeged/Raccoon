@@ -63,7 +63,6 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         ######
         pass
 
-    # TODO: finish
     async def heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
         proc = await create_subprocess_exec(
@@ -71,6 +70,9 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             stdout=PIPE,
             stderr=PIPE
         )
+        result, err = proc.communicate()
+        if "server extension \"heartbeat\" (id=15)" in result.decode():
+            print("Target seems to be vulnerable to heartbleed ")
 
     async def _extract_ssl_data(self, sni=False):
         """Test for version support (SNI/non-SNI), get all SANs, get certificate"""
@@ -81,6 +83,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         for res in responses:
             if self.is_certificate(res):
                 tls_dict["SANs"] = await self._parse_san_output(res)
+                self.heartbleed_vulnerable()
                 break
         return tls_dict
 

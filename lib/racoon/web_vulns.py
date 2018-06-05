@@ -2,13 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 
 
+# TODO: Probably load selenium here for more thorough like cookies, whatcms.org
 class WebAppVulnDetector:
 
     def __init__(self, target):
         self.target = target
 
     def detect_cms(self):
-        # Headless browser ? oh man
         pass
 
     def find_login_page(self):

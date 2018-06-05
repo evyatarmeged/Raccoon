@@ -59,6 +59,3 @@ class SubDomainEnumerator:
         print("Trying to detect sub-domains by bruteforce")
         sub_domain_fuzzer = URLFuzzer(self.target, wordlist=self.domain_list, tor_routing=self.tor_routing)
         sub_domain_fuzzer.fuzz_all(sub_domain=True)
-
-
-url = "www.joomla.com"
