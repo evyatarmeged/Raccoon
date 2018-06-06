@@ -1,8 +1,9 @@
-# Main
+import click
+from lib.racoon.coloring import COLOR
 
 
-def logo():
-    print("""
+def intro():
+    print("""{}
       _____                _____    _____    ____     ____    _   _ 
      |  __ \      /\      / ____|  / ____|  / __ \   / __ \  | \ | |
      | |__) |    /  \    | |      | |      | |  | | | |  | | |  \| |
@@ -10,5 +11,14 @@ def logo():
      | | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
      |_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
 
-    """)
+    {}
+    """.format(COLOR.RED, COLOR.RESET))
 
+
+def main():
+    # tasks = [
+    #     asyncio.ensure_future()),
+    #     asyncio.ensure_future(),
+    # ]
+    # run_until_complete(asyncio.wait(tasks))
+    pass

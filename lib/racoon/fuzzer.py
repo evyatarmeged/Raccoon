@@ -2,13 +2,14 @@ import random
 import time
 import requests
 from functools import partial
-from multiprocessing.pool import ThreadPool
 from requests.exceptions import ProxyError, ConnectionError, TooManyRedirects
 from fake_useragent import UserAgent
 from exceptions import FuzzerException
 from coloring import COLOR
 from concurrent.futures import ThreadPoolExecutor
 import asyncio
+
+
 USER_AGENT = UserAgent()
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
@@ -46,10 +47,9 @@ class URLFuzzer:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        print("{}{} [{}] {} ".format(color, COLOR.RESET, code, url))
+        print("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
     def _fetch(self, uri, proto="http", sub_domain=False, prx_dict=None, tries=0, refuse_count=0):
-        # asyncio.sleep(4)
         """
         Send a HEAD request to URL and print response code if it's not in ignored_error_codes
 
@@ -142,7 +142,5 @@ class URLFuzzer:
 
         print("Fuzzing URLs from {}".format(self.wordlist))
 
-        with ThreadPoolExecutor(max_workers=25) as executor:
+        with ThreadPoolExecutor(max_workers=self.threads) as executor:
             executor.map(partial(self._fetch, proto=proto, sub_domain=sub_domain), fuzzlist)
-        # pool = ThreadPool(self.threads)
-        # pool.map(partial(self._fetch, proto=proto, sub_domain=sub_domain), fuzzlist)

@@ -1,9 +1,9 @@
 ![Racoon](Raccoon.png)
 
 ### WORK IN PROGRESS
-#### Stuffz that should be performed by Raccoon
-- [ ] Port scan
-- [ ] Service scan
+#### Raccoon can do the following
+- [x] Port scan
+- [x] Serivces and scripts scan
 - [x] URL fuzzing
 - [x] DNS
 - [x] TLS versions
@@ -13,9 +13,10 @@
 - [ ] CMS detection
 - [ ] Web Vulnerabilities Detection
 - [x] Tor / Proxy routing
-- [ ] Rate limit evasion support
+- [ ] Rate limit evasion
 - [x] WHOIS records
 - [ ] SQL / NoSQL map
-- [ ] robots.txt
+- [x] robots.txt
 - [ ] Detect known WAFs
+- [ ] Supports multiple hosts, CIDR notation and port ranges
 - [ ] More
