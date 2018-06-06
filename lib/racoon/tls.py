@@ -52,6 +52,8 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
+        await self.heartbleed_vulnerable()
+
         print("Done collecting data")
 
     def is_certificate(self, text):
@@ -65,14 +67,17 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
 
     async def heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
-        proc = await create_subprocess_exec(
+        process = await create_subprocess_exec(
             script.split(),
             stdout=PIPE,
             stderr=PIPE
         )
-        result, err = proc.communicate()
-        if "server extension \"heartbeat\" (id=15)" in result.decode():
-            print("Target seems to be vulnerable to heartbleed ")
+        result, err = await process.communicate()
+        try:
+            if "server extension \"heartbeat\" (id=15)" in result.decode():
+                await print("Target seems to be vulnerable to heartbleed ")
+        except TypeError:  # Type error means no result
+            pass
 
     async def _extract_ssl_data(self, sni=False):
         """Test for version support (SNI/non-SNI), get all SANs, get certificate"""
@@ -83,25 +88,24 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         for res in responses:
             if self.is_certificate(res):
                 tls_dict["SANs"] = await self._parse_san_output(res)
-                self.heartbleed_vulnerable()
                 break
         return tls_dict
 
     async def _exec_openssl(self, script, sni=False):
-        procs = []
+        processes = []
         outputs = []
         if sni:
             script += " -servername {}".format(self.host)
         for v in self._versions:
             curr = (script + ' -{}'.format(v)).split()
-            procs.append(
+            processes.append(
                 await create_subprocess_exec(
                     *curr,
                     stdout=PIPE,
                     stderr=PIPE
                 )
             )
-        for p in procs:
+        for p in processes:
             result, err = await p.communicate()
 
             outputs.append(result.decode().strip())
