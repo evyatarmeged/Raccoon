@@ -31,6 +31,7 @@ class Host:
         if ":" in addr:
             try:
                 self.target, self.port = addr.split(":")
+                self.port = int(self.port)
                 print("Port detected: {}".format(self.port))
             except IndexError:
                 print("Did not detect port. Using default port 80")

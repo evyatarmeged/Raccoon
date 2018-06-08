@@ -29,9 +29,20 @@ class HostHandlerException(RaccoonBaseException):
 
 
 class ScannerException(RaccoonBaseException):
-    """base exception class"""
+    """Scanner base exception class"""
     def __init__(self, message='Scanner Exception'):
         self._message = message
 
     def __str__(self):
         return self._message
+
+
+class WAFException(RaccoonBaseException):
+    """Scanner base exception class"""
+
+    def __init__(self, message='Scanner Exception'):
+        self._message = message
+
+    def __str__(self):
+        return self._message
+
