@@ -2,14 +2,22 @@ import requests
 from bs4 import BeautifulSoup
 
 
-# TODO: Probably load selenium here for more thorough like cookies, whatcms.org
 class WebAppVulnDetector:
 
     def __init__(self, target):
         self.target = target
+        self.cms_url = "https://whatcms.org/?s={}"
 
     def detect_cms(self):
-        pass
+        page = requests.get(self.cms_url.format(self.target))
+        soup = BeautifulSoup(page.text, "lxml")
+        found = soup.select(".panel.pangel-success")
+        if found:
+            try:
+                cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
+                print("CMS detected: target seems to use {}".format(cms.get("title")))
+            except IndexError:
+                pass
 
     def find_login_page(self):
         pass
@@ -28,4 +36,3 @@ class WebAppVulnDetector:
 
     def get_robots_txt(self):
         pass
-

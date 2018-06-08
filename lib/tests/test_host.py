@@ -28,3 +28,10 @@ class TestHost(unittest.TestCase):
         self.assertEquals(self.ip_host.is_ip is True)
         self.assertEquals(self.domain_proto_host.is_ip is False)
         self.assertEquals(self.ip_port_host.is_ip is True)
+
+    def test_forward_slash_removal(self):
+        domain = "google.com/"
+        host = Host(domain)
+        self.assertEquals(host.target == "google.com")
+
+

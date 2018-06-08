@@ -74,6 +74,7 @@ class Host:
         if self.target.startswith("www."):
             # Obviously an FQDN
             domains.extend((self.target, self.target.split("www.")[1]))
+            print("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target
             self.naked = ".".join(self.fqdn.split('.')[1:])
         else:
