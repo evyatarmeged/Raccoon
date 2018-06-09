@@ -19,12 +19,12 @@ USER_AGENT = UserAgent()
 class URLFuzzer:
 
     def __init__(self, target, threads=100, proxy_list=None, wordlist="../wordlists/fuzzlist",
-                 tor_routing=False, ignored_error_codes=(404, 504)):
+                 tor_routing=False, ignored_response_codes=(404, 504)):
         self.target = target
         self.threads = threads
         self.proxy_list = proxy_list
         self.wordlist = wordlist
-        self.ignored_error_codes = ignored_error_codes
+        self.ignored_error_codes = ignored_response_codes
         self.tor_routing = tor_routing
         self.user_agents = self._get_user_agents()
         self.proxies = None

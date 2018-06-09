@@ -9,13 +9,11 @@ class NmapScan:
     Will run SYN/TCP scan according to privileges
     """
 
-    def __init__(self, target, full_scan=False, scripts=False,
-                 services=False, quick=False, port_range=None):
+    def __init__(self, target, full_scan=False, scripts=False, services=False, port_range=None):
         self.target = target
         self.full_scan = full_scan
         self.scripts = scripts
         self.services = services
-        self.quick = quick
         self.port_range = port_range
         self.script = self.build_script()
 
@@ -32,9 +30,6 @@ class NmapScan:
             script += " -sV -sC"
             print("Added scripts and services to nmap script")
             return script
-        elif self.quick:
-            print("Will run simple port scan")
-            return script
         else:
             if self.scripts:
                 print("Added script scan to nmap script")
@@ -42,6 +37,8 @@ class NmapScan:
             if self.services:
                 print("Added service scan to nmap script")
                 script += " -sV"
+            else:
+                print("Running simple nmap scan")
         return script.split()
 
 

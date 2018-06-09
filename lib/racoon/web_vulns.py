@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+from coloring import COLOR
 
 
 class WebAppVulnDetector:
@@ -11,13 +12,15 @@ class WebAppVulnDetector:
     def detect_cms(self):
         page = requests.get(self.cms_url.format(self.target))
         soup = BeautifulSoup(page.text, "lxml")
-        found = soup.select(".panel.pangel-success")
+        found = soup.select(".panel.panel-success")
         if found:
             try:
                 cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
                 print("CMS detected: target seems to use {}".format(cms.get("title")))
             except IndexError:
                 pass
+        else:
+            print("BURRRP")
 
     def find_login_page(self):
         pass
@@ -36,3 +39,7 @@ class WebAppVulnDetector:
 
     def get_robots_txt(self):
         pass
+
+
+vuln_detector = WebAppVulnDetector("www.github.com")
+vuln_detector.detect_cms()
