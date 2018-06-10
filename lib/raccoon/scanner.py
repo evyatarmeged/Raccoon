@@ -6,7 +6,8 @@ from asyncio.subprocess import PIPE, create_subprocess_exec
 class NmapScan:
     """
     Nmap scan class
-    Will run SYN/TCP scan according to privileges
+    Will run SYN/TCP scan according to privileges.
+    Start Raccoon with sudo for -sS else will run -sT
     """
 
     def __init__(self, target, full_scan=False, scripts=False, services=False, port_range=None):
@@ -70,3 +71,4 @@ class Scanner:
                 file.write(err)
             elif result:
                 file.write(result)
+

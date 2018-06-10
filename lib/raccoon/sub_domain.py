@@ -6,34 +6,22 @@ from bs4 import BeautifulSoup
 
 class SubDomainEnumerator:
 
-    def __init__(self,
-                 target,
-                 sans,
-                 tor_routing,
-                 proxy_list=None,
-                 domain_list="../wordlists/subdomains",
-                 sans_lookup=True,
-                 google_dork_lookup=True,
-                 bruteforce_lookup=True):
+    def __init__(self, target, sans, tor_routing,
+                 proxy_list=None, domain_list="../wordlists/subdomains"):
 
         self.target = target
         self.sans = sans
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
         self.domain_list = domain_list
-        self.sans_lookup = sans_lookup
-        self.google_dork_lookup = google_dork_lookup
-        self.bruteforce_lookup = bruteforce_lookup
         self.sub_domains = set()
 
     def run(self):
         print("Enumerating sub-domains")
-        if self.sans_lookup:
+        if self.sans:
             self.find_subdomains_in_sans()
-        if self.google_dork_lookup:
-            self.google_dork()
-        if self.bruteforce_lookup:
-            self.bruteforce()
+        self.google_dork()
+        self.bruteforce()
         print("Done enumerating sub-domains")
 
     def find_subdomains_in_sans(self):
@@ -47,7 +35,7 @@ class SubDomainEnumerator:
                 print("Sub-domain detected: {}".format(san))
 
     def google_dork(self):
-        print("Discovering sub-domains suggestions in Google")
+        print("Discovering sub-domain suggestions in Google")
         page = requests.get("https://www.google.com/search?q=site:{}&num=100".format(self.target))
         soup = BeautifulSoup(page.text, "lxml")
         results = set(re.findall(r"\w+\.{}".format(self.target), soup.text))
@@ -56,6 +44,6 @@ class SubDomainEnumerator:
                 print("Detected Sub-domain through Google dorking: {}".format(subd))
 
     def bruteforce(self):
-        print("Trying to detect sub-domains by bruteforce")
+        print("Fuzzing sub-domains")
         sub_domain_fuzzer = URLFuzzer(self.target, wordlist=self.domain_list, tor_routing=self.tor_routing)
         sub_domain_fuzzer.fuzz_all(sub_domain=True)

@@ -6,7 +6,7 @@ from exceptions import HostHandlerException
 class Host:
     """
     Host parsing, IP to host resolution (and vice verse), etc
-    Sets domain/IP, port, protocol. Also - FQDN, naked domain, if possible.
+    Sets domain/IP, port, protocol. also tries to parse FQDN, naked domain, if possible.
     """
     def __init__(self, target):
         self.target = target.strip()

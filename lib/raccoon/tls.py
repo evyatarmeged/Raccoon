@@ -75,7 +75,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         result, err = await process.communicate()
         try:
             if "server extension \"heartbeat\" (id=15)" in result.decode():
-                await print("Target seems to be vulnerable to heartbleed")
+                print("Target seems to be vulnerable to heartbleed")
         except TypeError:  # Type error means no result
             pass
 

@@ -1,6 +1,5 @@
-import click
 from fake_useragent import UserAgent
-from lib.racoon.coloring import COLOR
+from lib.raccoon.utils.coloring import COLOR
 
 
 def intro():

@@ -1,7 +1,6 @@
-import sys
 import unittest
-from ..racoon.host import Host
-from ..racoon.exceptions import HostHandlerException
+from ..raccoon.host import Host
+from lib.raccoon.utils.exceptions import HostHandlerException
 
 
 class TestHost(unittest.TestCase):

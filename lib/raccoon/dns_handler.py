@@ -2,7 +2,7 @@ from dns import resolver
 
 
 # noinspection PyUnboundLocalVariable
-class DNSHandler(resolver.Resolver):
+class DNSHandler:
     """Handles DNS queries and lookups"""
 
     _resolver = resolver.Resolver()

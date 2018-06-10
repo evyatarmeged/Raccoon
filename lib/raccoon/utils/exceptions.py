@@ -46,3 +46,12 @@ class WAFException(RaccoonBaseException):
     def __str__(self):
         return self._message
 
+
+class RequestHandlerException(RaccoonBaseException):
+    """Request Handler base exception class"""
+
+    def __init__(self, message='RequestHandler Exception'):
+        self._message = message
+
+    def __str__(self):
+        return self._message
