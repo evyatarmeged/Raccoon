@@ -1,22 +1,20 @@
 ![Racoon](Raccoon.png)
 
 ### WORK IN PROGRESS
-#### Raccoon can do the following
+#### Features
 - [x] Port scan
 - [x] Serivces and scripts scan
 - [x] URL fuzzing
-- [x] DNS
+- [x] DNS details
 - [x] TLS versions
-- [x] Ciphers
+- [x] Supported Ciphers
 - [x] AsyncIO for improved performance
-- [x] Sub-domain enumeration
-- [ ] CMS detection
-- [ ] Web Vulnerabilities Detection
+- [x] Subdomain Enumeration
+- [x] CMS detection
+- [x] Web Vulnerabilities Detection
 - [x] Tor / Proxy routing
 - [ ] Rate limit evasion
 - [x] WHOIS records
-- [ ] SQL / NoSQL map
 - [x] robots.txt
-- [ ] Detect known WAFs
+- [x] Detect known WAFs
 - [ ] Supports multiple hosts, CIDR notation and port ranges
-- [ ] More

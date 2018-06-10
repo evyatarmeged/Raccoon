@@ -10,15 +10,13 @@ from concurrent.futures import ThreadPoolExecutor
 import asyncio
 
 
-USER_AGENT = UserAgent()
-
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
 # Going threaded on this one
 
 
 class URLFuzzer:
 
-    def __init__(self, target, threads=100, proxy_list=None, wordlist="../wordlists/fuzzlist",
+    def __init__(self, target, ua, threads=100, proxy_list=None, wordlist="../wordlists/fuzzlist",
                  tor_routing=False, ignored_response_codes=(404, 504)):
         self.target = target
         self.threads = threads
@@ -26,15 +24,8 @@ class URLFuzzer:
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
         self.tor_routing = tor_routing
-        self.user_agents = self._get_user_agents()
+        self.ua = ua
         self.proxies = None
-
-    @staticmethod
-    def _get_user_agents():
-        user_agents = []
-        for i in range(10):
-            user_agents.append(USER_AGENT.random)
-        return user_agents
 
     @staticmethod
     def _print_response(code, url, headers):
@@ -81,7 +72,7 @@ class URLFuzzer:
 
             res = requests.head(
                 url,
-                headers={"User-Agent": random.choice(self.user_agents)},
+                headers={"User-Agent": self.ua.random},
                 proxies=proxies)
             if res.status_code not in self.ignored_error_codes:
                 self._print_response(res.status_code, url, res.headers)
@@ -91,7 +82,7 @@ class URLFuzzer:
             if tries > 4:
                 if not self.tor_routing:
                     to_drop = list(proxies.values())[0]
-                    print("5 connection errors received from {}.\n Dropping it from proxy list".format(to_drop))
+                    print("5 coself.usernnection errors received from {}.\n Dropping it from proxy list".format(to_drop))
                     try:
                         # Handles race conditions
                         self.proxies.remove(to_drop)

@@ -1,4 +1,5 @@
 import click
+from fake_useragent import UserAgent
 from lib.racoon.coloring import COLOR
 
 
@@ -16,6 +17,7 @@ def intro():
 
 
 def main():
+    UA = UserAgent()
     # tasks = [
     #     asyncio.ensure_future()),
     #     asyncio.ensure_future(),

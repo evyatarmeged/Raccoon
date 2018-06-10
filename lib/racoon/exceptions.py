@@ -40,7 +40,7 @@ class ScannerException(RaccoonBaseException):
 class WAFException(RaccoonBaseException):
     """Scanner base exception class"""
 
-    def __init__(self, message='Scanner Exception'):
+    def __init__(self, message='WAF Exception'):
         self._message = message
 
     def __str__(self):

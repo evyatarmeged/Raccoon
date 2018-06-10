@@ -100,5 +100,4 @@ class WAF:
                     self.waf_detected(waf)
 
         except (ConnectTimeout, ConnectionError, TooManyRedirects):
-            # TODO: throw normal error for each
             return
