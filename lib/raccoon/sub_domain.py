@@ -1,19 +1,17 @@
 import re
 import requests
 from bs4 import BeautifulSoup
+from utils.request_handler import RequestHandler
 # from fuzzer import URLFuzzer
 
 
 class SubDomainEnumerator:
 
-    def __init__(self, target, sans, tor_routing,
-                 proxy_list=None, domain_list="../wordlists/subdomains"):
-
+    def __init__(self, target, sans, domain_list="../wordlists/subdomains"):
         self.target = target
         self.sans = sans
-        self.proxy_list = proxy_list
-        self.tor_routing = tor_routing
         self.domain_list = domain_list
+        self.request_handler = RequestHandler()
         self.sub_domains = set()
 
     def run(self):
@@ -36,12 +34,15 @@ class SubDomainEnumerator:
 
     def google_dork(self):
         print("Discovering sub-domain suggestions in Google")
-        page = requests.get("https://www.google.com/search?q=site:{}&num=100".format(self.target))
+        page = self.request_handler.send(
+            "GET",
+            "https://www.google.com/search?q=site:{}&num=100".format(self.target)
+        )
         soup = BeautifulSoup(page.text, "lxml")
         results = set(re.findall(r"\w+\.{}".format(self.target), soup.text))
-        for subd in results:
-            if "www." not in subd:
-                print("Detected Sub-domain through Google dorking: {}".format(subd))
+        for subdomain in results:
+            if "www." not in subdomain:
+                print("Detected Sub-domain through Google dorking: {}".format(subdomain))
 
     def bruteforce(self):
         print("Fuzzing sub-domains")

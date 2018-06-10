@@ -1,6 +1,3 @@
-# TODO: Put all exceptions here with a general Racoon exception class
-
-
 class RaccoonBaseException(Exception):
     """Raccoon base exception class"""
     def __init__(self, message='Raccoon Base Exception'):
@@ -55,3 +52,5 @@ class RequestHandlerException(RaccoonBaseException):
 
     def __str__(self):
         return self._message
+
+

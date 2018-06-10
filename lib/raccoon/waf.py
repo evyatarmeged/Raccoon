@@ -2,6 +2,7 @@ from fake_useragent import UserAgent
 import requests
 from requests.exceptions import TooManyRedirects, ConnectionError, ConnectTimeout
 from exceptions import WAFException
+from utils.request_handler import RequestHandler
 
 
 SERVER = "Server"
@@ -55,7 +56,7 @@ class WAF:
     def __init__(self, host, dns_records):
         self.host = host
         self.cnames = dns_records.get('CNAME')
-        self.ua = UserAgent()
+        self.request_handler = RequestHandler()
         self.waf_cname_map = {
             "incapdns": "Incapsula",
             "edgekey": "Akamai",
@@ -80,24 +81,21 @@ class WAF:
     def detect(self):
         if self.cnames:
             self._detect_by_cname()
-        self._detect_by_application(self.ua.random)
+        self._detect_by_application()
 
     def _detect_by_cname(self):
         for waf in self.WAF_CNAME_MAP:
             if any(waf in cname for cname in self.cnames):
                 print("Detected WAF presence in CNAME: {}".format(self.WAF_CNAME_MAP.get(waf)))
 
-    def _detect_by_application(self, ua):
+    def _detect_by_application(self):
         try:
-            response = requests.head(
-                'http://{}'.format(self.host),
-                headers={'User-Agent': ua},
-                allow_redirects=True
-            )
+            response = self.request_handler.send("HEAD", 'http://{}'.format(self.host))
             for waf, method in self.waf_app_method_map.keys():
                 result = method(response.headers)
                 if result:
                     self.waf_detected(waf)
 
         except (ConnectTimeout, ConnectionError, TooManyRedirects):
+            # TODO: Some output
             return

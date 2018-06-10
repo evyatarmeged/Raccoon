@@ -8,7 +8,7 @@ from .exceptions import RequestHandlerException
 class RequestHandler:
     """
     Request handling class.
-    Used to abstract proxy/tor routing and not repeat for each module
+    Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
 
     _instance = None
@@ -19,6 +19,7 @@ class RequestHandler:
         return cls._instance
 
     def __init__(self, proxy_list=None, tor_routing=None):
+        # TODO: Add Delay
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
         self.proxies = self.set_object_proxies()
@@ -99,6 +100,7 @@ class RequestHandler:
         except ConnectionError:
             if not sub_domain:
                 if refuse_count > 25:
+                    # TODO: Increase delay
                     raise RequestHandlerException(
                         "Connections are being actively refused by the target.\n"
                         "Maybe add a greater sleep interval ?\nStopping URL fuzzing..."
@@ -110,5 +112,3 @@ class RequestHandler:
                               *args, **kwargs)
         except TooManyRedirects:
             pass
-#
-#

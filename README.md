@@ -13,8 +13,8 @@
 - [x] CMS detection
 - [x] Web Vulnerabilities Detection
 - [x] Tor / Proxy routing
-- [ ] Rate limit evasion
 - [x] WHOIS records
 - [x] robots.txt
 - [x] Detect known WAFs
 - [ ] Supports multiple hosts, CIDR notation and port ranges
+- [ ] Rate limit evasion

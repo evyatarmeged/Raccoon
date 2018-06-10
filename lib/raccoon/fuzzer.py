@@ -15,10 +15,10 @@ from utils.request_handler import RequestHandler
 
 class URLFuzzer:
 
-    def __init__(self, target, request_handler, threads=100, wordlist="../wordlists/fuzzlist",
+    def __init__(self, target, threads=100, wordlist="../wordlists/fuzzlist",
                  ignored_response_codes=(404, 504)):
         self.target = target
-        self.request_handler = request_handler
+        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
         self.threads = threads
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
@@ -37,10 +37,9 @@ class URLFuzzer:
             color = COLOR.RESET
         print("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
-    def _fetch(self, uri, proto="https", sub_domain=False):
+    def _fetch(self, uri, proto="http", sub_domain=False):
         """
         Send a HEAD request to URL and print response code if it's not in ignored_error_codes
-
         :param uri: URI to fuzz
         :param proto: use HTTP/HTTPS
         :param sub_domain: If True, build destination URL with {URL}.{HOST} else {HOST}/{URL}
