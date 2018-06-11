@@ -1,8 +1,4 @@
-import asyncio
-import random
-import time
 from functools import partial
-from fake_useragent import UserAgent
 from concurrent.futures import ThreadPoolExecutor
 from utils.exceptions import FuzzerException
 from utils.coloring import COLOR
@@ -16,12 +12,13 @@ from utils.request_handler import RequestHandler
 class URLFuzzer:
 
     def __init__(self, target, threads=100, wordlist="../wordlists/fuzzlist",
-                 ignored_response_codes=(404, 504)):
+                 ignored_response_codes=(404, 504), proto="http"):
         self.target = target
-        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
         self.threads = threads
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
+        self.proto = proto
+        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
         self.proxies = None
 
     @staticmethod
@@ -37,7 +34,7 @@ class URLFuzzer:
             color = COLOR.RESET
         print("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
-    def _fetch(self, uri, proto="http", sub_domain=False):
+    def _fetch(self, uri, proto, sub_domain=False):
         """
         Send a HEAD request to URL and print response code if it's not in ignored_error_codes
         :param uri: URI to fuzz
@@ -52,7 +49,7 @@ class URLFuzzer:
         if res.status_code not in self.ignored_error_codes:
             self._print_response(res.status_code, url, res.headers)
 
-    def fuzz_all(self, proto="http", sub_domain=False):
+    def fuzz_all(self, sub_domain=False):
         try:
             with open(self.wordlist, "r") as file:
                 fuzzlist = file.readlines()
@@ -63,4 +60,4 @@ class URLFuzzer:
         print("Fuzzing URLs from {}".format(self.wordlist))
 
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
-            executor.map(partial(self._fetch, proto=proto, sub_domain=sub_domain), fuzzlist)
+            executor.map(partial(self._fetch, proto=self.proto, sub_domain=sub_domain), fuzzlist)
