@@ -54,3 +54,12 @@ class RequestHandlerException(RaccoonBaseException):
         return self._message
 
 
+class RequestHandlerConnectionReset(RequestHandlerException):
+    """Request Handler Connection Reset class"""
+
+    def __init__(self, message='Connection Reset'):
+        self._message = message
+
+    def __str__(self):
+        return self._message
+

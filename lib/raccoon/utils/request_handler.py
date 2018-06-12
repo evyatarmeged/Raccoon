@@ -1,8 +1,13 @@
 import random
 import requests
 from fake_useragent import UserAgent
-from requests.exceptions import ConnectionError, ProxyError, TooManyRedirects
-from .exceptions import RequestHandlerException
+from threading import Lock
+from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError
+from urllib3.exceptions import LocationParseError
+from .exceptions import RequestHandlerException, RequestHandlerConnectionReset
+
+
+lock = Lock()
 
 
 class RequestHandler:
@@ -48,19 +53,46 @@ class RequestHandler:
         elif self.proxy_list:
             try:
                 prx = random.choice(self.proxies)
-                proxies = {proto: "http://" + prx for proto in ("http", "https")}
+                proxies = {proto: "{}://{}".format(proto, prx) for proto in ("http", "https")}
             except IndexError:
                 raise RequestHandler("No valid proxies left in proxy list. Exiting.")
         else:
             proxies = self.proxies
         return proxies
 
-    def send(self, method="GET", proxies=None, tries=0, refuse_count=0, *args, **kwargs):
+    def drop_proxy(self, proxy_dict):
+        to_drop = list(proxy_dict.values())[0]
+        to_drop = to_drop.split("://")[1]
+        print("3 connection errors received from {}.\nDropping it from proxy list".format(to_drop))
+        lock.acquire()
+        try:
+            # Handles race conditions
+            self.proxies.remove(to_drop)
+            print(self.proxies)
+        except ValueError:
+            pass
+        finally:
+            lock.release()
+
+    def proxy_fail_over(self, method, proxies, tries, *args, **kwargs):
+        """If the proxy fails/refuses to connect 3 times in a row, it is dropped from proxy list"""
+        if tries > 2:
+            if not self.tor_routing:
+                self.drop_proxy(proxies)
+            else:
+                raise RequestHandlerException("Cannot seem to connect to TOR. Exiting")
+        else:
+            # Fail-over attempt for proxy connection issues
+            self.send(method=method,
+                      proxies=proxies,
+                      tries=tries+1,
+                      *args, **kwargs)
+
+    def send(self, method="GET", proxies=None, tries=0, *args, **kwargs):
         """
         :param method: Method to send request in. GET/POST/HEAD
         :param proxies: Proxy dict from last request (if this is a retry). Should be None otherwise
-        :param tries: Number of tries (if this is a retry). Should be 0 otherwise
-        :param refuse_count: Number of times connection was refused (if this is a retry). Should be 0 otherwise
+        :param tries: Number of proxy reconnection tries
         :return:
         """
         if not proxies:
@@ -73,42 +105,31 @@ class RequestHandler:
             elif method.lower() == "post":
                 return requests.post(proxies=proxies, headers=headers, *args, **kwargs)
             elif method.lower() == "head":
-                return requests.head(proxies=proxies, headers=headers,  *args, **kwargs)
+                return requests.head(proxies=proxies, headers=headers, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
-
         except ProxyError:
-            # Basic fail over and proxy sanity check. If proxy is down after 5 tries, remove it
-            if tries > 4:
-                if not self.tor_routing:
-                    to_drop = list(proxies.values())[0]
-                    print("5 connection errors received from {}.\n Dropping it from proxy list".format(to_drop))
-                    try:
-                        # Handles race conditions
-                        self.proxies.remove(to_drop)
-                    except ValueError:
-                        pass
-                else:
-                    raise RequestHandlerException("Cannot seem to connect to TOR. Exiting")
-            else:
-                # Recursive fail-over attempt
-                self.send(method=method,
-                          proxies=proxies,
-                          tries=tries+1,
-                          *args, **kwargs)
-
-        except ConnectionError:
-            if not sub_domain:
-                if refuse_count > 25:
-                    # TODO: Increase delay
-                    raise RequestHandlerException(
-                        "Connections are being actively refused by the target.\n"
-                        "Maybe add a greater sleep interval ?\nStopping URL fuzzing..."
+            self.proxy_fail_over(
+                method=method,
+                proxies=proxies,
+                tries=tries,
+                *args, **kwargs
+            )
+        except ConnectionError as e:
+            # Connection Error might also be proxy related, hence the check
+            curr_prx = list(proxies.values())[0]
+            curr_prx = curr_prx.split("://")[1].split(":")
+            if "host='{}', port={}".format(*curr_prx) in e.__str__():
+                if ":".join(curr_prx) in self.proxies:
+                    self.proxy_fail_over(
+                        method=method,
+                        proxies=proxies,
+                        tries=tries,
+                        *args, **kwargs
                     )
-                else:
-                    self.send(method=method,
-                              proxies=proxies,
-                              refuse_count=refuse_count+1,
-                              *args, **kwargs)
-        except TooManyRedirects:
-            pass
+            else:
+                raise RequestHandlerConnectionReset
+        except LocationParseError:
+            print("Bad proxy format: ".format(proxies.values()[0]))
+            # Bad proxy format
+            self.drop_proxy(proxies)
