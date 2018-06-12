@@ -1,13 +1,10 @@
 import random
 import requests
 from fake_useragent import UserAgent
-from threading import Lock
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError
 from urllib3.exceptions import LocationParseError
+import threading
 from .exceptions import RequestHandlerException, RequestHandlerConnectionReset
-
-
-lock = Lock()
 
 
 class RequestHandler:
@@ -55,32 +52,15 @@ class RequestHandler:
                 prx = random.choice(self.proxies)
                 proxies = {proto: "{}://{}".format(proto, prx) for proto in ("http", "https")}
             except IndexError:
-                raise RequestHandler("No valid proxies left in proxy list. Exiting.")
+                raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
         else:
             proxies = self.proxies
         return proxies
 
-    def drop_proxy(self, proxy_dict):
-        to_drop = list(proxy_dict.values())[0]
-        to_drop = to_drop.split("://")[1]
-        print("3 connection errors received from {}.\nDropping it from proxy list".format(to_drop))
-        lock.acquire()
-        try:
-            # Handles race conditions
-            self.proxies.remove(to_drop)
-            print(self.proxies)
-        except ValueError:
-            pass
-        finally:
-            lock.release()
-
     def proxy_fail_over(self, method, proxies, tries, *args, **kwargs):
         """If the proxy fails/refuses to connect 3 times in a row, it is dropped from proxy list"""
-        if tries > 2:
-            if not self.tor_routing:
-                self.drop_proxy(proxies)
-            else:
-                raise RequestHandlerException("Cannot seem to connect to TOR. Exiting")
+        if tries > 5:
+            raise Exception("Connect connect to proxy: {}".format(proxies))
         else:
             # Fail-over attempt for proxy connection issues
             self.send(method=method,
@@ -93,12 +73,12 @@ class RequestHandler:
         :param method: Method to send request in. GET/POST/HEAD
         :param proxies: Proxy dict from last request (if this is a retry). Should be None otherwise
         :param tries: Number of proxy reconnection tries
-        :return:
         """
+        if not self.proxies:
+            raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
         if not proxies:
             proxies = self.get_request_proxies()
         headers = {"User-Agent": self.ua.random}
-
         try:
             if method.lower() == "get":
                 return requests.get(proxies=proxies, headers=headers, *args, **kwargs)
@@ -109,26 +89,21 @@ class RequestHandler:
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
+            print("PRX ERR", e)
+            raise RequestHandlerException("Proxy Error for prx: {}".format(tuple(proxies.values())[0]))
+        except ConnectionError as e:
+            print("CONN ERR", e)
             self.proxy_fail_over(
                 method=method,
                 proxies=proxies,
                 tries=tries,
                 *args, **kwargs
             )
-        except ConnectionError as e:
-            # Connection Error might also be proxy related, hence the check
-            curr_prx = list(proxies.values())[0]
-            curr_prx = curr_prx.split("://")[1].split(":")
-            if "host='{}', port={}".format(*curr_prx) in e.__str__():
-                if ":".join(curr_prx) in self.proxies:
-                    self.proxy_fail_over(
-                        method=method,
-                        proxies=proxies,
-                        tries=tries,
-                        *args, **kwargs
-                    )
-            else:
-                raise RequestHandlerConnectionReset
+        except ConnectionResetError as e:
+            print("CONN RST ERR", e, type(e))
+            pass
+        except Exception as e:
+            print("GENERAL EXC", type(e), e)
         except LocationParseError:
             print("Bad proxy format: ".format(proxies.values()[0]))
             # Bad proxy format

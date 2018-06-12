@@ -1,5 +1,6 @@
+import time
 from functools import partial
-from concurrent.futures import ThreadPoolExecutor
+from multiprocessing.pool import ThreadPool
 from utils.exceptions import FuzzerException, RequestHandlerConnectionReset
 from utils.coloring import COLOR
 from utils.request_handler import RequestHandler
@@ -18,7 +19,7 @@ class URLFuzzer:
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
         self.proto = proto
-        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
+        self.request_handler = RequestHandler(proxy_list="../wordlists/proxies")  # Will get the single, already initiated instance
         self.proxies = None
 
     @staticmethod
@@ -54,7 +55,7 @@ class URLFuzzer:
             if not sub_domain:
                 if refuse_count > 25:
                     # TODO: Increase delay
-                    raise RequestHandlerException(
+                    raise FuzzerException(
                         "Connections are being actively refused by the target.\n"
                         "Maybe add a greater sleep interval ?\nStopping URL fuzzing..."
                     )
@@ -74,11 +75,15 @@ class URLFuzzer:
 
         print("Fuzzing URLs from {}".format(self.wordlist))
 
-        with ThreadPoolExecutor(max_workers=self.threads) as executor:
-            executor.map(partial(self._fetch, proto=self.proto, sub_domain=sub_domain), fuzzlist)
+        pool = ThreadPool(self.threads)
+        result = pool.map_async(partial(self._fetch, proto=self.proto, sub_domain=sub_domain), fuzzlist)
+        print(result.get())
+        pool.close()
+        pool.join()
 
 
-a = URLFuzzer("88.198.233.174:35413")
-print(len(a.request_handler.proxies))
+start = time.time()
+a = URLFuzzer("88.198.233.174:35554")
+
 a.fuzz_all()
-print(len(a.request_handler.proxies))
+print(time.time() - start)
