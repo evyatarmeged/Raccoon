@@ -1,7 +1,7 @@
 import time
 from functools import partial
 from multiprocessing.pool import ThreadPool
-from utils.exceptions import FuzzerException, RequestHandlerConnectionReset
+from utils.exceptions import FuzzerException, RequestHandlerException
 from utils.coloring import COLOR
 from utils.request_handler import RequestHandler
 
@@ -10,17 +10,17 @@ from utils.request_handler import RequestHandler
 # Going threaded on this one
 
 
+
 class URLFuzzer:
 
-    def __init__(self, target, threads=100, wordlist="../wordlists/fuzzlist",
-                 ignored_response_codes=(404, 504), proto="http"):
+    def __init__(self, target, threads=25, wordlist="../wordlists/fuzzlist",
+                 ignored_response_codes=(400, 401, 402, 403, 404, 504), proto="http"):
         self.target = target
         self.threads = threads
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
         self.proto = proto
-        self.request_handler = RequestHandler(proxy_list="../wordlists/proxies")  # Will get the single, already initiated instance
-        self.proxies = None
+        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
     @staticmethod
     def _print_response(code, url, headers):
@@ -35,13 +35,12 @@ class URLFuzzer:
             color = COLOR.RESET
         print("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
-    def _fetch(self, uri, proto, sub_domain=False, refuse_count=0):
+    def _fetch(self, uri, proto, sub_domain=False):
         """
         Send a HEAD request to URL and print response code if it's not in ignored_error_codes
         :param uri: URI to fuzz
         :param proto: use HTTP/HTTPS
         :param sub_domain: If True, build destination URL with {URL}.{HOST} else {HOST}/{URL}
-        :param refuse_count: Number of times connection was refused (if this is a retry). Should be 0 otherwise
         """
         if not sub_domain:
             url = "{}://{}/{}".format(proto, self.target, uri)
@@ -51,19 +50,8 @@ class URLFuzzer:
             res = self.request_handler.send("HEAD", url=url)
             if res.status_code not in self.ignored_error_codes:
                 self._print_response(res.status_code, url, res.headers)
-        except RequestHandlerConnectionReset:
-            if not sub_domain:
-                if refuse_count > 25:
-                    # TODO: Increase delay
-                    raise FuzzerException(
-                        "Connections are being actively refused by the target.\n"
-                        "Maybe add a greater sleep interval ?\nStopping URL fuzzing..."
-                    )
-                else:
-                    self._fetch(uri=uri,
-                                proto=proto,
-                                refuse_count=refuse_count+1,
-                                *args, **kwargs)
+        except RequestHandlerException as e:
+            raise RequestHandlerException("Encountered error", e)
 
     def fuzz_all(self, sub_domain=False):
         try:
@@ -74,16 +62,12 @@ class URLFuzzer:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
         print("Fuzzing URLs from {}".format(self.wordlist))
-
         pool = ThreadPool(self.threads)
-        result = pool.map_async(partial(self._fetch, proto=self.proto, sub_domain=sub_domain), fuzzlist)
-        print(result.get())
-        pool.close()
-        pool.join()
+        pool.map(partial(self._fetch, proto=self.proto, sub_domain=sub_domain), fuzzlist)
 
 
 start = time.time()
-a = URLFuzzer("88.198.233.174:35554")
+a = URLFuzzer("88.198.233.174:36059")
 
 a.fuzz_all()
 print(time.time() - start)

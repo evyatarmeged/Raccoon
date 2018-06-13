@@ -1,9 +1,9 @@
 import random
 import requests
+import threading
 from fake_useragent import UserAgent
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError
 from urllib3.exceptions import LocationParseError
-import threading
 from .exceptions import RequestHandlerException, RequestHandlerConnectionReset
 
 
@@ -48,37 +48,27 @@ class RequestHandler:
         if self.tor_routing:
             proxies = self.proxies
         elif self.proxy_list:
-            try:
-                prx = random.choice(self.proxies)
-                proxies = {proto: "{}://{}".format(proto, prx) for proto in ("http", "https")}
-            except IndexError:
+            if not self.proxies:
                 raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
+            else:
+                try:
+                    prx = random.choice(self.proxies)
+                    proxies = {proto: "{}://{}".format(proto, prx) for proto in ("http", "https")}
+                except IndexError:
+                    raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
         else:
             proxies = self.proxies
         return proxies
 
-    def proxy_fail_over(self, method, proxies, tries, *args, **kwargs):
-        """If the proxy fails/refuses to connect 3 times in a row, it is dropped from proxy list"""
-        if tries > 5:
-            raise Exception("Connect connect to proxy: {}".format(proxies))
-        else:
-            # Fail-over attempt for proxy connection issues
-            self.send(method=method,
-                      proxies=proxies,
-                      tries=tries+1,
-                      *args, **kwargs)
-
-    def send(self, method="GET", proxies=None, tries=0, *args, **kwargs):
+    def send(self, method="GET", proxies=None, *args, **kwargs):
         """
         :param method: Method to send request in. GET/POST/HEAD
         :param proxies: Proxy dict from last request (if this is a retry). Should be None otherwise
-        :param tries: Number of proxy reconnection tries
         """
-        if not self.proxies:
-            raise RequestHandlerException("No valid proxies left in proxy list. Exiting.")
         if not proxies:
             proxies = self.get_request_proxies()
         headers = {"User-Agent": self.ua.random}
+
         try:
             if method.lower() == "get":
                 return requests.get(proxies=proxies, headers=headers, *args, **kwargs)
@@ -89,22 +79,10 @@ class RequestHandler:
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
-            print("PRX ERR", e)
-            raise RequestHandlerException("Proxy Error for prx: {}".format(tuple(proxies.values())[0]))
-        except ConnectionError as e:
-            print("CONN ERR", e)
-            self.proxy_fail_over(
-                method=method,
-                proxies=proxies,
-                tries=tries,
-                *args, **kwargs
-            )
-        except ConnectionResetError as e:
-            print("CONN RST ERR", e, type(e))
+            # TODO: Apply fail over for bad proxies or omit them
+            raise RequestHandlerException("Error connecting to proxy")
+        except ConnectionError:
+            # TODO: Increase delay
+            raise RequestHandlerException("Error connecting to host")
+        except TooManyRedirects:
             pass
-        except Exception as e:
-            print("GENERAL EXC", type(e), e)
-        except LocationParseError:
-            print("Bad proxy format: ".format(proxies.values()[0]))
-            # Bad proxy format
-            self.drop_proxy(proxies)
