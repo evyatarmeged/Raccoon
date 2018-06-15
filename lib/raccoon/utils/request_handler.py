@@ -24,10 +24,16 @@ class RequestHandler:
         # TODO: Add Delay
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
-        self.proxies = self.set_object_proxies()
+        self.proxies = self.set_instance_proxies()
         self.ua = UserAgent()
 
-    def set_object_proxies(self):
+    def set_instance_proxies(self):
+        """
+        Set the proxies to any of the following:
+        Proxy List - a list of proxies to choose randomly from for each request. Read from file.
+        TOR - a dict of socks5 and the TOR service default 9050 that will be used
+        Else, No proxies - an empty dict will be used.
+        """
         proxies = {}
 
         if self.tor_routing:

@@ -2,7 +2,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from utils.request_handler import RequestHandler
-# from fuzzer import URLFuzzer
+from lib.raccoon.fuzzer import  URLFuzzer
 
 
 class SubDomainEnumerator:
@@ -46,5 +46,9 @@ class SubDomainEnumerator:
 
     def bruteforce(self):
         print("Fuzzing sub-domains")
-        sub_domain_fuzzer = URLFuzzer(self.target, wordlist=self.domain_list, tor_routing=self.tor_routing)
+        sub_domain_fuzzer = URLFuzzer(self.target, wordlist=self.domain_list)
         sub_domain_fuzzer.fuzz_all(sub_domain=True)
+
+    def write_up(self):
+        # TODO: Out to file
+        pass

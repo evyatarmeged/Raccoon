@@ -133,3 +133,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
                     ver = line.strip().split(':')[1].strip()
                     is_supported[ver] = True
         return is_supported
+
+    def write_up(self):
+        # TODO: Out to file
+        pass

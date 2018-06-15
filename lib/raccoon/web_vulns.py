@@ -84,3 +84,6 @@ class WebAppVulnDetector:
         self.detect_anti_clickjacking()
         self.gather_cookie_info(session.cookies)
 
+    def write_up(self):
+        # TODO: Out to file
+        pass

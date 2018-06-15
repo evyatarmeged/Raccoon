@@ -55,10 +55,10 @@ class Scanner:
         )
         result, err = await process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
-        await Scanner.write_scan_results(scan.target, result, err)
+        await Scanner.write_up(scan.target, result, err)
 
     @classmethod
-    async def write_scan_results(cls, target, result, err):
+    async def write_up(cls, target, result, err):
         path = "nmap_scans/{}".format(target)
         print("Writing nmap scan results to {}".format(path))
         try:
