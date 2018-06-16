@@ -71,4 +71,3 @@ class Scanner:
                 file.write(err)
             elif result:
                 file.write(result)
-

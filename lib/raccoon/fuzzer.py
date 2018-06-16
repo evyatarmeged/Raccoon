@@ -19,7 +19,7 @@ class URLFuzzer:
         self.wordlist = wordlist
         self.ignored_error_codes = ignored_response_codes
         self.proto = proto
-        self.request_handler = RequestHandler(tor_routing=True)  # Will get the single, already initiated instance
+        self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
     @staticmethod
     def _print_response(code, url, headers):
@@ -44,12 +44,9 @@ class URLFuzzer:
             url = "{}://{}/{}".format(self.proto, self.target, uri)
         else:
             url = "{}://{}.{}".format(self.proto, uri, self.target)
-        try:
-            res = self.request_handler.send("HEAD", url=url)
-            if res.status_code not in self.ignored_error_codes:
-                self._print_response(res.status_code, url, res.headers)
-        except RequestHandlerException as e:
-            raise RequestHandlerException("Encountered error", e)
+        res = self.request_handler.send("HEAD", url=url)
+        if res.status_code not in self.ignored_error_codes:
+            self._print_response(res.status_code, url, res.headers)
 
     async def fuzz_all(self, sub_domain=False):
         """

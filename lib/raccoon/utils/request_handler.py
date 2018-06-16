@@ -20,10 +20,10 @@ class RequestHandler:
             cls._instance = super(RequestHandler, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, proxy_list=None, tor_routing=None):
-        # TODO: Add Delay
+    def __init__(self, proxy_list=None, tor_routing=None, delay=None):
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
+        self.delay = delay
         self.proxies = self.set_instance_proxies()
         self.ua = UserAgent()
 
@@ -85,7 +85,7 @@ class RequestHandler:
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
-            # TODO: Apply fail over for bad proxies or omit them
+            # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
         except ConnectionError:
             # TODO: Increase delay
