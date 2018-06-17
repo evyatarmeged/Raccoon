@@ -1,9 +1,9 @@
 import time
 from functools import partial
 from multiprocessing.pool import ThreadPool
-from utils.exceptions import FuzzerException, RequestHandlerException
-from utils.coloring import COLOR
-from utils.request_handler import RequestHandler
+from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
+from raccoon.utils.coloring import COLOR
+from raccoon.utils.request_handler import RequestHandler
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
@@ -26,7 +26,7 @@ class URLFuzzer:
         if 300 > code >= 200:
             color = COLOR.GREEN
         elif 400 > code >= 300:
-            color = COLOR.BLUE
+            color = COLOR.CYAN
             url += " redirects to {}".format(headers.get("Location"))
         elif 510 > code >= 400:
             color = COLOR.RED
@@ -52,7 +52,7 @@ class URLFuzzer:
         """
         Create a pool of threads, read the wordlist and invoke fuzz_all.
         Should be run in an event loop.
-        :param sub_domain: Indicate if this is subdomain enumeration or resource fuzzing
+        :param sub_domain: Indicate if this is subdomain enumeration or URL busting
         """
         try:
             with open(self.wordlist, "r") as file:

@@ -4,7 +4,7 @@ import threading
 from fake_useragent import UserAgent
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError
 from urllib3.exceptions import LocationParseError
-from .exceptions import RequestHandlerException, RequestHandlerConnectionReset
+from raccoon.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
 
 
 class RequestHandler:

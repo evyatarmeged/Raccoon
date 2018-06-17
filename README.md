@@ -2,19 +2,27 @@
 
 ### WORK IN PROGRESS
 #### Features
-- [x] Port scan
-- [x] Serivces and scripts scan
-- [x] URL fuzzing
-- [x] DNS details
-- [x] TLS versions
+- [x] Port Scan
+- [x] Services And Scripts Scan
+- [x] URL Fuzzing
+- [x] DNS Details
+- [x] TLS Versions
 - [x] Supported Ciphers
-- [x] AsyncIO for improved performance
+- [x] AsyncIO For Improved Performance
 - [x] Subdomain Enumeration
-- [x] CMS detection
+- [x] CMS Detection
 - [x] Web Vulnerabilities Detection
 - [x] Tor / Proxy routing
-- [x] WHOIS records
-- [x] robots.txt
-- [x] Detect known WAFs
-- [ ] Supports multiple hosts, CIDR notation and port ranges
-- [ ] Rate limit evasion
+- [x] WHOIS Records
+- [x] Robots.txt
+- [x] Detect Known WAFs
+
+#### Road Map
+- [ ] Support Multiple Hosts
+- [ ] CIDR Notation Support
+- [ ] IP Ranges
+- [ ] Port Ranges
+- [ ] Rate Limit Evasion
+- [ ] XSS Scan
+- [ ] SQLi Scan
+

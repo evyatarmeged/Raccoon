@@ -1,5 +1,5 @@
 import os
-from exceptions import ScannerException
+from raccoon.utils.exceptions import ScannerException
 from asyncio.subprocess import PIPE, create_subprocess_exec
 
 

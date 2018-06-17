@@ -5,12 +5,12 @@ from asyncio.subprocess import PIPE, create_subprocess_exec
 
 class TLSCipherSuiteChecker:
 
-    def __init__(self, host):
-        self.host = host
+    def __init__(self, target):
+        self.target = target
 
-    async def scan_ciphers(self, port=443):
+    async def scan_ciphers(self, port):
         print("Scanning supported ciphers")
-        script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.host).split()
+        script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.target).split()
         process = await create_subprocess_exec(
             *script,
             stdout=PIPE,
@@ -33,13 +33,13 @@ class TLSCipherSuiteChecker:
 # noinspection PyTypeChecker
 class TLSInfoScanner(TLSCipherSuiteChecker):
 
-    def __init__(self, host, port=443):
-        super().__init__(host)
-        self.host = host
+    def __init__(self, target, port=443):
+        super().__init__(target)
+        self.target = target
         self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
-        self._base_script = "timeout 10 openssl s_client -connect {}:443 ".format(self.host)
+        self._base_script = "timeout 10 openssl s_client -connect {}:443 ".format(self.target)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
         self.sni_data = {}
@@ -48,7 +48,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
 
     async def run_scan(self, sni=True):
         print("Collecting TLS data")
-        self.ciphers = await self.scan_ciphers()
+        self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
@@ -95,7 +95,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         processes = []
         outputs = []
         if sni:
-            script += " -servername {}".format(self.host)
+            script += " -servername {}".format(self.target)
         for v in self._versions:
             curr = (script + ' -{}'.format(v)).split()
             processes.append(

@@ -1,6 +1,6 @@
 from ipaddress import ip_address
-from dns_handler import DNSHandler
-from exceptions import HostHandlerException
+from raccoon.lib.dns_handler import DNSHandler
+from raccoon.utils.exceptions import HostHandlerException
 
 
 class Host:

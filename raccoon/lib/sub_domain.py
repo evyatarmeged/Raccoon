@@ -1,8 +1,7 @@
 import re
-import requests
 from bs4 import BeautifulSoup
-from utils.request_handler import RequestHandler
-from lib.raccoon.fuzzer import URLFuzzer
+from raccoon.utils.request_handler import RequestHandler
+from raccoon.lib.fuzzer import URLFuzzer
 
 
 class SubDomainEnumerator:

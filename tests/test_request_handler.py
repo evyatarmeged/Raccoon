@@ -1,8 +1,6 @@
-import os
-import sys
 import unittest
-from ..raccoon.utils.request_handler import RequestHandler
-from ..raccoon.utils.exceptions import RequestHandlerException
+from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.exceptions import RequestHandlerException
 
 
 class TestRequestHandler(unittest.TestCase):

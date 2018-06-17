@@ -11,11 +11,10 @@ class WebAppVulnDetector:
     def __init__(self, target, ua):
         self.target = target
         self.ua = ua
-        self.cms_url = "https://whatcms.org/?s={}"
         self.headers = None
 
     def detect_cms(self):
-        page = requests.get(self.cms_url.format(self.target))
+        page = requests.get("https://whatcms.org/?s={}".format(self.target))
         soup = BeautifulSoup(page.text, "lxml")
         found = soup.select(".panel.panel-success")
         if found:

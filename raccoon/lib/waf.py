@@ -1,8 +1,7 @@
-from fake_useragent import UserAgent
 import requests
 from requests.exceptions import TooManyRedirects, ConnectionError, ConnectTimeout
-from exceptions import WAFException
-from utils.request_handler import RequestHandler
+from raccoon.utils.exceptions import WAFException
+from raccoon.utils.request_handler import RequestHandler
 
 
 SERVER = "Server"
