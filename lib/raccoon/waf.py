@@ -84,9 +84,9 @@ class WAF:
         self._detect_by_application()
 
     def _detect_by_cname(self):
-        for waf in self.WAF_CNAME_MAP:
+        for waf in self.waf_cname_map:
             if any(waf in cname for cname in self.cnames):
-                print("Detected WAF presence in CNAME: {}".format(self.WAF_CNAME_MAP.get(waf)))
+                print("Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf)))
 
     def _detect_by_application(self):
         try:

@@ -39,7 +39,7 @@ class NmapScan:
                 print("Added service scan to nmap script")
                 script += " -sV"
             else:
-                print("Running simple nmap scan")
+                print("Running basic nmap scan")
         return script.split()
 
 
