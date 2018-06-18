@@ -1,4 +1,4 @@
-class RaccoonBaseException(Exception):
+class RaccoonException(Exception):
     """Raccoon base exception class"""
     def __init__(self, message='Raccoon Base Exception'):
         self._message = message
@@ -7,7 +7,7 @@ class RaccoonBaseException(Exception):
         return self._message
 
 
-class FuzzerException(RaccoonBaseException):
+class FuzzerException(RaccoonException):
     def __init__(self, message='Fuzzer Exception'):
         super().__init__(message)
 
@@ -15,7 +15,7 @@ class FuzzerException(RaccoonBaseException):
         return self._message
 
 
-class HostHandlerException(RaccoonBaseException):
+class HostHandlerException(RaccoonException):
     def __init__(self, message='Host Handler Exception'):
         super().__init__(message)
 
@@ -23,7 +23,7 @@ class HostHandlerException(RaccoonBaseException):
         return self._message
 
 
-class ScannerException(RaccoonBaseException):
+class ScannerException(RaccoonException):
     def __init__(self, message='Scanner Exception'):
         super().__init__(message)
 
@@ -31,7 +31,7 @@ class ScannerException(RaccoonBaseException):
         return self._message
 
 
-class WAFException(RaccoonBaseException):
+class WAFException(RaccoonException):
     def __init__(self, message='WAF Exception'):
         super().__init__(message)
 
@@ -39,7 +39,7 @@ class WAFException(RaccoonBaseException):
         return self._message
 
 
-class RequestHandlerException(RaccoonBaseException):
+class RequestHandlerException(RaccoonException):
 
     def __init__(self, message='RequestHandler Exception'):
         super().__init__(message)

@@ -1,4 +1,5 @@
 from ipaddress import ip_address
+from dns import resolver
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 
@@ -8,15 +9,22 @@ class Host:
     Host parsing, IP to host resolution (and vice verse), etc
     Sets domain/IP, port, protocol. also tries to parse FQDN, naked domain, if possible.
     """
-    def __init__(self, target):
+    def __init__(self, target, records):
         self.target = target.strip()
         self.port = 80
         self.protocol = "http"
-        self.dns_records = []
+        self.dns_records = {}
         self.is_ip = False
         self.fqdn = None
         self.naked = None
+        self.records = records
         self._parse_host()
+
+    def __str__(self):
+        return "Host [{}://{}]".format(self.protocol, self.target)
+
+    def __repr__(self):
+        return self.__dict__
 
     def validate_ip(self, addr=None):
         if not addr:
@@ -66,7 +74,7 @@ class Host:
             self._extract_port(self.target)
 
         if self.validate_ip(self.target):
-            print("Found {} to be an IP address.".format(self.target))
+            print("Detected {} as an IP address.".format(self.target))
             self.is_ip = True
             return
 
@@ -82,6 +90,7 @@ class Host:
             domains.append(self.target)
 
         self.dns_records = DNSHandler.query_dns(domains)
+
         if self.dns_records.get("CNAME"):
             # Naked domains shouldn't hold CNAME records according to RFC regulations
             print("Found {} to be an FQDN".format(self.target))

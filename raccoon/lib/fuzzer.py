@@ -12,8 +12,13 @@ from raccoon.utils.request_handler import RequestHandler
 
 class URLFuzzer:
 
-    def __init__(self, target, threads=25, wordlist="../wordlists/fuzzlist",
-                 ignored_response_codes=(400, 401, 402, 403, 404, 504), proto="http"):
+    def __init__(self,
+                 target,
+                 ignored_response_codes,
+                 threads=25,
+                 wordlist="../wordlists/fuzzlist",
+                 proto="http"):
+
         self.target = target
         self.threads = threads
         self.wordlist = wordlist

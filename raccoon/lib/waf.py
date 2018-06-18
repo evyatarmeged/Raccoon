@@ -52,9 +52,9 @@ class WAFApplicationMethods:
 
 class WAF:
 
-    def __init__(self, host, dns_records):
-        self.host = host
-        self.cnames = dns_records.get('CNAME')
+    def __init__(self, host):
+        self.host = host.target
+        self.cnames = host.dns_records.get('CNAME')
         self.request_handler = RequestHandler()
         self.waf_cname_map = {
             "incapdns": "Incapsula",
@@ -74,7 +74,7 @@ class WAF:
         }
 
     @staticmethod
-    def waf_detected(name):
+    def _waf_detected(name):
         print("Detected {} WAF presence in web application".format(name))
 
     def detect(self):
@@ -84,16 +84,16 @@ class WAF:
 
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
-            if any(waf in cname for cname in self.cnames):
+            if any(waf in str(cname) for cname in self.cnames):
                 print("Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf)))
 
     def _detect_by_application(self):
         try:
-            response = self.request_handler.send("HEAD", 'http://{}'.format(self.host))
-            for waf, method in self.waf_app_method_map.keys():
+            response = self.request_handler.send("HEAD", url='http://{}'.format(self.host))
+            for waf, method in self.waf_app_method_map.items():
                 result = method(response.headers)
                 if result:
-                    self.waf_detected(waf)
+                    self._waf_detected(waf)
 
         except (ConnectTimeout, ConnectionError, TooManyRedirects):
             # TODO: Some output

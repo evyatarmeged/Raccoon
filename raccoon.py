@@ -1,9 +1,10 @@
+import os
 import click
 from subprocess import PIPE, check_call, CalledProcessError
 import requests
 from requests.exceptions import ConnectionError
-from raccoon.utils import coloring
-from raccoon.utils.exceptions import RaccoonBaseException
+from raccoon.utils.coloring import COLOR
+from raccoon.utils.exceptions import RaccoonException
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
 from raccoon.lib.scanner import Scanner
@@ -37,22 +38,31 @@ def validate_target_is_up(host):
         try:
             if "http" not in host:
                 host = "http://"+host
-            requests.get(host)
+            requests.get(host, timeout=10)
             return
         except ConnectionError:
-            raise RaccoonBaseException("Target does not seem to be up.\n"
-                                       "Run with --no-health-check to ignore hosts considered as down.")
+            raise RaccoonException("Target does not seem to be up.\n"
+                                   "Run with --no-health-check to ignore hosts considered as down.")
+
+
+def validate_port_range(port_range):
+    ports = port_range.split("-")
+    if all(ports) and int(ports[-1]) <= 65535:
+        return True
+    raise RaccoonException("Invalid port range supplied: {}".format(port_range))
 
 
 @click.command()
 @click.option("-t", "--target", help="Target to scan")
+@click.option("-r", "--records", help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
 @click.option("--tor-routing", is_flag=True, help="Route traffic through TOR")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing")
 @click.option("-w", "--wordlist", help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", help="Number of threads to use. Default: 25")
-@click.option("--ignore-error-codes", help="Comma separated list of HTTP status code to ignore for fuzzing")
+@click.option("--ignore-error-codes", help="Comma separated list of HTTP status code to ignore for fuzzing"
+              "Defaults to: 400,401,402,403,404,504")
 @click.option("--subdomain-list", help="Path to subdomain list file that would be used for enumeration")
-@click.option("-F", "--full-scan", is_flag=True, help="Run Nmap scan both scripts and services scans")
+@click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan both scripts and services scans")
 @click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with scripts scan")
 @click.option("-s", "--services", is_flag=True, help="Run Nmap scan with services scan")
 @click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
@@ -64,24 +74,44 @@ def main(target,
          proxy_list=None,
          wordlist=None,
          threads=25,
-         ignore_error_codes=(),
+         ignore_error_codes="400,401,402,403,404,504",
          subdomain_list=None,
          full_scan=False,
          scripts=False,
          services=False,
+         records="A,MX,NS,CNAME,SOA",
          port_range=None,
          tls_port=443,
          no_health_check=False,
          quiet=False):
 
-    # TODO: Validate params (file paths, error codes are comma-sep, port-range is legit)
+    # Arg validation
+
+    if proxy_list and not os.path.isfile(proxy_list):
+        raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+
+    if wordlist and not os.path.isfile(wordlist):
+        raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
+
+    if subdomain_list and not os.path.isfile(subdomain_list):
+        raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
+
+    records = tuple(records.split(","))
+
+    ignore_error_codes = tuple(ignore_error_codes.split(","))
+
+    if port_range:
+        validate_port_range(port_range)
 
     if not no_health_check:
         validate_target_is_up(target)
 
-    host = Host(target=target)
+    # /Arg validation
 
+    host = Host(target=target, records=records)
 
+    waf = WAF(host)
+    waf.detect()
 
 main()
 
