@@ -60,8 +60,7 @@ def validate_port_range(port_range):
               help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
 @click.option("--tor-routing", is_flag=True, help="Route traffic through TOR")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing")
-@click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
-              help="Path to wordlist that would be used for URL fuzzing")
+@click.option("-w", "--wordlist", help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
 @click.option("--ignore-error-codes", default="301,400,401,402,403,404,504",
               help="Comma separated list of HTTP status code to ignore for fuzzing.\n"
@@ -109,6 +108,8 @@ def main(target,
 
     # /Arg validation
 
+    intro()
+
     # Set Request Handler instance
     request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing)
 
@@ -122,7 +123,9 @@ def main(target,
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
     fuzzer = URLFuzzer(host, ignore_error_codes, threads, wordlist)
+    subdomain_enumerator = SubDomainEnumerator(host)
     # TODO: Decide on execution order.
+
     tasks = [
         asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(tls_info_scanner.scan()),
