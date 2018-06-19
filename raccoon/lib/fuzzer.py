@@ -12,18 +12,13 @@ from raccoon.utils.request_handler import RequestHandler
 
 class URLFuzzer:
 
-    def __init__(self,
-                 target,
-                 ignored_response_codes,
-                 threads=25,
-                 wordlist="../wordlists/fuzzlist",
-                 proto="http"):
+    def __init__(self, host, ignored_response_codes, threads, wordlist):
 
-        self.target = target
+        self.target = host.target
+        self.ignored_error_codes = ignored_response_codes
+        self.proto = host.protocol
         self.threads = threads
         self.wordlist = wordlist
-        self.ignored_error_codes = ignored_response_codes
-        self.proto = proto
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
     @staticmethod

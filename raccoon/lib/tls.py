@@ -53,7 +53,9 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
-
+        print(self.ciphers)
+        print(self.sni_data)
+        print(self.non_sni_data)
         print("Done collecting data")
 
     def is_certificate(self, text):
@@ -68,13 +70,13 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
     async def heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
         process = await create_subprocess_exec(
-            script.split(),
+            *script.split(),
             stdout=PIPE,
             stderr=PIPE
         )
         result, err = await process.communicate()
         try:
-            if "server extension \"heartbeat\" (id=15)" in result.decode():
+            if "server extension \"heartbeat\" (id=15)" in result.decode().strip():
                 print("Target seems to be vulnerable to heartbleed")
         except TypeError:  # Type error means no result
             pass

@@ -9,15 +9,15 @@ class Host:
     Host parsing, IP to host resolution (and vice verse), etc
     Sets domain/IP, port, protocol. also tries to parse FQDN, naked domain, if possible.
     """
-    def __init__(self, target, records):
+    def __init__(self, target, dns_records):
         self.target = target.strip()
+        self.dns_records = dns_records
         self.port = 80
         self.protocol = "http"
-        self.dns_records = {}
         self.is_ip = False
         self.fqdn = None
         self.naked = None
-        self.records = records
+        self.dns_results = {}
         self._parse_host()
 
     def __str__(self):
@@ -89,9 +89,9 @@ class Host:
             # Can't be sure if FQDN or just naked domain
             domains.append(self.target)
 
-        self.dns_records = DNSHandler.query_dns(domains)
+        self.dns_results = DNSHandler.query_dns(domains, self.dns_results)
 
-        if self.dns_records.get("CNAME"):
+        if self.dns_results.get("CNAME"):
             # Naked domains shouldn't hold CNAME records according to RFC regulations
             print("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target

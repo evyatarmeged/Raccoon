@@ -6,7 +6,7 @@ from raccoon.lib.fuzzer import URLFuzzer
 
 class SubDomainEnumerator:
 
-    def __init__(self, target, sans, domain_list="../wordlists/subdomains"):
+    def __init__(self, target, sans, domain_list):
         self.target = target
         self.sans = sans
         self.domain_list = domain_list

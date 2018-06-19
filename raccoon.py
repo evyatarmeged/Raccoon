@@ -6,6 +6,7 @@ import requests
 from requests.exceptions import ConnectionError
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
+from raccoon.utils.request_handler import RequestHandler
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
 from raccoon.lib.scanner import Scanner
@@ -55,39 +56,41 @@ def validate_port_range(port_range):
 
 @click.command()
 @click.option("-t", "--target", help="Target to scan")
-@click.option("-r", "--records", help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
+@click.option("-dr", "--dns-records", default="A,MX,NS,CNAME,SOA",
+              help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
 @click.option("--tor-routing", is_flag=True, help="Route traffic through TOR")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing")
-@click.option("-w", "--wordlist", help="Path to wordlist that would be used for URL fuzzing")
-@click.option("-T", "--threads", help="Number of threads to use. Default: 25")
-@click.option("--ignore-error-codes", help="Comma separated list of HTTP status code to ignore for fuzzing"
-              "Defaults to: 400,401,402,403,404,504")
+@click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
+              help="Path to wordlist that would be used for URL fuzzing")
+@click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
+@click.option("--ignore-error-codes", default="301,400,401,402,403,404,504",
+              help="Comma separated list of HTTP status code to ignore for fuzzing.\n"
+                   "Defaults to: 400,401,402,403,404,504")
 @click.option("--subdomain-list", help="Path to subdomain list file that would be used for enumeration")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan both scripts and services scans")
 @click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with scripts scan")
 @click.option("-s", "--services", is_flag=True, help="Run Nmap scan with services scan")
 @click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
-@click.option("--tls-port", help="Use this port for TLS queries. Default: 443")
+@click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
 def main(target,
-         tor_routing=False,
-         proxy_list=None,
-         wordlist=None,
-         threads=25,
-         ignore_error_codes="400,401,402,403,404,504",
-         subdomain_list=None,
-         full_scan=False,
-         scripts=False,
-         services=False,
-         records="A,MX,NS,CNAME,SOA",
-         port_range=None,
-         tls_port=443,
-         no_health_check=False,
-         quiet=False):
+         tor_routing,
+         proxy_list,
+         dns_records,
+         wordlist,
+         threads,
+         ignore_error_codes,
+         subdomain_list,
+         full_scan,
+         scripts,
+         services,
+         port_range,
+         tls_port,
+         no_health_check,
+         quiet):
 
     # Arg validation
-
     if proxy_list and not os.path.isfile(proxy_list):
         raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
 
@@ -97,30 +100,35 @@ def main(target,
     if subdomain_list and not os.path.isfile(subdomain_list):
         raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
 
-    records = tuple(records.split(","))
+    dns_records = tuple(dns_records.split(","))
 
-    ignore_error_codes = tuple(ignore_error_codes.split(","))
+    ignore_error_codes = tuple(int(code) for code in ignore_error_codes.split(","))
 
     if port_range:
         validate_port_range(port_range)
 
     # /Arg validation
 
+    # Set Request Handler instance
+    request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing)
+
     if not no_health_check:
         validate_target_is_up(target)
 
     main_loop = asyncio.get_event_loop()
 
-    host = Host(target=target, records=records)
+    host = Host(target=target, dns_records=dns_records)
 
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
+    fuzzer = URLFuzzer(host, ignore_error_codes, threads, wordlist)
+    # TODO: Decide on execution order.
+    tasks = [
+        asyncio.ensure_future(waf.detect()),
+        asyncio.ensure_future(tls_info_scanner.scan()),
+        asyncio.ensure_future(fuzzer.fuzz_all()),
+    ]
+    main_loop.run_until_complete(asyncio.wait(tasks))
 
 
 main()
-
-# tasks = [
-#     asyncio.ensure_future()),
-#     asyncio.ensure_future(),
-# ]
-# run_until_complete(asyncio.wait(tasks))

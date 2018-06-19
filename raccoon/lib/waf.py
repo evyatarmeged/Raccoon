@@ -53,8 +53,8 @@ class WAFApplicationMethods:
 class WAF:
 
     def __init__(self, host):
-        self.host = host.target
-        self.cnames = host.dns_records.get('CNAME')
+        self.target = host.target
+        self.cnames = host.dns_results.get('CNAME')
         self.request_handler = RequestHandler()
         self.waf_cname_map = {
             "incapdns": "Incapsula",
@@ -77,19 +77,19 @@ class WAF:
     def _waf_detected(name):
         print("Detected {} WAF presence in web application".format(name))
 
-    def detect(self):
+    async def detect(self):
         if self.cnames:
-            self._detect_by_cname()
-        self._detect_by_application()
+            await self._detect_by_cname()
+        await self._detect_by_application()
 
-    def _detect_by_cname(self):
+    async def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
                 print("Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf)))
 
-    def _detect_by_application(self):
+    async def _detect_by_application(self):
         try:
-            response = self.request_handler.send("HEAD", url='http://{}'.format(self.host))
+            response = self.request_handler.send("HEAD", url='http://{}'.format(self.target))
             for waf, method in self.waf_app_method_map.items():
                 result = method(response.headers)
                 if result:
