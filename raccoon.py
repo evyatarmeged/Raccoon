@@ -123,7 +123,15 @@ def main(target,
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
     fuzzer = URLFuzzer(host, ignore_error_codes, threads, wordlist)
-    subdomain_enumerator = SubDomainEnumerator(host)
+    sans = None
+    if tls_info_scanner.non_sni_data.get("SANs"):
+        pass
+    elif tls_info_scanner.sni_data.get("SANs"):
+        pass
+    else:
+        pass
+
+    subdomain_enumerator = SubDomainEnumerator(host,  domain_list=subdomain_list, sans=TLSInfoScanner.)
     # TODO: Decide on execution order.
 
     tasks = [
