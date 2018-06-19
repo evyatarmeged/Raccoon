@@ -5,8 +5,8 @@ from asyncio.subprocess import PIPE, create_subprocess_exec
 
 class TLSCipherSuiteChecker:
 
-    def __init__(self, target):
-        self.target = target
+    def __init__(self, host):
+        self.target = host.target
 
     async def scan_ciphers(self, port):
         print("Scanning supported ciphers")
@@ -33,9 +33,9 @@ class TLSCipherSuiteChecker:
 # noinspection PyTypeChecker
 class TLSInfoScanner(TLSCipherSuiteChecker):
 
-    def __init__(self, target, port=443):
-        super().__init__(target)
-        self.target = target
+    def __init__(self, host, port=443):
+        super().__init__(host)
+        self.target = host.target
         self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
@@ -46,7 +46,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.non_sni_data = {}
         self.ciphers = ""
 
-    async def run_scan(self, sni=True):
+    async def scan(self, sni=True):
         print("Collecting TLS data")
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()

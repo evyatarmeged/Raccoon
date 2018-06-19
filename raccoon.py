@@ -1,4 +1,5 @@
 import os
+import asyncio
 import click
 from subprocess import PIPE, check_call, CalledProcessError
 import requests
@@ -103,15 +104,18 @@ def main(target,
     if port_range:
         validate_port_range(port_range)
 
+    # /Arg validation
+
     if not no_health_check:
         validate_target_is_up(target)
 
-    # /Arg validation
+    main_loop = asyncio.get_event_loop()
 
     host = Host(target=target, records=records)
 
     waf = WAF(host)
-    waf.detect()
+    tls_info_scanner = TLSInfoScanner(host, tls_port)
+
 
 main()
 

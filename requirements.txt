@@ -3,3 +3,4 @@ requests==2.18.4
 lxml==4.2.1
 beautifulsoup4==4.6.0
 click==6.7
+fake-useragent==0.1.10
