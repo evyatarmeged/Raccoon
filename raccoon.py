@@ -1,15 +1,16 @@
 import os
 import asyncio
-import click
+import threading
 from subprocess import PIPE, check_call, CalledProcessError
 import requests
+import click
 from requests.exceptions import ConnectionError
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
-from raccoon.lib.scanner import Scanner
+from raccoon.lib.scanner import Scanner, NmapScan
 from raccoon.lib.sub_domain import SubDomainEnumerator
 from raccoon.lib.waf import WAF
 from raccoon.lib.tls import TLSInfoScanner
@@ -120,25 +121,34 @@ def main(target,
 
     host = Host(target=target, dns_records=dns_records)
 
+    # TODO: Populate array when multiple targets are supported
+    # nmap_threads = []
+
+    print("Setting Nmap scans to run in the background")
+    nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
+    nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
+    # Run Nmap scan in the background. Can take some time
+    nmap_thread.start()
+
+    # Run first set of checks - TLS, web application data, WHOIS
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
-    fuzzer = URLFuzzer(host, ignore_error_codes, threads, wordlist)
-    sans = None
-    if tls_info_scanner.non_sni_data.get("SANs"):
-        pass
-    elif tls_info_scanner.sni_data.get("SANs"):
-        pass
-    else:
-        pass
-
-    subdomain_enumerator = SubDomainEnumerator(host,  domain_list=subdomain_list, sans=TLSInfoScanner.)
-    # TODO: Decide on execution order.
-
     tasks = [
         asyncio.ensure_future(waf.detect()),
-        asyncio.ensure_future(tls_info_scanner.scan()),
-        asyncio.ensure_future(fuzzer.fuzz_all()),
+        asyncio.ensure_future(tls_info_scanner.run()),
+        # asyncio.ensure_future("some WHOIS COMMAND")
     ]
+
+    main_loop.run_until_complete(asyncio.wait(tasks))
+
+    # Second set of checks - URL fuzzing, Subdomain enumeration
+    sans = tls_info_scanner.sni_data.get("SANs")
+    # TODO: Solve the num_threads and ignored_response_codes double FUZZER initiation
+    # TODO: For Subdomain Enum and fuzzer
+    fuzzer = URLFuzzer(host, ignore_error_codes, threads, wordlist)
+    subdomain_enumerator = SubDomainEnumerator(host,  domain_list=subdomain_list, sans=sans, su)
+
+
     main_loop.run_until_complete(asyncio.wait(tasks))
 
 

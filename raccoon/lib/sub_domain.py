@@ -7,6 +7,7 @@ from raccoon.lib.fuzzer import URLFuzzer
 class SubDomainEnumerator:
 
     def __init__(self, host, sans, domain_list):
+        self.host = host
         self.target = host.target
         self.sans = sans
         self.domain_list = domain_list
@@ -45,7 +46,10 @@ class SubDomainEnumerator:
 
     def bruteforce(self):
         print("Fuzzing sub-domains")
-        sub_domain_fuzzer = URLFuzzer(self.target, wordlist=self.domain_list)
+        sub_domain_fuzzer = URLFuzzer(
+            host=self.host,
+            wordlist=self.domain_list,
+            summary_file="raccoon/subdomains/{}")
         sub_domain_fuzzer.fuzz_all(sub_domain=True)
 
     def write_up(self):

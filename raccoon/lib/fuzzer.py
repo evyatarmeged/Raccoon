@@ -12,19 +12,25 @@ from raccoon.utils.request_handler import RequestHandler
 
 class URLFuzzer:
 
-    def __init__(self, host, ignored_response_codes, threads, wordlist):
+    def __init__(self,
+                 host,
+                 ignored_response_codes,
+                 num_threads,
+                 wordlist,
+                 summary_file="raccoon/fuzzing/{}"):
 
         self.target = host.target
         self.ignored_error_codes = ignored_response_codes
         self.proto = host.protocol
-        self.threads = threads
+        self.num_threads = num_threads
         self.wordlist = wordlist
+        self.summary_file = summary_file.format(self.target)
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
     @staticmethod
     def _print_response(code, url, headers):
         if 300 > code >= 200:
-            color = COLOR.GREEN
+            color = COLOR.GREEN`
         elif 400 > code >= 300:
             color = COLOR.CYAN
             url += " redirects to {}".format(headers.get("Location"))
@@ -61,8 +67,8 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        print("Fuzzing URLs from {}".format(self.wordlist))
-        pool = ThreadPool(self.threads)
+        print("Fuzzing from {}".format(self.wordlist))
+        pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
 
     def write_up(self):

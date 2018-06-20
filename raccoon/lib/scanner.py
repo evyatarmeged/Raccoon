@@ -1,6 +1,7 @@
 import os
 from raccoon.utils.exceptions import ScannerException
-from asyncio.subprocess import PIPE, create_subprocess_exec
+import asyncio
+from subprocess import PIPE, Popen
 
 
 class NmapScan:
@@ -10,8 +11,8 @@ class NmapScan:
     Start Raccoon with sudo for -sS else will run -sT
     """
 
-    def __init__(self, target, full_scan=False, scripts=False, services=False, port_range=None):
-        self.target = target
+    def __init__(self, host, full_scan=False, scripts=False, services=False, port_range=None):
+        self.target = host.target
         self.full_scan = full_scan
         self.scripts = scripts
         self.services = services
@@ -46,19 +47,19 @@ class NmapScan:
 class Scanner:
 
     @classmethod
-    async def run_scan(cls, scan):
+    def run(cls, scan):
         print("Starting nmap scan on {}".format(scan.target))
-        process = await create_subprocess_exec(
-            *scan.script,
+        process = Popen(
+            scan.script,
             stdout=PIPE,
             stderr=PIPE
         )
-        result, err = await process.communicate()
+        result, err = process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
-        await Scanner.write_up(scan.target, result, err)
+        Scanner.write_up(scan.target, result, err)
 
     @classmethod
-    async def write_up(cls, target, result, err):
+    def write_up(cls, target, result, err):
         path = "nmap_scans/{}".format(target)
         print("Writing nmap scan results to {}".format(path))
         try:
