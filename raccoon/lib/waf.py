@@ -59,6 +59,8 @@ class WAF:
         self.waf_cname_map = {
             "incapdns": "Incapsula",
             "edgekey": "Akamai",
+            "akamai": "Akamai",
+            "edgesuite": "Akamai",
             "distil": "Distil Networks",
             "cloudfront": "CloudFront",
             "adn": "EdgeCast",
