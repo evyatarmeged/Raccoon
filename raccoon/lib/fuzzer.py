@@ -22,6 +22,7 @@ class URLFuzzer:
         self.target = host.target
         self.ignored_error_codes = ignored_response_codes
         self.proto = host.protocol
+        self.port = host.port
         self.num_threads = num_threads
         self.wordlist = wordlist
         self.summary_file = summary_file.format(self.target)
@@ -30,7 +31,7 @@ class URLFuzzer:
     @staticmethod
     def _print_response(code, url, headers):
         if 300 > code >= 200:
-            color = COLOR.GREEN`
+            color = COLOR.GREEN
         elif 400 > code >= 300:
             color = COLOR.CYAN
             url += " redirects to {}".format(headers.get("Location"))
@@ -47,12 +48,16 @@ class URLFuzzer:
         :param sub_domain: If True, build destination URL with {URL}.{HOST} else {HOST}/{URL}
         """
         if not sub_domain:
-            url = "{}://{}/{}".format(self.proto, self.target, uri)
+            url = "{}://{}:{}/{}".format(self.proto, self.target, self.port, uri)
         else:
-            url = "{}://{}.{}".format(self.proto, uri, self.target)
+            url = "{}://{}.{}:{}".format(self.proto, uri, self.target, self.port)
         res = self.request_handler.send("HEAD", url=url)
-        if res.status_code not in self.ignored_error_codes:
-            self._print_response(res.status_code, url, res.headers)
+        try:
+            if res.status_code not in self.ignored_error_codes:
+                self._print_response(res.status_code, url, res.headers)
+        except AttributeError:
+            # res is None, an error probably occurred
+            pass
 
     async def fuzz_all(self, sub_domain=False):
         """
@@ -74,3 +79,18 @@ class URLFuzzer:
     def write_up(self):
         # TODO: Out to file
         pass
+
+import asyncio
+class a:
+    target = "88.198.233.174"
+    port = 33536
+    protocol = "http"
+
+import time
+
+fuzzer = URLFuzzer(a, (404,504), 50, "../wordlists/fuzzlist")
+main_loop = asyncio.get_event_loop()
+
+start = time.time()
+main_loop.run_until_complete(asyncio.ensure_future(fuzzer.fuzz_all()))
+print(time.time() - start)

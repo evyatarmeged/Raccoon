@@ -49,14 +49,10 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
     async def run(self, sni=True):
         print("Collecting TLS data")
         self.ciphers = await self.scan_ciphers(self.port)
-        # self.non_sni_data = await self._extract_ssl_data()
-        # if sni:
-        #     self.sni_data = await self._extract_ssl_data(sni=sni)
-        # await self.heartbleed_vulnerable()
-        from pprint import pprint
-        pprint(self.ciphers)
-        # pprint(self.sni_data)
-        # pprint(self.non_sni_data)
+        self.non_sni_data = await self._extract_ssl_data()
+        if sni:
+            self.sni_data = await self._extract_ssl_data(sni=sni)
+        await self.heartbleed_vulnerable()
         print("Done collecting data")
 
     def is_certificate(self, text):

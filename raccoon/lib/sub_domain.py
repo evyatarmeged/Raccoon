@@ -6,20 +6,22 @@ from raccoon.lib.fuzzer import URLFuzzer
 
 class SubDomainEnumerator:
 
-    def __init__(self, host, sans, domain_list):
+    def __init__(self, host, sans, domain_list, ignored_response_codes, num_threads):
         self.host = host
         self.target = host.target
         self.sans = sans
         self.domain_list = domain_list
+        self.ignored_error_codes = ignored_response_codes
+        self.num_threads = num_threads
         self.request_handler = RequestHandler()
         self.sub_domains = set()
 
-    def run(self):
+    async def run(self):
         print("Enumerating sub-domains")
         if self.sans:
-            self.find_subdomains_in_sans()
-        self.google_dork()
-        self.bruteforce()
+            await self.find_subdomains_in_sans()
+        await self.google_dork()
+        await self.bruteforce()
         print("Done enumerating sub-domains")
 
     def find_subdomains_in_sans(self):
@@ -36,7 +38,7 @@ class SubDomainEnumerator:
         print("Discovering sub-domain suggestions in Google")
         page = self.request_handler.send(
             "GET",
-            "https://www.google.com/search?q=site:{}&num=100".format(self.target)
+            url="https://www.google.com/search?q=site:{}&num=100".format(self.target)
         )
         soup = BeautifulSoup(page.text, "lxml")
         results = set(re.findall(r"\w+\.{}".format(self.target), soup.text))
@@ -44,13 +46,16 @@ class SubDomainEnumerator:
             if "www." not in subdomain:
                 print("Detected Sub-domain through Google dorking: {}".format(subdomain))
 
-    def bruteforce(self):
+    async def bruteforce(self):
         print("Fuzzing sub-domains")
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
             wordlist=self.domain_list,
-            summary_file="raccoon/subdomains/{}")
-        sub_domain_fuzzer.fuzz_all(sub_domain=True)
+            summary_file="raccoon/subdomains/{}",
+            num_threads=self.num_threads,
+            ignored_response_codes=self.ignored_error_codes
+            )
+        await sub_domain_fuzzer.fuzz_all(sub_domain=True)
 
     def write_up(self):
         # TODO: Out to file

@@ -2,14 +2,14 @@ import random
 import requests
 import threading
 from fake_useragent import UserAgent
-from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError
+from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import LocationParseError
 from raccoon.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
 
 
 class RequestHandler:
     """
-    Request handling class.
+    A wrapper for request sending and session creating.
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
 
@@ -66,13 +66,12 @@ class RequestHandler:
             proxies = self.proxies
         return proxies
 
-    def send(self, method="GET", proxies=None, *args, **kwargs):
+    def send(self, method="GET", *args, **kwargs):
         """
+        Send a GET/POST/HEAD request using the object's proxies and headers
         :param method: Method to send request in. GET/POST/HEAD
-        :param proxies: Proxy dict from last request (if this is a retry). Should be None otherwise
         """
-        if not proxies:
-            proxies = self.get_request_proxies()
+        proxies = self.get_request_proxies()
         headers = {"User-Agent": self.ua.random}
 
         try:
@@ -87,8 +86,17 @@ class RequestHandler:
         except ProxyError:
             # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
+        except ConnectTimeout:
+            pass
         except ConnectionError:
             # TODO: Increase delay
             raise RequestHandlerException("Error connecting to host")
         except TooManyRedirects:
             pass
+
+    def get_new_session(self):
+        """Returns a new session using the object's proxies and headers"""
+        session = requests.Session()
+        session.headers = {"User-Agent": self.ua.random}
+        session.proxies = self.get_request_proxies()
+        return session

@@ -1,17 +1,18 @@
 import asyncio
 import aiohttp
 import requests
-from fake_useragent import UserAgent
 from bs4 import BeautifulSoup
 from coloring import COLOR
+from raccoon.utils.request_handler import RequestHandler
 
 
-class WebAppVulnDetector:
+class WebAppDataGrabber:
 
-    def __init__(self, target, ua):
-        self.target = target
-        self.ua = ua
+    def __init__(self, host):
+        self.target = host.target
+        self.request_handler = RequestHandler()
         self.headers = None
+        self.robots = None
 
     def detect_cms(self):
         page = requests.get("https://whatcms.org/?s={}".format(self.target))
@@ -55,25 +56,17 @@ class WebAppVulnDetector:
 
     def get_robots_txt(self):
         res = requests.get("{}/robots.txt".format(self.target))
-        if res.status_code == 200:
-            # TODO: Write to file
-            robots_txt = res.text
+        if res.status_code == 200 and res.text:
+            self.robots = res.text
             print("Fetched robots.txt")
 
-    def scan_xss(self):
-        # TODO: Scan input fields for XSS
-        pass
-
-    def test_sqli(self):
-        # TODO: Scan forms/parameterized URLs for SQLi
-        pass
-
     def run(self):
-        print("Scanning {} for web vulnerabilities".format(self.target))
+        print("Collecting {} web app information".format(self.target))
         self.detect_cms()
         self.get_robots_txt()
 
-        with requests.Session() as session:
+        session = self.request_handler.get_new_session()
+        with session:
             response = session.get(self.target)
             self.headers = response.headers
 

@@ -26,3 +26,7 @@ class DNSHandler:
                     # Type of record doesn't fit domain or no answer from ns
                     continue
         return {k: None if not v else v for k, v in results.items()}
+
+    @classmethod
+    def grab_whois(cls, target):
+        pass

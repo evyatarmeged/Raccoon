@@ -67,6 +67,8 @@ class Host:
             try:
                 self.protocol, self.target = self.target.split("://")
                 print("Protocol detected: {}".format(self.protocol))
+                if self.protocol.lower() == "https":
+                    self.port = 443
             except ValueError:
                 raise HostHandlerException("Could not make domain and protocol from host")
 
