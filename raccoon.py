@@ -8,6 +8,7 @@ from requests.exceptions import ConnectionError
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
 from raccoon.lib.scanner import Scanner, NmapScan
@@ -87,7 +88,7 @@ def main(target,
     ignored_response_codes = tuple(int(code) for code in ignored_response_codes.split(","))
 
     if port_range:
-        validate_port_range(port_range)
+        HelperUtilities.validate_port_range(port_range)
 
     # /Arg validation
 
@@ -97,7 +98,7 @@ def main(target,
     request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing)
 
     if not no_health_check:
-        validate_target_is_up(target)
+        HelperUtilities.validate_target_is_up(target)
 
     main_loop = asyncio.get_event_loop()
 
@@ -131,6 +132,8 @@ def main(target,
 
     tasks = create_event_loop_tasks((fuzzer.fuzz_all, subdomain_enumerator.run))
     main_loop.run_until_complete(asyncio.wait(tasks))
+
+# TODO: Change relative paths in default wordlist/subdomain list/etc
 
 
 main()
