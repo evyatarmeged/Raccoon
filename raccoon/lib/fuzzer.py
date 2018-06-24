@@ -16,8 +16,7 @@ class URLFuzzer:
                  host,
                  ignored_response_codes,
                  num_threads,
-                 wordlist,
-                 summary_file="raccoon/fuzzing/{}"):
+                 wordlist):
 
         self.target = host.target
         self.ignored_error_codes = ignored_response_codes
@@ -25,7 +24,7 @@ class URLFuzzer:
         self.port = host.port
         self.num_threads = num_threads
         self.wordlist = wordlist
-        self.summary_file = summary_file.format(self.target)
+        self.outfile = None
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
     @staticmethod
@@ -73,6 +72,14 @@ class URLFuzzer:
         Should be run in an event loop.
         :param sub_domain: Indicate if this is subdomain enumeration or URL busting
         """
+        # TODO: EDIT
+        if sub_domain:
+            # Outfile path subdomain/target
+            pass
+        else:
+            # Outfile path fuzzer/target
+            pass
+
         try:
             with open(self.wordlist, "r") as file:
                 fuzzlist = file.readlines()

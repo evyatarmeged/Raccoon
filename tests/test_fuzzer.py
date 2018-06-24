@@ -10,11 +10,11 @@ class TestURLFuzzer(unittest.TestCase):
         self.loop = asyncio.get_event_loop()
 
     def test_bad_wordlist(self):
-        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="no/such/path")
+        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="no/such/path", num_threads=1)
         with self.assertRaises(FuzzerException):
             self.loop.run_until_complete(fuzzer.fuzz_all())
 
     def test_bad_host(self):
-        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="../raccoon/wordlists/mock_wordlist")
+        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="../raccoon/wordlists/mock_wordlist", num_threads=1)
         with self.assertRaises(RequestHandlerException):
             self.loop.run_until_complete(fuzzer.fuzz_all())
