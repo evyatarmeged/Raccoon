@@ -11,7 +11,7 @@ class NmapScan:
     Start Raccoon with sudo for -sS else will run -sT
     """
 
-    def __init__(self, host, full_scan=False, scripts=False, services=False, port_range=None):
+    def __init__(self, host, full_scan, scripts, services, port_range):
         self.target = host.target
         self.full_scan = full_scan
         self.scripts = scripts
@@ -48,7 +48,9 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        print("Starting nmap scan on {}".format(scan.target))
+        path = "nmap_scans/{}".format(scan.target)
+        print("Starting nmap scan on {}\n"
+              "Will write results to {} when finished.".format(scan.target, path))
         process = Popen(
             scan.script,
             stdout=PIPE,
@@ -59,9 +61,8 @@ class Scanner:
         Scanner.write_up(scan.target, result, err)
 
     @classmethod
-    def write_up(cls, target, result, err):
-        path = "nmap_scans/{}".format(target)
-        print("Writing nmap scan results to {}".format(path))
+    def write_up(cls, path, result, err):
+
         try:
             os.mkdir("nmap_scans")
         except FileExistsError:

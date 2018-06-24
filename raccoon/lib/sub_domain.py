@@ -19,8 +19,8 @@ class SubDomainEnumerator:
     async def run(self):
         print("Enumerating sub-domains")
         if self.sans:
-            await self.find_subdomains_in_sans()
-        await self.google_dork()
+            self.find_subdomains_in_sans()
+        self.google_dork()
         await self.bruteforce()
         print("Done enumerating sub-domains")
 

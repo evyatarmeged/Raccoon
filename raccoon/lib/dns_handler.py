@@ -29,4 +29,5 @@ class DNSHandler:
 
     @classmethod
     def grab_whois(cls, target):
+        # TODO: Add whois command
         pass

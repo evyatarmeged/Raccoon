@@ -45,9 +45,9 @@ def create_event_loop_tasks(funcs):
 @click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
-@click.option("--ignored-response-codes", default="301,400,401,402,404,504",
+@click.option("--ignored-response-codes", default="400,401,402,404,504",
               help="Comma separated list of HTTP status code to ignore for fuzzing.\n"
-                   "Defaults to: 400,401,402,403,404,504")
+                   "Defaults to: 400,401,402,404,504")
 @click.option("--subdomain-list", default="./raccoon/wordlists/subdomains",
               help="Path to subdomain list file that would be used for enumeration")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan both scripts and services scans")
@@ -122,16 +122,18 @@ def main(target,
     # Second set of checks - URL fuzzing, Subdomain enumeration
     sans = tls_info_scanner.sni_data.get("SANs")
     fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
-    subdomain_enumerator = SubDomainEnumerator(
-        host,
-        domain_list=subdomain_list,
-        sans=sans,
-        ignored_response_codes=ignored_response_codes,
-        num_threads=threads
-    )
+    main_loop.run_until_complete(fuzzer.fuzz_all())
 
-    tasks = create_event_loop_tasks((fuzzer.fuzz_all, subdomain_enumerator.run))
-    main_loop.run_until_complete(asyncio.wait(tasks))
+    if not host.is_ip:
+        subdomain_enumerator = SubDomainEnumerator(
+            host,
+            domain_list=subdomain_list,
+            sans=None,
+            ignored_response_codes=ignored_response_codes,
+            num_threads=threads
+        )
+        main_loop.run_until_complete(subdomain_enumerator.run())
+
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

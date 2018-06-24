@@ -48,10 +48,18 @@ class URLFuzzer:
         :param sub_domain: If True, build destination URL with {URL}.{HOST} else {HOST}/{URL}
         """
         if not sub_domain:
-            url = "{}://{}:{}/{}".format(self.proto, self.target, self.port, uri)
+            if self.port != 80 and self.port != 443:
+                url = "{}://{}:{}/{}".format(self.proto, self.target, self.port, uri)
+            else:
+                url = "{}://{}/{}".format(self.proto, self.target, uri)
         else:
-            url = "{}://{}.{}:{}".format(self.proto, uri, self.target, self.port)
+            if self.port != 80 and self.port != 443:
+                url = "{}://{}.{}:{}".format(self.proto, uri, self.target, self.port)
+            else:
+                url = "{}://{}.{}".format(self.proto, uri, self.target)
+
         res = self.request_handler.send("HEAD", url=url)
+
         try:
             if res.status_code not in self.ignored_error_codes:
                 self._print_response(res.status_code, url, res.headers)
@@ -79,18 +87,3 @@ class URLFuzzer:
     def write_up(self):
         # TODO: Out to file
         pass
-
-import asyncio
-class a:
-    target = "88.198.233.174"
-    port = 33536
-    protocol = "http"
-
-import time
-
-fuzzer = URLFuzzer(a, (404,504), 50, "../wordlists/fuzzlist")
-main_loop = asyncio.get_event_loop()
-
-start = time.time()
-main_loop.run_until_complete(asyncio.ensure_future(fuzzer.fuzz_all()))
-print(time.time() - start)

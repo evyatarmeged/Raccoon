@@ -9,7 +9,6 @@ class TLSCipherSuiteChecker:
         self.target = host.target
 
     async def scan_ciphers(self, port):
-        print("Scanning supported ciphers")
         script = "nmap --script ssl-enum-ciphers -p {} {}".format(str(port), self.target).split()
         process = await create_subprocess_exec(
             *script,
@@ -21,7 +20,6 @@ class TLSCipherSuiteChecker:
             parsed = err.decode().strip()
         else:
             parsed = self._parse_nmap_outpt(result)
-        print("Done scanning ciphers")
         return parsed
 
     @staticmethod
@@ -47,13 +45,15 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.ciphers = ""
 
     async def run(self, sni=True):
-        print("Collecting TLS data")
+        path = "TLS_data/{}".format(self.target)
+        print("Started collecting TLS data.\n"
+              "Will write results to {}".format(path))
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
-        print("Done collecting data")
+        print("Done collecting TLS data")
 
     def is_certificate(self, text):
         if self.begin in text and self.end in text:
@@ -74,7 +74,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         result, err = await process.communicate()
         try:
             if "server extension \"heartbeat\" (id=15)" in result.decode().strip():
-                print("Target seems to be vulnerable to heartbleed")
+                print("Target seems to be vulnerable to Heartbleed - CVE-2014-0160")
         except TypeError:  # Type error means no result
             pass
 
@@ -133,6 +133,6 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
                     is_supported[ver] = True
         return is_supported
 
-    def write_up(self):
+    def write_up(self, path):
         # TODO: Out to file
         pass
