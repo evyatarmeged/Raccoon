@@ -1,10 +1,7 @@
 import os
 import asyncio
 import threading
-from subprocess import PIPE, check_call, CalledProcessError
-import requests
 import click
-from requests.exceptions import ConnectionError
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
@@ -13,6 +10,7 @@ from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
 from raccoon.lib.scanner import Scanner, NmapScan
 from raccoon.lib.sub_domain import SubDomainEnumerator
+from raccoon.lib.dns_handler import DNSHandler
 from raccoon.lib.waf import WAF
 from raccoon.lib.tls import TLSInfoScanner
 
@@ -30,10 +28,6 @@ def intro():
 
     {}
     """.format(COLOR.BLUE, COLOR.RESET))
-
-
-def create_event_loop_tasks(funcs):
-    return [asyncio.ensure_future(f()) for f in funcs]
 
 
 @click.command()
@@ -116,7 +110,14 @@ def main(target,
     # Run first set of checks - TLS, web application data, WHOIS
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
-    tasks = create_event_loop_tasks((waf.detect, tls_info_scanner.run))
+
+    # TODO: Can these be generators ?
+    tasks = (
+        asyncio.ensure_future(waf.detect()),
+        asyncio.ensure_future(tls_info_scanner.run()),
+        asyncio.ensure_future(DNSHandler.grab_whois(host)),
+    )
+
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration

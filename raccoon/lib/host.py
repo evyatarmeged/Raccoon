@@ -1,5 +1,4 @@
 from ipaddress import ip_address
-from dns import resolver
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 
@@ -19,6 +18,7 @@ class Host:
         self.naked = None
         self.dns_results = {}
         self._parse_host()
+        self.write_up()
 
     def __str__(self):
         return "Host [{}://{}]".format(self.protocol, self.target)
@@ -91,10 +91,20 @@ class Host:
             # Can't be sure if FQDN or just naked domain
             domains.append(self.target)
 
-        self.dns_results = DNSHandler.query_dns(domains, self.dns_results)
+        self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
 
         if self.dns_results.get("CNAME"):
             # Naked domains shouldn't hold CNAME records according to RFC regulations
             print("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target
             self.naked = ".".join(self.fqdn.split('.')[1:])
+
+    def write_up(self):
+        path = "{}/dns_records.txt".format(self.target)
+        print("Writing {} DNS query results to {}".format(self.target, path))
+
+        with open(path, "w") as file:
+            for record in self.dns_results:
+                file.write(record+"\n")
+                for value in record:
+                    file.write("\t{}\n".format(value))

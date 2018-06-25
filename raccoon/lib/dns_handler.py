@@ -1,4 +1,5 @@
 from dns import resolver
+from asyncio.subprocess import PIPE, create_subprocess_exec
 
 
 # noinspection PyUnboundLocalVariable
@@ -25,9 +26,27 @@ class DNSHandler:
                 except (resolver.NoAnswer, resolver.NXDOMAIN, resolver.NoNameservers):
                     # Type of record doesn't fit domain or no answer from ns
                     continue
+
         return {k: None if not v else v for k, v in results.items()}
 
     @classmethod
-    def grab_whois(cls, target):
-        # TODO: Add whois command
-        pass
+    async def grab_whois(cls, host):
+        if host.naked:
+            target = host.naked
+        else:
+            return
+
+        script = "whois {}".format(target).split()
+        path = "{}/whois.txt".format(target)
+        process = await create_subprocess_exec(
+            *script,
+            stdout=PIPE,
+            stderr=PIPE
+        )
+        result, err = await process.communicate()
+        print("Writing {} WHOIS Information to {}".format(target, path))
+
+        with open(path, "w+") as file:
+            for line in result.decode().strip().split("\n"):
+                if ":" in line:
+                    file.write("{}\n".format(line))
