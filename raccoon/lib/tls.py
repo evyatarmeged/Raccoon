@@ -1,5 +1,4 @@
 import re
-import json
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 
@@ -49,14 +48,17 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         path = "{}/tls_data.txt".format(self.target)
         print("Started collecting TLS data.\n"
               "Will write results to {}".format(path))
-        self.ciphers = await self.scan_ciphers(self.port)
+        # self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
         print("Done collecting TLS data")
-        self.write_up(path)
-
+        # self.write_up(path)
+        print(self.sni_data)
+        print(type(self.sni_data))
+        print(self.non_sni_data)
+        print(type(self.non_sni_data))
     def is_certificate(self, text):
         if self.begin in text and self.end in text:
             return True
@@ -140,6 +142,8 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             file.write("Supporting Ciphers:\n")
             file.write(self.ciphers+"\n")
             file.write("SNI Data:\n")
-            file.write(json.dumps(self.sni_data)+"\n")
+            for k, v in self.sni_data.items():
+                file.write("{}: {}\n".format(k, v))
             file.write("non-SNI Data:\n")
-            file.write(json.dumps(self.non_sni_data))
+            for k, v in self.sni_data.items():
+                file.write("{}: {}\n".format(k, v))

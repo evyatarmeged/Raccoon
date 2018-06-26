@@ -81,15 +81,15 @@ class WAF:
 
     async def detect(self):
         if self.cnames:
-            await self._detect_by_cname()
-        await self._detect_by_application()
+            self._detect_by_cname()
+        self._detect_by_application()
 
-    async def _detect_by_cname(self):
+    def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
                 print("Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf)))
 
-    async def _detect_by_application(self):
+    def _detect_by_application(self):
         try:
             response = self.request_handler.send("HEAD", url='http://{}'.format(self.target))
             for waf, method in self.waf_app_method_map.items():

@@ -13,7 +13,6 @@ from raccoon.lib.sub_domain import SubDomainEnumerator
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.lib.waf import WAF
 from raccoon.lib.tls import TLSInfoScanner
-import time
 
 
 # TODO: Change all prints to a logger debug/info/warning call for EASY verbosity control
