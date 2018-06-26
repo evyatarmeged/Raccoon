@@ -3,22 +3,16 @@ import requests
 import threading
 from fake_useragent import UserAgent
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
-from urllib3.exceptions import LocationParseError
+from urllib3.exceptions import LocationParseError, NewConnectionError
 from raccoon.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
+from raccoon.utils.singleton import Singleton
 
 
-class RequestHandler:
+class RequestHandler(metaclass=Singleton):
     """
     A wrapper for request sending and session creating.
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
-
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls._instance:
-            cls._instance = super(RequestHandler, cls).__new__(cls)
-        return cls._instance
 
     def __init__(self, proxy_list=None, tor_routing=None, delay=None):
         self.proxy_list = proxy_list
@@ -87,12 +81,15 @@ class RequestHandler:
             # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
         except ConnectTimeout:
-            pass
+            return
+        except NewConnectionError:
+            return
+            # New connection error == Can't resolve address
         except ConnectionError:
             # TODO: Increase delay
-            raise RequestHandlerException("Error connecting to host")
+            raise RequestHandlerException("Error connecting to host\n")
         except TooManyRedirects:
-            pass
+            return
 
     def get_new_session(self):
         """Returns a new session using the object's proxies and headers"""

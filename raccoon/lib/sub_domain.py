@@ -17,25 +17,25 @@ class SubDomainEnumerator:
         self.sub_domains = set()
 
     async def run(self):
-        print("Enumerating sub-domains")
+        print("Enumerating Subdomains")
         if self.sans:
             self.find_subdomains_in_sans()
         self.google_dork()
         await self.bruteforce()
-        print("Done enumerating sub-domains")
+        print("Done enumerating Subdomains")
 
     def find_subdomains_in_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""
-        print("Trying to find sub-domains in the Subject Alternative Name list")
+        print("Trying to find Subdomains in SANs list")
         domains = self.target.split('.')
         domain, tld_less = domains[0], ".".join(domains[:-1])
 
         for san in self.sans:
             if (tld_less in san or domain in san) and self.target != san:
-                print("Sub-domain detected: {}".format(san))
+                print("Subdomain detected: {}".format(san))
 
     def google_dork(self):
-        print("Discovering sub-domain suggestions in Google")
+        print("Trying to discover subdomains in Google")
         page = self.request_handler.send(
             "GET",
             url="https://www.google.com/search?q=site:{}&num=100".format(self.target)
@@ -44,14 +44,17 @@ class SubDomainEnumerator:
         results = set(re.findall(r"\w+\.{}".format(self.target), soup.text))
         for subdomain in results:
             if "www." not in subdomain:
-                print("Detected Sub-domain through Google dorking: {}".format(subdomain))
+                print("Detected subdomain through Google dorking: {}".format(subdomain))
 
     async def bruteforce(self):
-        print("Fuzzing sub-domains")
+        """If a naked domain exists, use it"""
+        if self.host.naked:
+            self.host.target = self.host.naked
+
+        print("Fuzzing Subdomains")
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
             wordlist=self.domain_list,
-            summary_file="raccoon/subdomains/{}",
             num_threads=self.num_threads,
             ignored_response_codes=self.ignored_error_codes
             )

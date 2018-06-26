@@ -27,24 +27,22 @@ class DNSHandler:
                     # Type of record doesn't fit domain or no answer from ns
                     continue
 
-        return {k: None if not v else v for k, v in results.items()}
+        return {k: v for k, v in results.items() if v}
 
     @classmethod
     async def grab_whois(cls, host):
-        if host.naked:
-            target = host.naked
-        else:
+        if not host.naked:
             return
 
-        script = "whois {}".format(target).split()
-        path = "{}/whois.txt".format(target)
+        script = "whois {}".format(host.naked).split()
+        path = "{}/whois.txt".format(host.target)
         process = await create_subprocess_exec(
             *script,
             stdout=PIPE,
             stderr=PIPE
         )
         result, err = await process.communicate()
-        print("Writing {} WHOIS Information to {}".format(target, path))
+        print("Writing {} WHOIS Information to {}".format(host, path))
 
         with open(path, "w+") as file:
             for line in result.decode().strip().split("\n"):

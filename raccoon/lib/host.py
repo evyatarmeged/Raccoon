@@ -1,3 +1,4 @@
+import os
 from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
@@ -67,7 +68,7 @@ class Host:
             try:
                 self.protocol, self.target = self.target.split("://")
                 print("Protocol detected: {}".format(self.protocol))
-                if self.protocol.lower() == "https":
+                if self.protocol.lower() == "https" and self.port == 80:
                     self.port = 443
             except ValueError:
                 raise HostHandlerException("Could not make domain and protocol from host")
@@ -100,11 +101,16 @@ class Host:
             self.naked = ".".join(self.fqdn.split('.')[1:])
 
     def write_up(self):
+        try:
+            os.mkdir(self.target)
+        except FileExistsError:
+            pass
+
         path = "{}/dns_records.txt".format(self.target)
         print("Writing {} DNS query results to {}".format(self.target, path))
 
         with open(path, "w") as file:
             for record in self.dns_results:
                 file.write(record+"\n")
-                for value in record:
+                for value in self.dns_results.get(record):
                     file.write("\t{}\n".format(value))

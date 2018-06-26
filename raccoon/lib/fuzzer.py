@@ -57,13 +57,12 @@ class URLFuzzer:
             else:
                 url = "{}://{}.{}".format(self.proto, uri, self.target)
 
-        res = self.request_handler.send("HEAD", url=url)
-
         try:
+            res = self.request_handler.send("HEAD", url=url)
             if res.status_code not in self.ignored_error_codes:
                 self._print_response(res.status_code, url, res.headers)
-        except AttributeError:
-            # res is None, an error probably occurred
+        except (AttributeError, RequestHandlerException):
+            # res is None or another error occurred
             pass
 
     async def fuzz_all(self, sub_domain=False):

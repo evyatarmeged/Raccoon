@@ -48,7 +48,7 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        path = "nmap_scans/{}".format(scan.target)
+        path = "{0}/nmap_scans/{0}.txt".format(scan.target)
         print("Starting nmap scan on {}\n"
               "Will write results to {} when finished.".format(scan.target, path))
         process = Popen(
@@ -58,13 +58,12 @@ class Scanner:
         )
         result, err = process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
-        Scanner.write_up(scan.target, result, err)
+        Scanner.write_up(path, result, err)
 
     @classmethod
     def write_up(cls, path, result, err):
-
         try:
-            os.mkdir("nmap_scans")
+            os.mkdir("/".join(path.split("/")[:-1]))
         except FileExistsError:
             pass
 
