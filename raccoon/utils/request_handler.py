@@ -70,11 +70,11 @@ class RequestHandler(metaclass=Singleton):
 
         try:
             if method.lower() == "get":
-                return requests.get(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.get(proxies=proxies, headers=headers, timeout=10, *args, **kwargs)
             elif method.lower() == "post":
-                return requests.post(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.post(proxies=proxies, headers=headers, timeout=10, *args, **kwargs)
             elif method.lower() == "head":
-                return requests.head(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.head(proxies=proxies, headers=headers, timeout=10, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:

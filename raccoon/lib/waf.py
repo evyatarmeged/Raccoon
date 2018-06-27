@@ -91,12 +91,16 @@ class WAF:
 
     def _detect_by_application(self):
         try:
-            response = self.request_handler.send("HEAD", url='http://{}'.format(self.target))
+            response = self.request_handler.send(
+                "HEAD",
+                timeout=10,
+                url='http://{}'.format(self.target)
+            )
             for waf, method in self.waf_app_method_map.items():
                 result = method(response.headers)
                 if result:
                     self._waf_detected(waf)
 
-        except (ConnectTimeout, ConnectionError, TooManyRedirects):
-            # TODO: Some output
-            return
+        except (ConnectTimeout, ConnectionError, TooManyRedirects) as e:
+            raise WAFException("Couldn't get response from server.\n"
+                               "Caused due to exception: {}".format(str(e)))

@@ -54,11 +54,8 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
         print("Done collecting TLS data")
-        # self.write_up(path)
-        print(self.sni_data)
-        print(type(self.sni_data))
-        print(self.non_sni_data)
-        print(type(self.non_sni_data))
+        self.write_up(path)
+
     def is_certificate(self, text):
         if self.begin in text and self.end in text:
             return True
@@ -141,9 +138,9 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         with open(path, "w") as file:
             file.write("Supporting Ciphers:\n")
             file.write(self.ciphers+"\n")
-            file.write("SNI Data:\n")
+            file.write("\nSNI Data:\n")
             for k, v in self.sni_data.items():
                 file.write("{}: {}\n".format(k, v))
-            file.write("non-SNI Data:\n")
+            file.write("\nnon-SNI Data:\n")
             for k, v in self.sni_data.items():
                 file.write("{}: {}\n".format(k, v))

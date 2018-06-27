@@ -34,8 +34,10 @@ def intro():
 @click.option("-t", "--target", help="Target to scan")
 @click.option("-dr", "--dns-records", default="A,MX,NS,CNAME,SOA",
               help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
-@click.option("--tor-routing", is_flag=True, help="Route traffic through TOR")
-@click.option("--proxy-list", help="Path to proxy list file that would be used for routing")
+@click.option("--tor-routing", is_flag=True, help="Route traffic through TOR.\n"
+                                                  "Slows the total runtime significantly")
+@click.option("--proxy-list", help="Path to proxy list file that would be used for routing\n"
+                                   "Slows the total runtime significantly")
 @click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
@@ -116,24 +118,23 @@ def main(target,
     # hosts = []
     host = Host(target=target, dns_records=dns_records)
 
-    print("Setting Nmap scans to run in the background")
+    print("Setting Nmap scan to run in the background")
     nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
     # TODO: Populate array when multiple targets are supported
     # nmap_threads = []
     nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
     # Run Nmap scan in the background. Can take some time
     nmap_thread.start()
-
     # Run first set of checks - TLS, web application data, WHOIS
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
 
-    tasks = [
+    tasks = (
         asyncio.ensure_future(tls_info_scanner.run()),
         asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(DNSHandler.grab_whois(host))
-    ]
-
+    )
+    # TODO: Add WebApp class instance to tasks and run
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration

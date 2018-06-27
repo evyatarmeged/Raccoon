@@ -1,7 +1,8 @@
 import logging
+from raccoon.utils.singleton import Singleton
 
 
-class Logger:
+class Logger(metaclass=Singleton):
 
     def __init__(self):
         pass

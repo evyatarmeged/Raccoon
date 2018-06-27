@@ -6,7 +6,7 @@ from coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
 
 
-class WebAppDataGrabber:
+class WebApplicationScanner:
 
     def __init__(self, host):
         self.target = host.target
@@ -60,8 +60,8 @@ class WebAppDataGrabber:
             self.robots = res.text
             print("Fetched robots.txt")
 
-    def run(self):
-        print("Collecting {} web app information".format(self.target))
+    def run_scan(self):
+        print("Trying to collect {} web app information".format(self.target))
         self.detect_cms()
         self.get_robots_txt()
 
