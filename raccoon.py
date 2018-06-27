@@ -128,11 +128,11 @@ def main(target,
     waf = WAF(host)
     tls_info_scanner = TLSInfoScanner(host, tls_port)
 
-    tasks = (
-        asyncio.ensure_future(waf.detect()),
+    tasks = [
         asyncio.ensure_future(tls_info_scanner.run()),
+        asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(DNSHandler.grab_whois(host))
-    )
+    ]
 
     main_loop.run_until_complete(asyncio.wait(tasks))
 
