@@ -45,25 +45,38 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.ciphers = ""
 
     async def run(self, sni=True):
-        path = "{}/tls_data.txt".format(self.target)
+        path = "{}/tls_report.txt".format(self.target)
         print("Started collecting TLS data.\n"
               "Will write results to {}".format(path))
-        # self.ciphers = await self.scan_ciphers(self.port)
+        self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
         print("Done collecting TLS data")
+        from pprint import pprint
+        pprint(self.ciphers)
+        pprint(self.non_sni_data)
+        pprint(self.sni_data)
         self.write_up(path)
 
-    def is_certificate(self, text):
+    def is_cert_exists(self, text):
         if self.begin in text and self.end in text:
             return True
         return
 
-    def get_certificate(self, text):
-        ######
-        pass
+    async def extract_cert_details(self, data):
+        process = await create_subprocess_exec(
+            "timeout", "5", "openssl", "x509", "-text",
+            stdin=PIPE,
+            stderr=PIPE,
+            stdout=PIPE
+        )
+        result, err = await process.communicate(input=bytes(data, encoding='ascii'))
+        result = result.decode().strip()
+        cert_details = result.split(self.begin)[0]
+
+        return cert_details.strip()
 
     async def heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
@@ -80,15 +93,20 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             pass
 
     async def _extract_ssl_data(self, sni=False):
-        """Test for version support (SNI/non-SNI), get all SANs, get certificate"""
+        """
+        Test for version support (SNI/non-SNI), get all SANs, get certificate details
+        :param sni: True will call cause _exec_openssl to call openssl with -servername flag
+        """
         # Do for all responses
         responses = await self._exec_openssl(self._base_script, sni)
         tls_dict = self._parse_sclient_output(responses)
         # Do for one successful SSL response
         for res in responses:
-            if self.is_certificate(res):
+            if self.is_cert_exists(res):
                 tls_dict["SANs"] = await self._parse_san_output(res)
+                tls_dict["Certificate_details"] = await self.extract_cert_details(res)
                 break
+
         return tls_dict
 
     async def _exec_openssl(self, script, sni=False):
@@ -109,6 +127,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             result, err = await p.communicate()
 
             outputs.append(result.decode().strip())
+
         return outputs
 
     @staticmethod
@@ -126,7 +145,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
     def _parse_sclient_output(self, results):
         is_supported = {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
         for res in results:
-            if not self.is_certificate(res):
+            if not self.is_cert_exists(res):
                 continue
             for line in res.split('\n'):
                 if "Protocol" in line:
@@ -138,9 +157,10 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         with open(path, "w") as file:
             file.write("Supporting Ciphers:\n")
             file.write(self.ciphers+"\n")
-            file.write("\nSNI Data:\n")
+            file.write("\n{0}\nSNI Data:\n{0}\n".format("#"*20))
             for k, v in self.sni_data.items():
                 file.write("{}: {}\n".format(k, v))
-            file.write("\nnon-SNI Data:\n")
+
+            file.write("\n{0}\nSNI Data:\n{0}\n".format("#"*20))
             for k, v in self.sni_data.items():
                 file.write("{}: {}\n".format(k, v))
