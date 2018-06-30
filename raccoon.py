@@ -13,6 +13,7 @@ from raccoon.lib.sub_domain import SubDomainEnumerator
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.lib.waf import WAF
 from raccoon.lib.tls import TLSHandler
+from raccoon.lib.web_app import WebApplicationScanner
 
 
 # TODO: Change all prints to a logger debug/info/warning call for EASY verbosity control
@@ -75,7 +76,7 @@ def main(target,
          tls_port,
          no_health_check,
          outdir,
-         delay,
+         # delay,
          quiet):
 
     intro()
@@ -93,6 +94,16 @@ def main(target,
     HelperUtilities.create_output_directory(outdir)
 
     HelperUtilities.validate_proxy_arguments(tor_routing, proxy, proxy_list)
+
+    if tor_routing:
+        print("Routing traffic using TOR service")
+    elif proxy_list:
+        if proxy_list and not os.path.isfile(proxy_list):
+            raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+        else:
+            print("Routing traffic using proxies from list {}".format(proxy_list))
+    elif proxy:
+        print("Routing traffic through proxy {}".format(proxy))
 
     # TODO: Sanitize delay argument
 
@@ -123,16 +134,18 @@ def main(target,
     nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
     # Run Nmap scan in the background. Can take some time
     nmap_thread.start()
-    # Run first set of checks - TLS, web application data, WHOIS
+    # Run first set of checks - TLS, Web/WAF Data, WHOIS
     waf = WAF(host)
     tls_info_scanner = TLSHandler(host, tls_port)
+    web_app_scanner = WebApplicationScanner(host)
 
     tasks = (
         asyncio.ensure_future(tls_info_scanner.run()),
         asyncio.ensure_future(waf.detect()),
-        asyncio.ensure_future(DNSHandler.grab_whois(host))
+        asyncio.ensure_future(DNSHandler.grab_whois(host)),
+        asyncio.ensure_future(web_app_scanner.run_scan())
     )
-    # TODO: Add WebApp class instance to tasks and run
+
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration

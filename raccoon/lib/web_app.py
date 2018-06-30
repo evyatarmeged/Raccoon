@@ -2,7 +2,7 @@ import asyncio
 import aiohttp
 import requests
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
@@ -76,18 +76,22 @@ class WebApplicationScanner:
         session = self.request_handler.get_new_session()
         try:
             with session:
+                # Test if target is serving HTTP requests
                 response = session.get(self.target, timeout=10)
                 self.headers = response.headers
+                self.detect_cms()
+                self.get_robots_txt()
+                self.gather_server_info()
+                self.cors_wildcard()
+                self.detect_xss_protection()
+                self.detect_anti_clickjacking()
+                self.gather_cookie_info(session.cookies)
+
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
                                          "Caused due to exception: {}".format(str(e)))
-        self.detect_cms()
-        self.get_robots_txt()
-        self.gather_server_info()
-        self.cors_wildcard()
-        self.detect_xss_protection()
-        self.detect_anti_clickjacking()
-        self.gather_cookie_info(session.cookies)
+        finally:
+            self.write_up()
 
     def write_up(self):
         path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.target))

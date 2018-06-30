@@ -102,13 +102,13 @@ class Host:
             self.naked = ".".join(self.fqdn.split('.')[1:])
 
     def write_up(self):
-        try:
-            os.mkdir(self.target)
-        except FileExistsError:
-            pass
-
         path = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
         print("Writing {} DNS query results to {}".format(self.target, path))
+
+        try:
+            os.mkdir("/".join(path.split("/")[:-1]))
+        except FileExistsError:
+            pass
 
         with open(path, "w") as file:
             for record in self.dns_results:

@@ -2,6 +2,7 @@ import os
 import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
+from requests.exceptions import ConnectionError
 from raccoon.utils.exceptions import RaccoonException
 
 
@@ -40,16 +41,6 @@ class HelperUtilities:
         if Counter((not arg for arg in (*args,))).get(False) > 1:
             raise RaccoonException("Must specify only one of the following:\n"
                                    "--tor-routing, --proxy-list, --proxy")
-        else:
-            if tor_routing:
-                print("Routing traffic using TOR service")
-            elif proxy_list:
-                if proxy_list and not os.path.isfile(proxy_list):
-                    raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
-                else:
-                    print("Routing traffic using proxies from list {}".format(proxy_list))
-            elif proxy:
-                print("Routing traffic through proxy {}".format(proxy))
 
     @classmethod
     def create_output_directory(cls, outdir):
