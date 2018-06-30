@@ -149,18 +149,18 @@ def main(target,
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration
-    sans = tls_info_scanner.sni_data.get("SANs")
-    fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
-    main_loop.run_until_complete(fuzzer.fuzz_all())
-    if not host.is_ip:
-        subdomain_enumerator = SubDomainEnumerator(
-            host,
-            domain_list=subdomain_list,
-            sans=sans,
-            ignored_response_codes=ignored_response_codes,
-            num_threads=threads
-        )
-        main_loop.run_until_complete(subdomain_enumerator.run())
+    # sans = tls_info_scanner.sni_data.get("SANs")
+    # fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
+    # main_loop.run_until_complete(fuzzer.fuzz_all())
+    # if not host.is_ip:
+    #     subdomain_enumerator = SubDomainEnumerator(
+    #         host,
+    #         domain_list=subdomain_list,
+    #         sans=sans,
+    #         ignored_response_codes=ignored_response_codes,
+    #         num_threads=threads
+    #     )
+    #     main_loop.run_until_complete(subdomain_enumerator.run())
 
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc

@@ -54,7 +54,7 @@ class WAFApplicationMethods:
 class WAF:
 
     def __init__(self, host):
-        self.target = host.target
+        self.host = host
         self.cnames = host.dns_results.get('CNAME')
         self.request_handler = RequestHandler()
         self.waf_cname_map = {
@@ -94,8 +94,12 @@ class WAF:
         try:
             response = self.request_handler.send(
                 "HEAD",
-                timeout=10,
-                url='http://{}'.format(self.target)
+                timeout=20,
+                url="{}://{}:{}".format(
+                    self.host.protocol,
+                    self.host.target,
+                    self.host.port
+                )
             )
             for waf, method in self.waf_app_method_map.items():
                 result = method(response.headers)

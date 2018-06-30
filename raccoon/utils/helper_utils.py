@@ -38,7 +38,10 @@ class HelperUtilities:
     @classmethod
     def validate_proxy_arguments(cls, *args):
         """No more than 1 of the following can be specified: tor_routing, proxy, proxy_list"""
-        if Counter((not arg for arg in (*args,))).get(False) > 1:
+        supplied_proxies = Counter((not arg for arg in (*args,))).get(False)
+        if not supplied_proxies:
+            return
+        elif supplied_proxies > 1:
             raise RaccoonException("Must specify only one of the following:\n"
                                    "--tor-routing, --proxy-list, --proxy")
 

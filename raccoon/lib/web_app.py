@@ -1,5 +1,4 @@
 import asyncio
-import aiohttp
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, TooManyRedirects
@@ -12,7 +11,7 @@ from raccoon.utils.exceptions import WebAppScannerException
 class WebApplicationScanner:
 
     def __init__(self, host):
-        self.target = host.target
+        self.host = host
         self.request_handler = RequestHandler()
         self.web_scan_results = []
         self.headers = None
@@ -23,7 +22,7 @@ class WebApplicationScanner:
         print(result)
 
     def detect_cms(self):
-        page = requests.get("https://whatcms.org/?s={}".format(self.target))
+        page = requests.get("https://whatcms.org/?s={}".format(self.host.target))
         soup = BeautifulSoup(page.text, "lxml")
         found = soup.select(".panel.panel-success")
         if found:
@@ -67,17 +66,30 @@ class WebApplicationScanner:
             self.save_and_log_result("CORS wildcard detected")
 
     def get_robots_txt(self):
-        res = requests.get("{}/robots.txt".format(self.target))
+        res = requests.get(
+            "{}://{}:{}/robots.txt".format(
+                self.host.protocol,
+                self.host.target,
+                self.host.port
+            )
+        )
         if res.status_code == 200 and res.text:
             self.robots = res.text
 
-    def run_scan(self):
+    async def run_scan(self):
         print("Trying to collect {} web app information".format(self.target))
         session = self.request_handler.get_new_session()
         try:
             with session:
                 # Test if target is serving HTTP requests
-                response = session.get(self.target, timeout=10)
+                response = session.get(
+                    timeout=20,
+                    url="{}://{}:{}".format(
+                        self.host.protocol,
+                        self.host.target,
+                        self.host.port
+                    )
+                )
                 self.headers = response.headers
                 self.detect_cms()
                 self.get_robots_txt()

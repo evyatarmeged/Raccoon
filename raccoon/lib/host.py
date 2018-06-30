@@ -23,7 +23,7 @@ class Host:
         self.write_up()
 
     def __str__(self):
-        return "Host [{}://{}]".format(self.protocol, self.target)
+        return "Host [{}]".format(self.target)
 
     def __repr__(self):
         return self.__dict__
