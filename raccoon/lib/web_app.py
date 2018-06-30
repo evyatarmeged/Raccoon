@@ -2,8 +2,11 @@ import asyncio
 import aiohttp
 import requests
 from bs4 import BeautifulSoup
-from coloring import COLOR
+from requests.exceptions import ConnectionError
+from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.exceptions import WebAppScannerException
 
 
 class WebApplicationScanner:
@@ -11,8 +14,13 @@ class WebApplicationScanner:
     def __init__(self, host):
         self.target = host.target
         self.request_handler = RequestHandler()
+        self.web_scan_results = []
         self.headers = None
         self.robots = None
+
+    def save_and_log_result(self, result):
+        self.web_scan_results.append(result)
+        print(result)
 
     def detect_cms(self):
         page = requests.get("https://whatcms.org/?s={}".format(self.target))
@@ -34,48 +42,58 @@ class WebApplicationScanner:
             try:
                 if domain in self.target or self.target in domain:
                     if not secure:
-                        print("Found cookie without secure flag: {%s: %s}" % (key, value))
+                        self.save_and_log_result(
+                            "Found cookie without secure flag: {%s: %s}" % (key, value)
+                        )
             except TypeError:
                 continue
 
-    def server_info(self):
+    def gather_server_info(self):
         if self.headers.get("server"):
-            print("Web server used: {}".format(self.headers.get("server")))
+            self.save_and_log_result("Web server used: {}".format(self.headers.get("server")))
 
     def detect_anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
-            print("X-Frame-Options header not detected - target might be vulnerable to clickjacking")
+            self.save_and_log_result(
+                "X-Frame-Options header not detected - target might be vulnerable to clickjacking"
+            )
 
     def detect_xss_protection(self):
         if self.headers.get("X-XSS-PROTECTION") == "1":
-            print("Found X-XSS-PROTECTION")
+            self.save_and_log_result("Found X-XSS-PROTECTION")
 
     def cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
-            print("CORS wildcard detected")
+            self.save_and_log_result("CORS wildcard detected")
 
     def get_robots_txt(self):
         res = requests.get("{}/robots.txt".format(self.target))
         if res.status_code == 200 and res.text:
             self.robots = res.text
-            print("Fetched robots.txt")
 
     def run_scan(self):
         print("Trying to collect {} web app information".format(self.target))
+        session = self.request_handler.get_new_session()
+        try:
+            with session:
+                response = session.get(self.target, timeout=10)
+                self.headers = response.headers
+        except (ConnectionError, TooManyRedirects) as e:
+            raise WebAppScannerException("Couldn't get response from server.\n"
+                                         "Caused due to exception: {}".format(str(e)))
         self.detect_cms()
         self.get_robots_txt()
-
-        session = self.request_handler.get_new_session()
-        with session:
-            response = session.get(self.target)
-            self.headers = response.headers
-
-        self.server_info()
+        self.gather_server_info()
         self.cors_wildcard()
         self.detect_xss_protection()
         self.detect_anti_clickjacking()
         self.gather_cookie_info(session.cookies)
 
     def write_up(self):
-        # TODO: Out to file
-        pass
+        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.target))
+        with open(path, "w") as file:
+            for line in self.web_scan_results:
+                file.write(line+"\n")
+            if self.robots:
+                print("Found robots.txt. Writing contents to {}".format(path))
+                file.write(self.robots+"\n")

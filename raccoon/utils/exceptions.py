@@ -57,3 +57,9 @@ class RequestHandlerConnectionReset(RequestHandlerException):
         return self._message
 
 
+class WebAppScannerException(RaccoonException):
+    def __init__(self, message='Web Application Scanner Exception'):
+        super().__init__(message)
+
+    def __str__(self):
+        return self._message

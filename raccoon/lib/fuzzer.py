@@ -4,6 +4,7 @@ from multiprocessing.pool import ThreadPool
 from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.

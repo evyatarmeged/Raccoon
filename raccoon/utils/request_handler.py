@@ -14,10 +14,11 @@ class RequestHandler(metaclass=Singleton):
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
 
-    def __init__(self, proxy_list=None, tor_routing=None, delay=None):
+    def __init__(self, proxy_list=None, tor_routing=False, single_proxy=None, delay=None):
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
         self.delay = delay
+        self.single_proxy = single_proxy
         self.proxies = self.set_instance_proxies()
         self.ua = UserAgent()
 
@@ -29,7 +30,6 @@ class RequestHandler(metaclass=Singleton):
         Else, No proxies - an empty dict will be used.
         """
         proxies = {}
-
         if self.tor_routing:
             proxies = {
                 "http": "socks5://127.0.0.1:9050",
@@ -42,10 +42,15 @@ class RequestHandler(metaclass=Singleton):
                     proxies = [x.replace("\n", "") for x in file]
             except FileNotFoundError:
                 raise RequestHandlerException("Cannot read proxies from {}".format(self.proxy_list))
+        elif self.single_proxy:
+            proxies = {
+                "http": self.single_proxy,
+                "https": self.single_proxy
+            }
         return proxies
 
     def get_request_proxies(self):
-        if self.tor_routing:
+        if self.tor_routing or self.single_proxy:
             proxies = self.proxies
         elif self.proxy_list:
             if not self.proxies:

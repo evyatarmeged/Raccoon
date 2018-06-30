@@ -4,7 +4,8 @@
 #### Features
 - [x] DNS Details
 - [x] WHOIS Records
-- [x] TLS Data - Supported Ciphers, TLS versions, SANs
+- [x] TLS Data - Supported Ciphers, TLS versions,
+Certificate details and SANs
 - [x] Port Scan
 - [x] Services and Scripts Scan
 - [x] URL Fuzzing and directory detection
@@ -13,6 +14,9 @@
 - [x] Detects Known WAFs
 - [x] Supports Tor / Proxy routing
 - [x] Uses AsyncIO For Improved Performance
+- [x] Saves output to files - separates targets by folders
+and modules by files
+
 
 #### Road Map
 - [ ] Support Multiple Hosts
@@ -20,4 +24,4 @@
 - [ ] IP Ranges
 - [ ] Rate Limit Evasion
 - [ ] Vulnerability Scan (RFI, RCE, XSS, SQLi etc.)
-
+- [ ] More output formats

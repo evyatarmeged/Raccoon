@@ -12,7 +12,7 @@ from raccoon.lib.scanner import Scanner, NmapScan
 from raccoon.lib.sub_domain import SubDomainEnumerator
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.lib.waf import WAF
-from raccoon.lib.tls import TLSInfoScanner
+from raccoon.lib.tls import TLSHandler
 
 
 # TODO: Change all prints to a logger debug/info/warning call for EASY verbosity control
@@ -38,6 +38,7 @@ def intro():
                                                   "Slows the total runtime significantly")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing\n"
                                    "Slows the total runtime significantly")
+@click.option("--proxy", help="Proxy address to route traffic through")
 @click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
@@ -52,13 +53,16 @@ def intro():
 @click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("-d", "--delay", default="0.25-1",
-              help="Min and Max number of seconds of delay to be waited between requests\n"
-                   "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
+# @click.option("-d", "--delay", default="0.25-1",
+#               help="Min and Max number of seconds of delay to be waited between requests\n"
+#                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
+@click.option("-o", "--outdir", default="Raccoon_scan_results",
+              help="Directory destination for scan output")
 def main(target,
          tor_routing,
          proxy_list,
+         proxy,
          dns_records,
          wordlist,
          threads,
@@ -70,6 +74,7 @@ def main(target,
          port_range,
          tls_port,
          no_health_check,
+         outdir,
          delay,
          quiet):
 
@@ -85,16 +90,9 @@ def main(target,
     if subdomain_list and not os.path.isfile(subdomain_list):
         raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
 
-    if proxy_list and tor_routing:
-        raise RaccoonException("Cannot specify both --tor-routing and --proxy-list")
-    else:
-        if tor_routing:
-            print("Routing traffic using TOR service")
-        elif proxy_list:
-            if proxy_list and not os.path.isfile(proxy_list):
-                raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
-            else:
-                print("Routing traffic using proxy list {}".format(proxy_list))
+    HelperUtilities.create_output_directory(outdir)
+
+    HelperUtilities.validate_proxy_arguments(tor_routing, proxy, proxy_list)
 
     # TODO: Sanitize delay argument
 
@@ -108,7 +106,7 @@ def main(target,
     # /Arg validation
 
     # Set Request Handler instance
-    request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing)
+    request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
     if not no_health_check:
         HelperUtilities.validate_target_is_up(target)
 
@@ -127,7 +125,7 @@ def main(target,
     nmap_thread.start()
     # Run first set of checks - TLS, web application data, WHOIS
     waf = WAF(host)
-    tls_info_scanner = TLSInfoScanner(host, tls_port)
+    tls_info_scanner = TLSHandler(host, tls_port)
 
     tasks = (
         asyncio.ensure_future(tls_info_scanner.run()),

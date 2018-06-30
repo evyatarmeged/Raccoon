@@ -1,6 +1,7 @@
 import re
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 class TLSCipherSuiteChecker:
@@ -24,12 +25,12 @@ class TLSCipherSuiteChecker:
 
     @staticmethod
     def _parse_nmap_outpt(result):
-        result = result.decode().strip().split('\n')
-        return '\n'.join([line for line in result if "TLS" in line or "ciphers" in line]).strip().rstrip()
+        result = result.decode().strip().split("\n")
+        return '\n'.join([line for line in result if "|" in line]).strip().rstrip()
 
 
 # noinspection PyTypeChecker
-class TLSInfoScanner(TLSCipherSuiteChecker):
+class TLSHandler(TLSCipherSuiteChecker):
 
     def __init__(self, host, port=443):
         super().__init__(host)
@@ -45,7 +46,8 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         self.ciphers = ""
 
     async def run(self, sni=True):
-        path = "{}/tls_report.txt".format(self.target)
+        path = HelperUtilities.get_output_path("{}/tls_report.txt".format(self.target))
+
         print("Started collecting TLS data.\n"
               "Will write results to {}".format(path))
         self.ciphers = await self.scan_ciphers(self.port)
@@ -54,18 +56,14 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
         print("Done collecting TLS data")
-        from pprint import pprint
-        pprint(self.ciphers)
-        pprint(self.non_sni_data)
-        pprint(self.sni_data)
         self.write_up(path)
 
-    def is_cert_exists(self, text):
+    def _is_cert_exists(self, text):
         if self.begin in text and self.end in text:
             return True
         return
 
-    async def extract_cert_details(self, data):
+    async def _extract_cert_details(self, data):
         process = await create_subprocess_exec(
             "timeout", "5", "openssl", "x509", "-text",
             stdin=PIPE,
@@ -74,9 +72,16 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         )
         result, err = await process.communicate(input=bytes(data, encoding='ascii'))
         result = result.decode().strip()
-        cert_details = result.split(self.begin)[0]
+        cert_details = result.split(self.begin)[0].strip()
 
-        return cert_details.strip()
+        result_lines = cert_details.split("\n")
+        for i, line in enumerate(result_lines):
+            if "Subject Alternative Name" in line:
+                result_lines.pop(i)
+                result_lines.pop(i+1)
+
+        cert_details = "\n".join(result_lines)
+        return cert_details
 
     async def heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
@@ -102,9 +107,9 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
         tls_dict = self._parse_sclient_output(responses)
         # Do for one successful SSL response
         for res in responses:
-            if self.is_cert_exists(res):
+            if self._is_cert_exists(res):
                 tls_dict["SANs"] = await self._parse_san_output(res)
-                tls_dict["Certificate_details"] = await self.extract_cert_details(res)
+                tls_dict["Certificate_details"] = await self._extract_cert_details(res)
                 break
 
         return tls_dict
@@ -145,7 +150,7 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
     def _parse_sclient_output(self, results):
         is_supported = {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
         for res in results:
-            if not self.is_cert_exists(res):
+            if not self._is_cert_exists(res):
                 continue
             for line in res.split('\n'):
                 if "Protocol" in line:
@@ -153,14 +158,23 @@ class TLSInfoScanner(TLSCipherSuiteChecker):
                     is_supported[ver] = True
         return is_supported
 
+    @staticmethod
+    def _dictionary_write_procedure(result_dict, file):
+        for k, v in result_dict.items():
+            if k == "SANs":
+                file.write("{0}:\n{1}\n {2}\n{1}\n".format(k, "-"*15, "\n".join(v)))
+            elif k == "Certificate_details":
+                file.write(v)
+            else:
+                file.write("{}: {}\n".format(k, v))
+
     def write_up(self, path):
         with open(path, "w") as file:
             file.write("Supporting Ciphers:\n")
             file.write(self.ciphers+"\n")
-            file.write("\n{0}\nSNI Data:\n{0}\n".format("#"*20))
-            for k, v in self.sni_data.items():
-                file.write("{}: {}\n".format(k, v))
-
-            file.write("\n{0}\nSNI Data:\n{0}\n".format("#"*20))
-            for k, v in self.sni_data.items():
-                file.write("{}: {}\n".format(k, v))
+            file.write("-"*80+"\n")
+            file.write("SNI Data:\n")
+            self._dictionary_write_procedure(self.sni_data, file)
+            file.write("-"*80+"\n")
+            file.write("non-SNI Data:\n")
+            self._dictionary_write_procedure(self.non_sni_data, file)

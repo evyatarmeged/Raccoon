@@ -1,7 +1,8 @@
 import os
-from raccoon.utils.exceptions import ScannerException
 import asyncio
 from subprocess import PIPE, Popen
+from raccoon.utils.exceptions import ScannerException
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 class NmapScan:
@@ -48,7 +49,7 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        path = "{}/nmap_scan.txt".format(scan.target)
+        path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(scan.target))
         process = Popen(
             scan.script,
             stdout=PIPE,

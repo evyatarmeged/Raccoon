@@ -1,8 +1,13 @@
-from subprocess import PIPE, check_call, CalledProcessError
+import os
 import requests
+from collections import Counter
+from subprocess import PIPE, check_call, CalledProcessError
+from raccoon.utils.exceptions import RaccoonException
 
 
 class HelperUtilities:
+
+    PATH = ""
 
     @classmethod
     def validate_target_is_up(cls, host):
@@ -28,6 +33,34 @@ class HelperUtilities:
         if all(ports) and int(ports[-1]) <= 65535:
             return True
         raise RaccoonException("Invalid port range supplied: {}".format(port_range))
+
+    @classmethod
+    def validate_proxy_arguments(cls, *args):
+        if Counter((not arg for arg in (*args,))).get(False) > 1:
+            raise RaccoonException("Must specify only one of the following:\n"
+                                   "--tor-routing, --proxy-list, --proxy")
+        else:
+            if tor_routing:
+                print("Routing traffic using TOR service")
+            elif proxy_list:
+                if proxy_list and not os.path.isfile(proxy_list):
+                    raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+                else:
+                    print("Routing traffic using proxies from list {}".format(proxy_list))
+            elif proxy:
+                print("Routing traffic through proxy {}".format(proxy))
+
+    @classmethod
+    def create_output_directory(cls, outdir):
+        cls.PATH = outdir
+        try:
+            os.mkdir(outdir)
+        except FileExistsError:
+            pass
+
+    @classmethod
+    def get_output_path(cls, module_path):
+        return "{}/{}".format(cls.PATH, module_path)
 
     @classmethod
     def extract_hosts_from_cidr(cls):

@@ -2,6 +2,7 @@ import re
 from bs4 import BeautifulSoup
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.lib.fuzzer import URLFuzzer
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 class SubDomainEnumerator:

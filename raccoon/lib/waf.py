@@ -2,6 +2,7 @@ import requests
 from requests.exceptions import TooManyRedirects, ConnectionError, ConnectTimeout
 from raccoon.utils.exceptions import WAFException
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 SERVER = "Server"
@@ -101,6 +102,6 @@ class WAF:
                 if result:
                     self._waf_detected(waf)
 
-        except (ConnectTimeout, ConnectionError, TooManyRedirects) as e:
+        except (ConnectionError, TooManyRedirects) as e:
             raise WAFException("Couldn't get response from server.\n"
                                "Caused due to exception: {}".format(str(e)))

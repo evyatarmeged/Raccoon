@@ -2,6 +2,7 @@ import os
 from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
+from raccoon.utils.helper_utils import HelperUtilities
 
 
 class Host:
@@ -106,7 +107,7 @@ class Host:
         except FileExistsError:
             pass
 
-        path = "{}/dns_records.txt".format(self.target)
+        path = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
         print("Writing {} DNS query results to {}".format(self.target, path))
 
         with open(path, "w") as file:
