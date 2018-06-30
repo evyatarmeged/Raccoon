@@ -76,9 +76,9 @@ class TLSHandler(TLSCipherSuiteChecker):
 
         result_lines = cert_details.split("\n")
         for i, line in enumerate(result_lines):
-            if "Subject Alternative Name" in line:
+            if "DNS:" in line:
                 result_lines.pop(i)
-                result_lines.pop(i+1)
+                result_lines.pop(i-1)
 
         cert_details = "\n".join(result_lines)
         return cert_details
