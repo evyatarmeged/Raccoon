@@ -24,8 +24,7 @@ class NmapScan:
         script = "nmap -Pn {}".format(self.target)
 
         if self.port_range:
-            if "-" not in self.port_range or len(self.port_range.split("-") != 2):
-                raise ScannerExceptions("Invalid port range {}".format(self.port_range))
+            HelperUtilities.validate_port_range(self.port_range)
             script += " -p {}".format(self.port_range)
             print("Added port range to nmap script {}".format(self.port_range))
 

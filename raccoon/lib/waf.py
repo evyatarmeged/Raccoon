@@ -81,6 +81,7 @@ class WAF:
         print("Detected {} WAF presence in web application".format(name))
 
     async def detect(self):
+        print("Trying to detect WAF presence on {}".format(self.host.target))
         if self.cnames:
             self._detect_by_cname()
         self._detect_by_application()

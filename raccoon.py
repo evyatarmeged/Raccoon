@@ -2,6 +2,7 @@ import os
 import asyncio
 import threading
 import click
+import time
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
@@ -27,7 +28,7 @@ def intro():
      | | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
      |_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
 
-    {} By Evyatar Meged
+    {} By Evyatar Meged\n
     """.format(COLOR.BLUE, COLOR.RESET))
 
 
@@ -35,11 +36,12 @@ def intro():
 @click.option("-t", "--target", help="Target to scan")
 @click.option("-dr", "--dns-records", default="A,MX,NS,CNAME,SOA",
               help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
-@click.option("--tor-routing", is_flag=True, help="Route traffic through TOR.\n"
-                                                  "Slows the total runtime significantly")
-@click.option("--proxy-list", help="Path to proxy list file that would be used for routing\n"
-                                   "Slows the total runtime significantly")
-@click.option("--proxy", help="Proxy address to route traffic through")
+@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through TOR.\n"
+                                                  "Slows total runtime significantly")
+@click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic\n"
+                                   "Slows total runtime")
+@click.option("--proxy", help="Proxy address to route HTTP traffic through\n"
+                              "Slows total runtime")
 @click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
@@ -149,19 +151,27 @@ def main(target,
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration
-    # sans = tls_info_scanner.sni_data.get("SANs")
-    # fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
-    # main_loop.run_until_complete(fuzzer.fuzz_all())
-    # if not host.is_ip:
-    #     subdomain_enumerator = SubDomainEnumerator(
-    #         host,
-    #         domain_list=subdomain_list,
-    #         sans=sans,
-    #         ignored_response_codes=ignored_response_codes,
-    #         num_threads=threads
-    #     )
-    #     main_loop.run_until_complete(subdomain_enumerator.run())
+    sans = tls_info_scanner.sni_data.get("SANs")
+    fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
+    main_loop.run_until_complete(fuzzer.fuzz_all())
+    if not host.is_ip:
+        subdomain_enumerator = SubDomainEnumerator(
+            host,
+            domain_list=subdomain_list,
+            sans=sans,
+            ignored_response_codes=ignored_response_codes,
+            num_threads=threads
+        )
+        main_loop.run_until_complete(subdomain_enumerator.run())
 
+    if nmap_thread.is_alive():
+        print("All scans done. Waiting for Nmap scan to wrap up.\n"
+              "This may vary depending on parameters and port range")
+
+    while nmap_thread.is_alive():
+        time.sleep(15)
+
+    print("\nRaccoon scan finished\n")
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

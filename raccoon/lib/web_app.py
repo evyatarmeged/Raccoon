@@ -49,7 +49,7 @@ class WebApplicationScanner:
 
     def gather_server_info(self):
         if self.headers.get("server"):
-            self.save_and_log_result("Web server used: {}".format(self.headers.get("server")))
+            self.save_and_log_result("Web server detected: {}".format(self.headers.get("server")))
 
     def detect_anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
@@ -77,7 +77,7 @@ class WebApplicationScanner:
             self.robots = res.text
 
     async def run_scan(self):
-        print("Trying to collect {} web app information".format(self.target))
+        print("Trying to collect {} web app information".format(self.host.target))
         session = self.request_handler.get_new_session()
         try:
             with session:
@@ -106,7 +106,7 @@ class WebApplicationScanner:
             self.write_up()
 
     def write_up(self):
-        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.target))
+        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         with open(path, "w") as file:
             for line in self.web_scan_results:
                 file.write(line+"\n")

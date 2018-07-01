@@ -3,7 +3,7 @@ import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
-from raccoon.utils.exceptions import RaccoonException
+from raccoon.utils.exceptions import RaccoonException, ScannerException
 
 
 class HelperUtilities:
@@ -31,9 +31,10 @@ class HelperUtilities:
     def validate_port_range(cls, port_range):
         """Validate port range for Nmap scan"""
         ports = port_range.split("-")
-        if all(ports) and int(ports[-1]) <= 65535:
+        if all(ports) and int(ports[-1]) <= 65535 and not len(ports) != 2:
             return True
-        raise RaccoonException("Invalid port range supplied: {}".format(port_range))
+        raise ScannerException("Invalid port range {}".format(port_range))
+
 
     @classmethod
     def validate_proxy_arguments(cls, *args):
