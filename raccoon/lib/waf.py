@@ -3,6 +3,7 @@ from requests.exceptions import TooManyRedirects, ConnectionError, ConnectTimeou
 from raccoon.utils.exceptions import WAFException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import Logger
 
 
 SERVER = "Server"
@@ -75,13 +76,14 @@ class WAF:
             "Edgecast": WAFApplicationMethods.detect_edgecast,
             "Distil Networks": WAFApplicationMethods.detect_distil
         }
+        path = HelperUtilities.get_output_path("{}/WAF.txt".format)
+        self.logger = Logger(path)
 
-    @staticmethod
-    def _waf_detected(name):
-        print("Detected {} WAF presence in web application".format(name))
+    def _waf_detected(self, name):
+        self.logger.info("Detected {} WAF presence in web application".format(name))
 
     async def detect(self):
-        print("Trying to detect WAF presence on {}".format(self.host.target))
+        self.logger.info("Trying to detect WAF presence on {}".format(self.host.target))
         if self.cnames:
             self._detect_by_cname()
         self._detect_by_application()
@@ -89,7 +91,9 @@ class WAF:
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
-                print("Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf)))
+                self.logger.info(
+                    "Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf))
+                )
 
     def _detect_by_application(self):
         try:

@@ -1,6 +1,7 @@
 from dns import resolver
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import Logger
 
 
 # noinspection PyUnboundLocalVariable
@@ -37,6 +38,7 @@ class DNSHandler:
 
         script = "whois {}".format(host.naked).split()
         path = HelperUtilities.get_output_path("{}/whois.txt".format(host.target))
+        logger = Logger(path)
 
         process = await create_subprocess_exec(
             *script,
@@ -44,9 +46,9 @@ class DNSHandler:
             stderr=PIPE
         )
         result, err = await process.communicate()
-        print("Writing {} WHOIS Information to {}".format(host, path))
+        logger.info("Writing {} WHOIS Information to {}".format(host, path))
 
-        with open(path, "w+") as file:
-            for line in result.decode().strip().split("\n"):
+        for line in result.decode().strip().split("\n"):
                 if ":" in line:
-                    file.write("{}\n".format(line))
+                    logger.debug("{}\n".format(line))
+

@@ -5,6 +5,7 @@ from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import Logger
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
@@ -25,11 +26,12 @@ class URLFuzzer:
         self.port = host.port
         self.num_threads = num_threads
         self.wordlist = wordlist
-        self.outfile = None
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
 
-    @staticmethod
-    def _print_response(code, url, headers):
+        path = HelperUtilities.get_output_path(self.target)
+        self.logger = Logger(path)
+
+    def _print_response(self, code, url, headers):
         if 300 > code >= 200:
             color = COLOR.GREEN
         elif 400 > code >= 300:
@@ -39,7 +41,7 @@ class URLFuzzer:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        print("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
+        self.logger.debug("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
     def _fetch(self, uri, sub_domain=False):
         """
@@ -72,14 +74,6 @@ class URLFuzzer:
         Should be run in an event loop.
         :param sub_domain: Indicate if this is subdomain enumeration or URL busting
         """
-        # TODO: EDIT
-        if sub_domain:
-            # Outfile path subdomain/target
-            pass
-        else:
-            # Outfile path fuzzer/target
-            pass
-
         try:
             with open(self.wordlist, "r") as file:
                 fuzzlist = file.readlines()
@@ -87,7 +81,7 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        print("Fuzzing from {}".format(self.wordlist))
+        self.logger.debug("Fuzzing from {}".format(self.wordlist))
         pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
 

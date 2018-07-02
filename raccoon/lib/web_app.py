@@ -6,6 +6,7 @@ from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.exceptions import WebAppScannerException
+from raccoon.utils.logger import Logger
 
 
 class WebApplicationScanner:
@@ -16,10 +17,8 @@ class WebApplicationScanner:
         self.web_scan_results = []
         self.headers = None
         self.robots = None
-
-    def save_and_log_result(self, result):
-        self.web_scan_results.append(result)
-        print(result)
+        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
+        self.logger = Logger(path)
 
     def detect_cms(self):
         page = requests.get("https://whatcms.org/?s={}".format(self.host.target))
@@ -28,7 +27,7 @@ class WebApplicationScanner:
         if found:
             try:
                 cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
-                print("CMS detected: target seems to use {}".format(cms.get("title")))
+                self.logger.info("CMS detected: target seems to use {}".format(cms.get("title")))
             except IndexError:
                 pass
 
@@ -41,7 +40,7 @@ class WebApplicationScanner:
             try:
                 if domain in self.target or self.target in domain:
                     if not secure:
-                        self.save_and_log_result(
+                        self.logger.info(
                             "Found cookie without secure flag: {%s: %s}" % (key, value)
                         )
             except TypeError:
@@ -49,21 +48,21 @@ class WebApplicationScanner:
 
     def gather_server_info(self):
         if self.headers.get("server"):
-            self.save_and_log_result("Web server detected: {}".format(self.headers.get("server")))
+            self.logger.info("Web server detected: {}".format(self.headers.get("server")))
 
     def detect_anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
-            self.save_and_log_result(
+            self.logger.info(
                 "X-Frame-Options header not detected - target might be vulnerable to clickjacking"
             )
 
     def detect_xss_protection(self):
         if self.headers.get("X-XSS-PROTECTION") == "1":
-            self.save_and_log_result("Found X-XSS-PROTECTION")
+            self.logger.info("Found X-XSS-PROTECTION")
 
     def cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
-            self.save_and_log_result("CORS wildcard detected")
+            self.logger.info("CORS wildcard detected")
 
     def get_robots_txt(self):
         res = requests.get(
@@ -74,10 +73,11 @@ class WebApplicationScanner:
             )
         )
         if res.status_code == 200 and res.text:
-            self.robots = res.text
+            self.logger.info("Found robots.txt")
+            self.logger.debug(res.text)
 
     async def run_scan(self):
-        print("Trying to collect {} web app information".format(self.host.target))
+        self.logger.info("Trying to collect {} web app information".format(self.host.target))
         session = self.request_handler.get_new_session()
         try:
             with session:
@@ -102,14 +102,3 @@ class WebApplicationScanner:
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
                                          "Caused due to exception: {}".format(str(e)))
-        finally:
-            self.write_up()
-
-    def write_up(self):
-        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
-        with open(path, "w") as file:
-            for line in self.web_scan_results:
-                file.write(line+"\n")
-            if self.robots:
-                print("Found robots.txt. Writing contents to {}".format(path))
-                file.write(self.robots+"\n")

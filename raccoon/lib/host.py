@@ -3,6 +3,7 @@ from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import SystemOutLogger
 
 
 class Host:
@@ -15,6 +16,7 @@ class Host:
         self.dns_records = dns_records
         self.port = 80
         self.protocol = "http"
+        self.logger = SystemOutLogger()
         self.is_ip = False
         self.fqdn = None
         self.naked = None
@@ -42,9 +44,9 @@ class Host:
             try:
                 self.target, self.port = addr.split(":")
                 self.port = int(self.port)
-                print("Port detected: {}".format(self.port))
+                self.logger.info("Port detected: {}".format(self.port))
             except IndexError:
-                print("Did not detect port. Using default port 80")
+                self.logger.info("Did not detect port. Using default port 80")
                 return
         return
 
@@ -68,7 +70,7 @@ class Host:
         if self._is_proto(self.target):
             try:
                 self.protocol, self.target = self.target.split("://")
-                print("Protocol detected: {}".format(self.protocol))
+                self.logger.info("Protocol detected: {}".format(self.protocol))
                 if self.protocol.lower() == "https" and self.port == 80:
                     self.port = 443
             except ValueError:
@@ -78,7 +80,7 @@ class Host:
             self._extract_port(self.target)
 
         if self.validate_ip(self.target):
-            print("Detected {} as an IP address.".format(self.target))
+            self.logger.info("Detected {} as an IP address.".format(self.target))
             self.is_ip = True
             return
 
@@ -86,7 +88,7 @@ class Host:
         if self.target.startswith("www."):
             # Obviously an FQDN
             domains.extend((self.target, self.target.split("www.")[1]))
-            print("Found {} to be an FQDN".format(self.target))
+            self.logger.info("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target
             self.naked = ".".join(self.fqdn.split('.')[1:])
         else:
@@ -97,13 +99,13 @@ class Host:
 
         if self.dns_results.get("CNAME"):
             # Naked domains shouldn't hold CNAME records according to RFC regulations
-            print("Found {} to be an FQDN".format(self.target))
+            self.logger.info("Found {} to be an FQDN".format(self.target))
             self.fqdn = self.target
             self.naked = ".".join(self.fqdn.split('.')[1:])
 
     def write_up(self):
         path = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
-        print("Writing {} DNS query results to {}".format(self.target, path))
+        self.logger.info("Writing {} DNS query results to {}".format(self.target, path))
 
         try:
             os.mkdir("/".join(path.split("/")[:-1]))

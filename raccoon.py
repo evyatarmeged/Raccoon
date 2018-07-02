@@ -6,6 +6,7 @@ import time
 from raccoon.utils.coloring import COLOR
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.logger import SystemOutLogger
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.lib.host import Host
@@ -17,10 +18,8 @@ from raccoon.lib.tls import TLSHandler
 from raccoon.lib.web_app import WebApplicationScanner
 
 
-# TODO: Change all prints to a logger debug/info/warning call for EASY verbosity control
-
-def intro():
-    print("""{}
+def intro(logger):
+    logger.info("""{}
       _____                _____    _____    ____     ____    _   _ 
      |  __ \      /\      / ____|  / ____|  / __ \   / __ \  | \ | |
      | |__) |    /  \    | |      | |      | |  | | | |  | | |  \| |
@@ -60,6 +59,7 @@ def intro():
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
+@click.option("-v", "--verbose", is_flag=True, help="Increase stdout output verbosity")
 @click.option("-o", "--outdir", default="Raccoon_scan_results",
               help="Directory destination for scan output")
 def main(target,
@@ -77,13 +77,17 @@ def main(target,
          port_range,
          tls_port,
          no_health_check,
-         outdir,
          # delay,
-         quiet):
-
-    intro()
+         outdir,
+         quiet,
+         verbose):
 
     # Arg validation
+
+    # Set logging level and Logger instance
+    log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
+    logger = SystemOutLogger(log_level)
+
     if proxy_list and not os.path.isfile(proxy_list):
         raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
 
@@ -95,17 +99,17 @@ def main(target,
 
     HelperUtilities.create_output_directory(outdir)
 
-    HelperUtilities.validate_proxy_arguments(tor_routing, proxy, proxy_list)
+    HelperUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
 
     if tor_routing:
-        print("Routing traffic using TOR service")
+        logger.info("Routing traffic using TOR service")
     elif proxy_list:
         if proxy_list and not os.path.isfile(proxy_list):
             raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
         else:
-            print("Routing traffic using proxies from list {}".format(proxy_list))
+            logger.info("Routing traffic using proxies from list {}".format(proxy_list))
     elif proxy:
-        print("Routing traffic through proxy {}".format(proxy))
+        logger.info("Routing traffic through proxy {}".format(proxy))
 
     # TODO: Sanitize delay argument
 
@@ -120,6 +124,9 @@ def main(target,
 
     # Set Request Handler instance
     request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
+
+    intro(logger)
+
     if not no_health_check:
         HelperUtilities.validate_target_is_up(target)
 
@@ -129,25 +136,24 @@ def main(target,
     # hosts = []
     host = Host(target=target, dns_records=dns_records)
 
-    print("Setting Nmap scan to run in the background")
+    logger.info("Setting Nmap scan to run in the background")
     nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
     # TODO: Populate array when multiple targets are supported
     # nmap_threads = []
     nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
     # Run Nmap scan in the background. Can take some time
     nmap_thread.start()
+
     # Run first set of checks - TLS, Web/WAF Data, WHOIS
     waf = WAF(host)
     tls_info_scanner = TLSHandler(host, tls_port)
     web_app_scanner = WebApplicationScanner(host)
-
     tasks = (
         asyncio.ensure_future(tls_info_scanner.run()),
         asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(DNSHandler.grab_whois(host)),
         asyncio.ensure_future(web_app_scanner.run_scan())
     )
-
     main_loop.run_until_complete(asyncio.wait(tasks))
 
     # Second set of checks - URL fuzzing, Subdomain enumeration
@@ -165,13 +171,13 @@ def main(target,
         main_loop.run_until_complete(subdomain_enumerator.run())
 
     if nmap_thread.is_alive():
-        print("All scans done. Waiting for Nmap scan to wrap up.\n"
-              "This may vary depending on parameters and port range")
+        logger.info("All scans done. Waiting for Nmap scan to wrap up.\n"
+                    "This may vary depending on parameters and port range")
 
         while nmap_thread.is_alive():
             time.sleep(15)
 
-    print("\nRaccoon scan finished\n")
+    logger.info("\nRaccoon scan finished\n")
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

@@ -35,9 +35,8 @@ class HelperUtilities:
             return True
         raise ScannerException("Invalid port range {}".format(port_range))
 
-
     @classmethod
-    def validate_proxy_arguments(cls, *args):
+    def validate_proxy_args(cls, *args):
         """No more than 1 of the following can be specified: tor_routing, proxy, proxy_list"""
         supplied_proxies = Counter((not arg for arg in (*args,))).get(False)
         if not supplied_proxies:
@@ -45,6 +44,18 @@ class HelperUtilities:
         elif supplied_proxies > 1:
             raise RaccoonException("Must specify only one of the following:\n"
                                    "--tor-routing, --proxy-list, --proxy")
+
+    @classmethod
+    def validate_verbosity_args(cls, verbosity, quiet):
+        if verbosity and quiet:
+            raise RaccoonException("\nCannot specify both --verbose and --quiet")
+
+        if verbosity:
+            return "DEBUG"
+        elif quiet:
+            return "CRITICAL"
+        else:
+            return "INFO"
 
     @classmethod
     def create_output_directory(cls, outdir):

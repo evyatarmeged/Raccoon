@@ -3,6 +3,7 @@ import asyncio
 from subprocess import PIPE, Popen
 from raccoon.utils.exceptions import ScannerException
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import SystemOutLogger
 
 
 class NmapScan:
@@ -18,6 +19,7 @@ class NmapScan:
         self.scripts = scripts
         self.services = services
         self.port_range = port_range
+        self.logger = SystemOutLogger()
         self.script = self.build_script()
 
     def build_script(self):
@@ -26,21 +28,21 @@ class NmapScan:
         if self.port_range:
             HelperUtilities.validate_port_range(self.port_range)
             script += " -p {}".format(self.port_range)
-            print("Added port range to nmap script {}".format(self.port_range))
+            self.logger.debug_master("Added port range {} to nmap script".format(self.port_range))
 
         if self.full_scan:
             script += " -sV -sC"
-            print("Added scripts and services to nmap script")
+            self.logger.debug_master("Added scripts and services to nmap script")
             return script
         else:
             if self.scripts:
-                print("Added script scan to nmap script")
+                self.logger.debug_master("Added script scan to nmap script")
                 script += " -sC"
             if self.services:
-                print("Added service scan to nmap script")
+                self.logger.debug_master("Added service scan to nmap script")
                 script += " -sV"
             else:
-                print("Running basic nmap scan")
+                self.logger.debug_master("Running basic nmap scan")
         return script.split()
 
 
