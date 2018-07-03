@@ -1,7 +1,6 @@
 import logging
 from sys import stdout
 from raccoon.utils.singleton import Singleton
-from raccoon.utils.exceptions import RaccoonException
 
 
 class SystemOutLogger(metaclass=Singleton):

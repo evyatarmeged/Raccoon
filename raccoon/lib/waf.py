@@ -1,5 +1,4 @@
-import requests
-from requests.exceptions import TooManyRedirects, ConnectionError, ConnectTimeout
+from requests.exceptions import TooManyRedirects, ConnectionError
 from raccoon.utils.exceptions import WAFException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities

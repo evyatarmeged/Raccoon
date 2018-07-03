@@ -38,7 +38,7 @@ class WebApplicationScanner:
             domain = cookie.__dict__.get("domain")
             secure = cookie.__dict__.get("secure")
             try:
-                if domain in self.target or self.target in domain:
+                if domain in self.host.target or self.host.target in domain:
                     if not secure:
                         self.logger.info(
                             "Found cookie without secure flag: {%s: %s}" % (key, value)
@@ -75,6 +75,9 @@ class WebApplicationScanner:
         if res.status_code == 200 and res.text:
             self.logger.info("Found robots.txt")
             self.logger.debug(res.text)
+
+    def get_sitemap(self):
+        pass
 
     async def run_scan(self):
         self.logger.info("Trying to collect {} web app information".format(self.host.target))

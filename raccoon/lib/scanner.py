@@ -1,9 +1,6 @@
-import os
-import asyncio
 from subprocess import PIPE, Popen
-from raccoon.utils.exceptions import ScannerException
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.logger import SystemOutLogger
+from raccoon.utils.logger import Logger
 
 
 class NmapScan:
@@ -19,7 +16,8 @@ class NmapScan:
         self.scripts = scripts
         self.services = services
         self.port_range = port_range
-        self.logger = SystemOutLogger()
+        path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(self.target))
+        self.logger = Logger(path)
         self.script = self.build_script()
 
     def build_script(self):
@@ -28,21 +26,21 @@ class NmapScan:
         if self.port_range:
             HelperUtilities.validate_port_range(self.port_range)
             script += " -p {}".format(self.port_range)
-            self.logger.debug_master("Added port range {} to nmap script".format(self.port_range))
+            self.logger.debug("Added port range {} to nmap script".format(self.port_range))
 
         if self.full_scan:
             script += " -sV -sC"
-            self.logger.debug_master("Added scripts and services to nmap script")
+            self.logger.debug("Added scripts and services to nmap script")
             return script
         else:
             if self.scripts:
-                self.logger.debug_master("Added script scan to nmap script")
+                self.logger.debug("Added script scan to nmap script")
                 script += " -sC"
             if self.services:
-                self.logger.debug_master("Added service scan to nmap script")
+                self.logger.debug("Added service scan to nmap script")
                 script += " -sV"
             else:
-                self.logger.debug_master("Running basic nmap scan")
+                self.logger.debug("Running basic nmap scan")
         return script.split()
 
 
@@ -50,7 +48,6 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(scan.target))
         process = Popen(
             scan.script,
             stdout=PIPE,
@@ -58,12 +55,11 @@ class Scanner:
         )
         result, err = process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
-        Scanner.write_up(path, result, err)
+        Scanner.write_up(scan, result, err)
 
     @classmethod
-    def write_up(cls, path, result, err):
-        with open(path, "w") as file:
-            if result:
-                file.write(result+"\n")
-            if err:
-                file.write(err)
+    def write_up(cls, scan, result, err):
+        if result:
+            scan.logger.debug(result+"\n")
+        if err:
+            scan.logger.debug(err)
