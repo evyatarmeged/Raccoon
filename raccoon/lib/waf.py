@@ -64,7 +64,6 @@ class WAF:
             "edgesuite": "Akamai",
             "distil": "Distil Networks",
             "cloudfront": "CloudFront",
-            "adn": "EdgeCast",
             "netdna-cdn": "MaxCDN"
         }
         self.waf_app_method_map = {
@@ -75,8 +74,8 @@ class WAF:
             "Edgecast": WAFApplicationMethods.detect_edgecast,
             "Distil Networks": WAFApplicationMethods.detect_distil
         }
-        path = HelperUtilities.get_output_path("{}/WAF.txt".format)
-        self.logger = Logger(path)
+        log_file = HelperUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
+        self.logger = Logger(log_file)
 
     def _waf_detected(self, name):
         self.logger.info("Detected {} WAF presence in web application".format(name))

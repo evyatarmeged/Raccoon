@@ -59,7 +59,10 @@ def intro(logger):
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
-@click.option("-v", "--verbose", is_flag=True, help="Increase stdout output verbosity")
+@click.option("-v", "--verbose", is_flag=True,
+              help="Increase stdout output verbosity\nVerbose output can be messy as\n"
+                   "scans are ran in parallel and may output together.\n"
+                   "Verbose output is being logged to file whether verbose arg was passed or not.")
 @click.option("-o", "--outdir", default="Raccoon_scan_results",
               help="Directory destination for scan output")
 def main(target,
@@ -135,6 +138,7 @@ def main(target,
     # TODO: Populate array when multiple targets are supported
     # hosts = []
     host = Host(target=target, dns_records=dns_records)
+    host.parse()
 
     logger.info("Setting Nmap scan to run in the background")
     nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
@@ -172,7 +176,7 @@ def main(target,
 
     if nmap_thread.is_alive():
         logger.info("All scans done. Waiting for Nmap scan to wrap up.\n"
-                    "This may vary depending on parameters and port range")
+                    "Time left may vary depending on scan type and port range")
 
         while nmap_thread.is_alive():
             time.sleep(15)

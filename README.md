@@ -23,5 +23,6 @@ and modules by files
 - [ ] CIDR Notation Support
 - [ ] IP Ranges
 - [ ] Rate Limit Evasion
-- [ ] Vulnerability Scan (RFI, RCE, XSS, SQLi etc.)
+- [ ] OWASP Vulnerabilities Scan (RFI, RCE, XSS, SQLi etc.)
+- [ ] Run SearchSploit on results
 - [ ] More output formats

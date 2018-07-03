@@ -36,9 +36,11 @@ class DNSHandler:
         if not host.naked:
             return
 
+        logger.info("Retrieving WHOIS Information for {}".format(host))
+
         script = "whois {}".format(host.naked).split()
-        path = HelperUtilities.get_output_path("{}/whois.txt".format(host.target))
-        logger = Logger(path)
+        log_file = HelperUtilities.get_output_path("{}/whois.txt".format(host.target))
+        logger = Logger(log_file)
 
         process = await create_subprocess_exec(
             *script,
@@ -46,9 +48,8 @@ class DNSHandler:
             stderr=PIPE
         )
         result, err = await process.communicate()
-        logger.info("Writing {} WHOIS Information to {}".format(host, path))
 
         for line in result.decode().strip().split("\n"):
                 if ":" in line:
-                    logger.debug("{}\n".format(line))
+                    logger.debug(line)
 

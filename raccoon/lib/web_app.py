@@ -17,8 +17,8 @@ class WebApplicationScanner:
         self.web_scan_results = []
         self.headers = None
         self.robots = None
-        path = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
-        self.logger = Logger(path)
+        log_file = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
+        self.logger = Logger(log_file)
 
     def detect_cms(self):
         page = requests.get("https://whatcms.org/?s={}".format(self.host.target))
@@ -74,7 +74,7 @@ class WebApplicationScanner:
         )
         if res.status_code == 200 and res.text:
             self.logger.info("Found robots.txt")
-            self.logger.debug(res.text)
+            self.logger.debug("{0}\n{1}\n{0}\n".format("-"*40, res.text))
 
     def get_sitemap(self):
         pass

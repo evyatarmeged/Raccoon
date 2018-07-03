@@ -27,21 +27,19 @@ class URLFuzzer:
         self.num_threads = num_threads
         self.wordlist = wordlist
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
+        self.logger = None
 
-        path = HelperUtilities.get_output_path(self.target)
-        self.logger = Logger(path)
-
-    def _print_response(self, code, url, headers):
+    def _log_response(self, code, url, headers):
         if 300 > code >= 200:
             color = COLOR.GREEN
         elif 400 > code >= 300:
-            color = COLOR.CYAN
+            color = COLOR.BLUE
             url += " redirects to {}".format(headers.get("Location"))
         elif 510 > code >= 400:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        self.logger.debug("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
+        self.logger.info("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
 
     def _fetch(self, uri, sub_domain=False):
         """
@@ -63,17 +61,28 @@ class URLFuzzer:
         try:
             res = self.request_handler.send("HEAD", url=url)
             if res.status_code not in self.ignored_error_codes:
-                self._print_response(res.status_code, url, res.headers)
+                self._log_response(res.status_code, url, res.headers)
         except (AttributeError, RequestHandlerException):
             # res is None or another error occurred
             pass
 
-    async def fuzz_all(self, sub_domain=False):
+    def get_log_file_path(self, path):
+        if path:
+            log_file = path
+        else:
+            log_file = "{}/url_fuzz.txt".format(self.target)
+
+        return Logger(HelperUtilities.get_output_path(log_file))
+
+    async def fuzz_all(self, sub_domain=False, log_file_path=None):
         """
         Create a pool of threads, read the wordlist and invoke fuzz_all.
         Should be run in an event loop.
         :param sub_domain: Indicate if this is subdomain enumeration or URL busting
+        :param log_file_path: Log subdomain enum results to this path.
         """
+
+        self.logger = self.get_log_file_path(log_file_path)
         try:
             with open(self.wordlist, "r") as file:
                 fuzzlist = file.readlines()
@@ -81,10 +90,6 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        self.logger.debug("Fuzzing from {}".format(self.wordlist))
+        self.logger.info("Fuzzing from {}".format(self.wordlist))
         pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
-
-    def write_up(self):
-        # TODO: Out to file
-        pass

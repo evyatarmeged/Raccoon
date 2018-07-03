@@ -116,3 +116,4 @@ pip-selfcheck.json
 .idea
 !/raccoon/lib/
 aa.py
+Raccoon_scan_results

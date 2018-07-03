@@ -2,6 +2,7 @@ import re
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.logger import Logger
 
 
 class TLSCipherSuiteChecker:
@@ -44,19 +45,18 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.sni_data = {}
         self.non_sni_data = {}
         self.ciphers = ""
+        log_file = HelperUtilities.get_output_path("{}/tls_report.txt".format(self.target))
+        self.logger = Logger(log_file)
 
     async def run(self, sni=True):
-        path = HelperUtilities.get_output_path("{}/tls_report.txt".format(self.target))
-
-        print("Started collecting TLS data.\n"
-              "Will write results to {}".format(path))
+        self.logger.info("Started collecting TLS data")
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._extract_ssl_data()
         if sni:
             self.sni_data = await self._extract_ssl_data(sni=sni)
         await self.heartbleed_vulnerable()
-        print("Done collecting TLS data")
-        self.write_up(path)
+        self.logger.info("Done collecting TLS data")
+        self.write_up()
 
     def _is_cert_exists(self, text):
         if self.begin in text and self.end in text:
@@ -158,23 +158,21 @@ class TLSHandler(TLSCipherSuiteChecker):
                     is_supported[ver] = True
         return is_supported
 
-    @staticmethod
-    def _dictionary_write_procedure(result_dict, file):
+    def _dictionary_log_procedure(self, result_dict):
         for k, v in result_dict.items():
             if k == "SANs":
-                file.write("{0}:\n{1}\n {2}\n{1}\n".format(k, "-"*15, "\n".join(v)))
+                self.logger.debug("{0}:\n{1}\n {2}\n{1}\n".format(k, "-"*15, "\n".join(v)))
             elif k == "Certificate_details":
-                file.write(v)
+                self.logger.debug(v)
             else:
-                file.write("{}: {}\n".format(k, v))
+                self.logger.debug("{}: {}\n".format(k, v))
 
-    def write_up(self, path):
-        with open(path, "w") as file:
-            file.write("Supporting Ciphers:\n")
-            file.write(self.ciphers+"\n")
-            file.write("-"*80+"\n")
-            file.write("SNI Data:\n")
-            self._dictionary_write_procedure(self.sni_data, file)
-            file.write("-"*80+"\n")
-            file.write("non-SNI Data:\n")
-            self._dictionary_write_procedure(self.non_sni_data, file)
+    def write_up(self):
+        self.logger.debug("Supporting Ciphers:\n")
+        self.logger.debug(self.ciphers+"\n")
+        self.logger.debug("-"*80+"\n")
+        self.logger.debug("SNI Data:\n")
+        self._dictionary_log_procedure(self.sni_data)
+        self.logger.debug("-"*80+"\n")
+        self.logger.debug("non-SNI Data:\n")
+        self._dictionary_log_procedure(self.non_sni_data)

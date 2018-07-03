@@ -39,8 +39,6 @@ class NmapScan:
             if self.services:
                 self.logger.debug("Added service scan to nmap script")
                 script += " -sV"
-            else:
-                self.logger.debug("Running basic nmap scan")
         return script.split()
 
 
@@ -48,6 +46,8 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
+        scan.logger.debug("Nmap script to run: {}".format(" ".join(scan.script)))
+        scan.logger.info("Starting nmap scan")
         process = Popen(
             scan.script,
             stdout=PIPE,
