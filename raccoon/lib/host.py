@@ -3,7 +3,7 @@ from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.logger import Logger
+from raccoon.utils.logger import Logger, SystemOutLogger
 
 
 class Host:
@@ -20,9 +20,7 @@ class Host:
         self.fqdn = None
         self.naked = None
         self.dns_results = {}
-        log_file = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
-        self._create_host_dir(log_file)
-        self.logger = Logger(log_file)
+        self.logger = SystemOutLogger()
 
     def __str__(self):
         return "Host [{}]".format(self.target)
@@ -74,6 +72,12 @@ class Host:
             for value in self.dns_results.get(record):
                 self.logger.debug("\t{}".format(value))
 
+    def create_host_dir_and_set_file_logger(self):
+        log_file = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
+        self.logger.info(log_file)
+        self._create_host_dir(log_file)
+        self.logger = Logger(log_file)
+
     def parse(self):
         """
         Try to extract domain (full, naked, sub-domain), IP and port.
@@ -96,24 +100,23 @@ class Host:
         if self.validate_ip(self.target):
             self.logger.info("Detected {} as an IP address.".format(self.target))
             self.is_ip = True
-            return
-
-        domains = []
-        if self.target.startswith("www."):
-            # Obviously an FQDN
-            domains.extend((self.target, self.target.split("www.")[1]))
-            self.fqdn = self.target
-            self.naked = ".".join(self.fqdn.split('.')[1:])
         else:
-            # Can't be sure if FQDN or just naked domain
-            domains.append(self.target)
+            domains = []
+            if self.target.startswith("www."):
+                # Obviously an FQDN
+                domains.extend((self.target, self.target.split("www.")[1]))
+                self.fqdn = self.target
+                self.naked = ".".join(self.fqdn.split('.')[1:])
+            else:
+                # Can't be sure if FQDN or just naked domain
+                domains.append(self.target)
 
-        self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
+            self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
 
-        if self.dns_results.get("CNAME"):
-            # Naked domains shouldn't hold CNAME records according to RFC regulations
-            self.logger.info("Found {} to be an FQDN by present CNAME record ".format(self.target))
-            self.fqdn = self.target
-            self.naked = ".".join(self.fqdn.split('.')[1:])
-
+            if self.dns_results.get("CNAME"):
+                # Naked domains shouldn't hold CNAME records according to RFC regulations
+                self.logger.info("Found {} to be an FQDN by present CNAME record ".format(self.target))
+                self.fqdn = self.target
+                self.naked = ".".join(self.fqdn.split('.')[1:])
+        self.create_host_dir_and_set_file_logger()
         self.write_up()
