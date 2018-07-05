@@ -36,11 +36,10 @@ class DNSHandler:
         if not host.naked:
             return
 
-        logger.info("Retrieving WHOIS Information for {}".format(host))
-
         script = "whois {}".format(host.naked).split()
         log_file = HelperUtilities.get_output_path("{}/whois.txt".format(host.target))
         logger = Logger(log_file)
+        logger.info("Retrieving WHOIS Information for {}".format(host))
 
         process = await create_subprocess_exec(
             *script,
@@ -53,3 +52,5 @@ class DNSHandler:
                 if ":" in line:
                     logger.debug(line)
 
+    def dns_dumpster_mapping(self):
+        pass

@@ -10,8 +10,8 @@ SERVER = "Server"
 
 class WAFApplicationMethods:
 
-    @staticmethod
-    def detect_cloudfront(headers):
+    @classmethod
+    def detect_cloudfront(cls, headers):
         service = "CloudFront"
         waf_headers = ("Via", "X-cache")
         if any(h in headers.keys() for h in waf_headers) and any(service.lower() in val for val in headers.values()):
@@ -20,32 +20,32 @@ class WAFApplicationMethods:
             return True
         return
 
-    @staticmethod
-    def detect_incapsula(headers):
+    @classmethod
+    def detect_incapsula(cls, headers):
         if "X-Iinfo" in headers.keys() or headers.get("X-CDN") == "Incapsula":
             return True
         return
 
-    @staticmethod
-    def detect_distil( headers):
+    @classmethod
+    def detect_distil(cls, headers):
         if headers.get("x-distil-cs"):
             return True
         return
 
-    @staticmethod
-    def detect_cloudflare(headers):
+    @classmethod
+    def detect_cloudflare(cls, headers):
         if "CF-RAY" in headers.keys() or headers.get(SERVER) == "cloudflare":
             return True
         return
 
-    @staticmethod
-    def detect_edgecast(headers):
+    @classmethod
+    def detect_edgecast(cls, headers):
         if SERVER in headers.keys() and "ECD" in headers[SERVER]:
             return True
         return
 
-    @staticmethod
-    def detect_maxcdn(headers):
+    @classmethod
+    def detect_maxcdn(cls, headers):
         if SERVER in headers.keys() and "NetDNA-cache" in headers[SERVER]:
             return True
         return
