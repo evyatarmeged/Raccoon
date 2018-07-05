@@ -27,7 +27,7 @@ class WebApplicationScanner:
         if found:
             try:
                 cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
-                self.logger.info("CMS detected: target seems to use {}".format(cms.get("title")))
+                self.logger.info("CMS detected: target is using {}".format(cms.get("title")))
             except IndexError:
                 pass
 
@@ -80,7 +80,7 @@ class WebApplicationScanner:
         pass
 
     async def run_scan(self):
-        self.logger.info("Trying to collect {} web app information".format(self.host.target))
+        self.logger.info("Trying to collect {} web application data".format(self.host.target))
         session = self.request_handler.get_new_session()
         try:
             with session:

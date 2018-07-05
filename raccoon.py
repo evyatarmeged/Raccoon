@@ -139,10 +139,10 @@ def main(target,
     # hosts = []
     host = Host(target=target, dns_records=dns_records)
     host.parse()
-
+    DNSHandler.generate_dns_dumpster_mapping(host, logger)
     logger.info("Setting Nmap scan to run in the background")
     nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
-    # TODO: Populate array when multiple targets are supported
+    # # TODO: Populate array when multiple targets are supported
     # nmap_threads = []
     nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
     # Run Nmap scan in the background. Can take some time
@@ -156,6 +156,7 @@ def main(target,
         asyncio.ensure_future(tls_info_scanner.run()),
         asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(DNSHandler.grab_whois(host)),
+        asyncio.ensure_future(DNSHandler.generate_dns_dumpster_mapping(host, logger)),
         asyncio.ensure_future(web_app_scanner.run_scan())
     )
     main_loop.run_until_complete(asyncio.wait(tasks))
