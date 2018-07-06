@@ -43,7 +43,8 @@ def intro(logger):
                               "Slows total runtime")
 @click.option("-w", "--wordlist", default="./raccoon/wordlists/fuzzlist",
               help="Path to wordlist that would be used for URL fuzzing")
-@click.option("-T", "--threads", default=25, help="Number of threads to use. Default: 25")
+@click.option("-T", "--threads", default=25,
+              help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25")
 @click.option("--ignored-response-codes", default="301,400,401,402,404,504",
               help="Comma separated list of HTTP status code to ignore for fuzzing.\n"
                    "Defaults to: 301,400,401,402,404,504")
@@ -55,6 +56,7 @@ def intro(logger):
 @click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
+@click.option("--follow-redirects", is_flag=True, help="Follow redirects when fuzzing")
 # @click.option("-d", "--delay", default="0.25-1",
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
@@ -80,12 +82,14 @@ def main(target,
          port_range,
          tls_port,
          no_health_check,
+         follow_redirects,
          # delay,
          outdir,
          quiet,
          verbose):
 
     # Arg validation
+    START = time.time()
 
     # Set logging level and Logger instance
     log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
@@ -139,7 +143,7 @@ def main(target,
     # hosts = []
     host = Host(target=target, dns_records=dns_records)
     host.parse()
-    DNSHandler.generate_dns_dumpster_mapping(host, logger)
+
     logger.info("Setting Nmap scan to run in the background")
     nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
     # # TODO: Populate array when multiple targets are supported
@@ -148,7 +152,7 @@ def main(target,
     # Run Nmap scan in the background. Can take some time
     nmap_thread.start()
 
-    # Run first set of checks - TLS, Web/WAF Data, WHOIS
+    # Run first set of checks - TLS, Web/WAF Data, DNS data
     waf = WAF(host)
     tls_info_scanner = TLSHandler(host, tls_port)
     web_app_scanner = WebApplicationScanner(host)
@@ -156,22 +160,27 @@ def main(target,
         asyncio.ensure_future(tls_info_scanner.run()),
         asyncio.ensure_future(waf.detect()),
         asyncio.ensure_future(DNSHandler.grab_whois(host)),
-        asyncio.ensure_future(DNSHandler.generate_dns_dumpster_mapping(host, logger)),
         asyncio.ensure_future(web_app_scanner.run_scan())
     )
     main_loop.run_until_complete(asyncio.wait(tasks))
 
+    dns_mapping_thread = threading.Thread(
+        target=DNSHandler.generate_dns_dumpster_mapping, args=(host, logger))
+    dns_mapping_thread.start()
+
     # Second set of checks - URL fuzzing, Subdomain enumeration
-    sans = tls_info_scanner.sni_data.get("SANs")
-    fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist)
+    fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist, follow_redirects)
     main_loop.run_until_complete(fuzzer.fuzz_all())
+
     if not host.is_ip:
+        sans = tls_info_scanner.sni_data.get("SANs")
         subdomain_enumerator = SubDomainEnumerator(
             host,
             domain_list=subdomain_list,
             sans=sans,
             ignored_response_codes=ignored_response_codes,
-            num_threads=threads
+            num_threads=threads,
+            follow_redirects=follow_redirects
         )
         main_loop.run_until_complete(subdomain_enumerator.run())
 
@@ -183,6 +192,7 @@ def main(target,
             time.sleep(15)
 
     logger.info("\nRaccoon scan finished\n")
+    print(time.time() - START)
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

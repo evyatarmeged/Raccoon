@@ -21,25 +21,27 @@ class NmapScan:
         self.script = self.build_script()
 
     def build_script(self):
-        script = "nmap -Pn {}".format(self.target)
+        script = ["nmap", "-Pn", self.target]
 
         if self.port_range:
             HelperUtilities.validate_port_range(self.port_range)
-            script += " -p {}".format(self.port_range)
-            self.logger.debug("Added port range {} to nmap script".format(self.port_range))
+            script.append("-p")
+            script.append(self.port_range)
+            self.logger.debug("Added port range {} to Nmap script".format(self.port_range))
 
         if self.full_scan:
-            script += " -sV -sC"
-            self.logger.debug("Added scripts and services to nmap script")
+            script.append("-sV")
+            script.append("-sC")
+            self.logger.debug("Added scripts and services to Nmap script")
             return script
         else:
             if self.scripts:
-                self.logger.debug("Added script scan to nmap script")
-                script += " -sC"
+                self.logger.debug("Added script scan to Nmap script")
+                script.append("-sC")
             if self.services:
-                self.logger.debug("Added service scan to nmap script")
-                script += " -sV"
-        return script.split()
+                self.logger.debug("Added service scan to Nmap script")
+                script.append("-sV")
+        return script
 
 
 class Scanner:
@@ -47,7 +49,7 @@ class Scanner:
     @classmethod
     def run(cls, scan):
         scan.logger.debug("Nmap script to run: {}".format(" ".join(scan.script)))
-        scan.logger.info("Starting nmap scan")
+        scan.logger.info("Starting Nmap scan")
         process = Popen(
             scan.script,
             stdout=PIPE,

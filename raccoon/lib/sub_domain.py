@@ -8,13 +8,20 @@ from raccoon.utils.logger import Logger
 
 class SubDomainEnumerator:
 
-    def __init__(self, host, sans, domain_list, ignored_response_codes, num_threads):
+    def __init__(self,
+                 host,
+                 sans,
+                 domain_list,
+                 ignored_response_codes,
+                 num_threads,
+                 follow_redirects):
         self.host = host
         self.target = host.target
         self.sans = sans
         self.domain_list = domain_list
         self.ignored_error_codes = ignored_response_codes
         self.num_threads = num_threads
+        self.follow_redirects = follow_redirects
         self.request_handler = RequestHandler()
         self.sub_domains = set()
         log_file = HelperUtilities.get_output_path("{}/subdomains.txt".format(self.target))
@@ -67,7 +74,8 @@ class SubDomainEnumerator:
             host=self.host,
             wordlist=self.domain_list,
             num_threads=self.num_threads,
-            ignored_response_codes=self.ignored_error_codes
+            ignored_response_codes=self.ignored_error_codes,
+            follow_redirects=self.follow_redirects
             )
         await sub_domain_fuzzer.fuzz_all(sub_domain=True, log_file_path=path)
 

@@ -57,7 +57,7 @@ class DNSHandler:
                     logger.debug(line)
 
     @classmethod
-    async def generate_dns_dumpster_mapping(cls, host, sout_logger):
+    def generate_dns_dumpster_mapping(cls, host, sout_logger):
         # Start DNS Dumpster session for the token
         dnsdumpster_session = DNSHandler.request_handler.get_new_session()
         url = "https://dnsdumpster.com"

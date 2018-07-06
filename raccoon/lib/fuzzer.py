@@ -18,7 +18,8 @@ class URLFuzzer:
                  host,
                  ignored_response_codes,
                  num_threads,
-                 wordlist):
+                 wordlist,
+                 follow_redirects=False):
 
         self.target = host.target
         self.ignored_error_codes = ignored_response_codes
@@ -26,6 +27,7 @@ class URLFuzzer:
         self.port = host.port
         self.num_threads = num_threads
         self.wordlist = wordlist
+        self.follow_redirects = follow_redirects
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
         self.logger = None
 
@@ -59,7 +61,7 @@ class URLFuzzer:
                 url = "{}://{}.{}".format(self.proto, uri, self.target)
 
         try:
-            res = self.request_handler.send("HEAD", url=url)
+            res = self.request_handler.send("HEAD", url=url, allow_redirects=self.follow_redirects)
             if res.status_code not in self.ignored_error_codes:
                 self._log_response(res.status_code, url, res.headers)
         except (AttributeError, RequestHandlerException):

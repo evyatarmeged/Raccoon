@@ -18,6 +18,7 @@ class WebApplicationScanner:
         self.headers = None
         self.robots = None
         log_file = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
+        self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
 
     def detect_cms(self):
@@ -65,8 +66,9 @@ class WebApplicationScanner:
             self.logger.info("CORS wildcard detected")
 
     def get_robots_txt(self):
-        res = requests.get(
-            "{}://{}:{}/robots.txt".format(
+        res = self.request_handler.send(
+            "GET",
+            url="{}://{}:{}/robots.txt".format(
                 self.host.protocol,
                 self.host.target,
                 self.host.port
@@ -74,10 +76,22 @@ class WebApplicationScanner:
         )
         if res.status_code == 200 and res.text:
             self.logger.info("Found robots.txt")
-            self.logger.debug("{0}\n{1}\n{0}\n".format("-"*40, res.text))
+            with open("{}/robots.txt".format(self.target_dir), "w") as file:
+                file.write(res.text)
 
     def get_sitemap(self):
-        pass
+        res = self.request_handler.send(
+            "GET",
+            url="{}://{}:{}/robots.txt".format(
+                self.host.protocol,
+                self.host.target,
+                self.host.port
+            )
+        )
+        if res.status_code == 200 and res.text:
+            self.logger.info("Found sitemap.xml")
+            with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
+                file.write(res.text)
 
     async def run_scan(self):
         self.logger.info("Trying to collect {} web application data".format(self.host.target))

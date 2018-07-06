@@ -74,7 +74,6 @@ class Host:
 
     def create_host_dir_and_set_file_logger(self):
         log_file = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
-        self.logger.info(log_file)
         self._create_host_dir(log_file)
         self.logger = Logger(log_file)
 
