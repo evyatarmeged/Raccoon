@@ -1,8 +1,9 @@
-![Racoon](Raccoon.png)
+![Racoon](raccoon.png)
 
-### WORK IN PROGRESS
+### Offensive Security Scanner and Reconnaissance Tool<br>(**WORK IN PROGRESS**)
 #### Features
 - [x] DNS Details
+- [x] DNS visual mapping using DNS dumpster
 - [x] WHOIS Records
 - [x] TLS Data - Supported Ciphers, TLS versions,
 Certificate details and SANs
@@ -10,7 +11,8 @@ Certificate details and SANs
 - [x] Services and Scripts Scan
 - [x] URL Fuzzing and directory detection
 - [x] Subdomain Enumeration
-- [x] Web Application Data (CMS, Web Server info, robots.txt)
+- [x] Web Application Data (CMS, Web Server info, robots & sitemap
+extraction)
 - [x] Detects Known WAFs
 - [x] Supports Tor / Proxy routing
 - [x] Uses AsyncIO For Improved Performance

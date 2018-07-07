@@ -69,7 +69,7 @@ class DNSHandler:
             "targetip": target,
             "csrfmiddlewaretoken": None
         }
-        sout_logger.info("Trying to generate DNS Mapping for {}".format(host.target))
+        sout_logger.info("Trying to generate DNS Mapping for {} from DNS dumpster".format(host))
         try:
             dnsdumpster_session.get(url)
             jar = dnsdumpster_session.cookies
@@ -86,5 +86,6 @@ class DNSHandler:
                 path = HelperUtilities.get_output_path("{}/dns_mapping.png".format(host.target))
                 with open(path, "wb") as target_image:
                     target_image.write(page.content)
+            sout_logger.info("Successfully fetched DNS mapping for {}".format(host.target))
         except ConnectionError:
             sout_logger.info("Failed to generate DNS mapping. A connection error occurred.")

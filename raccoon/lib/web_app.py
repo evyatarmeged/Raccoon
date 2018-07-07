@@ -94,7 +94,7 @@ class WebApplicationScanner:
                 file.write(res.text)
 
     async def run_scan(self):
-        self.logger.info("Trying to collect {} web application data".format(self.host.target))
+        self.logger.info("Trying to collect {} web application data".format(self.host))
         session = self.request_handler.get_new_session()
         try:
             with session:

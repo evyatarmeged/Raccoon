@@ -88,8 +88,7 @@ def main(target,
          quiet,
          verbose):
 
-    # Arg validation
-    START = time.time()
+    # ------ Arg validation ------
 
     # Set logging level and Logger instance
     log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
@@ -127,7 +126,7 @@ def main(target,
     if port_range:
         HelperUtilities.validate_port_range(port_range)
 
-    # /Arg validation
+    # ------ /Arg validation ------
 
     # Set Request Handler instance
     request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
@@ -192,7 +191,6 @@ def main(target,
             time.sleep(15)
 
     logger.info("\nRaccoon scan finished\n")
-    print(time.time() - START)
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

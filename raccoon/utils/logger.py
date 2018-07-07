@@ -54,14 +54,9 @@ class Logger:
         self.stout_logger = SystemOutLogger()
         self.logger = self.get_logger()
 
-    def truncate_existing(self):
-        if path.isfile(self.outfile):
-            open(self.outfile, "w+").close()
-
     def get_logger(self):
         logger = logging.getLogger(self.__str__())
         logger.setLevel("DEBUG")
-        self.truncate_existing()
 
         out_handler = logging.FileHandler(self.outfile)
         formatter = logging.Formatter('%(message)s')

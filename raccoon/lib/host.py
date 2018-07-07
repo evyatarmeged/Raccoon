@@ -23,7 +23,7 @@ class Host:
         self.logger = SystemOutLogger()
 
     def __str__(self):
-        return "Host [{}]".format(self.target)
+        return "[{}]".format(self.target)
 
     def __repr__(self):
         return self.__dict__
@@ -65,7 +65,7 @@ class Host:
         return
 
     def write_up(self):
-        self.logger.info("Writing {} DNS query results".format(self.target))
+        self.logger.info("Writing {} DNS query results".format(self))
 
         for record in self.dns_results:
             self.logger.debug(record+"\n")
