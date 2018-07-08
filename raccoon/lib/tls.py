@@ -39,7 +39,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
         # OpenSSL likes to hang, Linux timeout to the rescue
-        self._base_script = "timeout 10 openssl s_client -connect {}:443 ".format(self.target)
+        self._base_script = "timeout 10 openssl s_client -connect {}:{} ".format(self.target, self.port)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
         self.sni_data = {}
@@ -93,7 +93,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         result, err = await process.communicate()
         try:
             if "server extension \"heartbeat\" (id=15)" in result.decode().strip():
-                print("Target seems to be vulnerable to Heartbleed - CVE-2014-0160")
+                self.logger.info("Target seems to be vulnerable to Heartbleed - CVE-2014-0160")
         except TypeError:  # Type error means no result
             pass
 
