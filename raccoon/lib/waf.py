@@ -78,7 +78,7 @@ class WAF:
         self.logger = Logger(log_file)
 
     def _waf_detected(self, name):
-        self.logger.info("Detected {} WAF presence in web application".format(name))
+        self.logger.info("Detected WAF presence in web application: {}".format(name))
 
     async def detect(self):
         self.logger.info("Trying to detect WAF presence on {}".format(self.host))
@@ -98,6 +98,7 @@ class WAF:
             response = self.request_handler.send(
                 "HEAD",
                 timeout=20,
+                allow_redirects=True,
                 url="{}://{}:{}".format(
                     self.host.protocol,
                     self.host.target,

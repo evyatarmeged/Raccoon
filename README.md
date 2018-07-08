@@ -10,7 +10,7 @@ Certificate details and SANs
 - [x] Port Scan
 - [x] Services and Scripts Scan
 - [x] URL Fuzzing and directory detection
-- [x] Subdomain Enumeration
+- [x] Subdomain Enumeration - Uses Google Dorking, Bruteforce and SAN discovery
 - [x] Web Application Data (CMS, Web Server info, robots & sitemap
 extraction)
 - [x] Detects Known WAFs

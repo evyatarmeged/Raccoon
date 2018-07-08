@@ -51,19 +51,33 @@ class TLSHandler(TLSCipherSuiteChecker):
     async def run(self, sni=True):
         self.logger.info("Started collecting TLS data")
         self.ciphers = await self.scan_ciphers(self.port)
-        self.non_sni_data = await self._extract_ssl_data()
+        self.non_sni_data = await self._execute_ssl_data_extraction()
         if sni:
-            self.sni_data = await self._extract_ssl_data(sni=sni)
-        await self.heartbleed_vulnerable()
+            self.sni_data = await self._execute_ssl_data_extraction(sni=sni)
+        await self.is_heartbleed_vulnerable()
         self.logger.info("Done collecting TLS data")
+
+        if self._are_certificates_identical():
+            self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
         self.write_up()
 
-    def _is_cert_exists(self, text):
+    def _are_certificates_identical(self):
+        """
+        Validate that both certificates exist.
+        :returns: True if they are identical, False otherwise
+        """
+        sni_cert = self.sni_data["Certificate_details"]
+        non_sni_cert = self.non_sni_data["Certificate_details"]
+        if all(cert for cert in (sni_cert, non_sni_cert) if cert) and sni_cert == non_sni_cert:
+            return True
+        return
+
+    def _is_certificate_exists(self, text):
         if self.begin in text and self.end in text:
             return True
         return
 
-    async def _extract_cert_details(self, data):
+    async def _extract_certificate_details(self, data):
         process = await create_subprocess_exec(
             "timeout", "5", "openssl", "x509", "-text",
             stdin=PIPE,
@@ -83,7 +97,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         cert_details = "\n".join(result_lines)
         return cert_details
 
-    async def heartbleed_vulnerable(self):
+    async def is_heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
         process = await create_subprocess_exec(
             *script.split(),
@@ -97,24 +111,24 @@ class TLSHandler(TLSCipherSuiteChecker):
         except TypeError:  # Type error means no result
             pass
 
-    async def _extract_ssl_data(self, sni=False):
+    async def _execute_ssl_data_extraction(self, sni=False):
         """
         Test for version support (SNI/non-SNI), get all SANs, get certificate details
         :param sni: True will call cause _exec_openssl to call openssl with -servername flag
         """
         # Do for all responses
-        responses = await self._exec_openssl(self._base_script, sni)
-        tls_dict = self._parse_sclient_output(responses)
+        responses = await self._run_openssl_sclient_cmd(self._base_script, sni)
+        tls_dict = self._parse_openssl_sclient_output(responses)
         # Do for one successful SSL response
         for res in responses:
-            if self._is_cert_exists(res):
-                tls_dict["SANs"] = await self._parse_san_output(res)
-                tls_dict["Certificate_details"] = await self._extract_cert_details(res)
+            if self._is_certificate_exists(res):
+                tls_dict["SANs"] = await self._get_sans_from_openssl_cmd(res)
+                tls_dict["Certificate_details"] = await self._extract_certificate_details(res)
                 break
 
         return tls_dict
 
-    async def _exec_openssl(self, script, sni=False):
+    async def _run_openssl_sclient_cmd(self, script, sni=False):
         processes = []
         outputs = []
         if sni:
@@ -136,7 +150,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         return outputs
 
     @staticmethod
-    async def _parse_san_output(data):
+    async def _get_sans_from_openssl_cmd(data):
         process = await create_subprocess_exec(
             "openssl", "x509", "-noout", "-text",
             stdin=PIPE,
@@ -147,10 +161,10 @@ class TLSHandler(TLSCipherSuiteChecker):
         sans = re.findall(r"DNS:\S*\b", result.decode().strip())
         return {san.replace("DNS:", '') for san in sans}
 
-    def _parse_sclient_output(self, results):
+    def _parse_openssl_sclient_output(self, results):
         is_supported = {"TLSv1": False, "TLSv1.1": False, "TLSv1.2": False}
         for res in results:
-            if not self._is_cert_exists(res):
+            if not self._is_certificate_exists(res):
                 continue
             for line in res.split('\n'):
                 if "Protocol" in line:

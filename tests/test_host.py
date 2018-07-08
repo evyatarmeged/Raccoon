@@ -3,40 +3,48 @@ from raccoon.lib.host import Host
 from raccoon.utils.exceptions import HostHandlerException
 
 
-class TestHst(unittest.TestCase):
+class TestHost(unittest.TestCase):
 
     def setUp(self):
-        # Dir creation and logger error solve
-        # host = Host("noonecares.com", ())
-        # host.create_host_dir_and_set_file_logger = lambda: None
-        pass
+        self.TestHost = Host
+        self.TestHost.create_host_dir_and_set_file_logger = lambda _: None
 
     def test_port_extraction(self):
-        pass
+        host = self.TestHost("www.example.com:35000", ())
+        host.parse()
+        self.assertEqual(host.port, 35000)
 
     def test_default_port(self):
-        pass
-
-    def test_custom_port(self):
-        pass
+        host = self.TestHost("www.example.com", ())
+        host.parse()
+        self.assertEqual(host.port, 80)
 
     def test_proto_extraction(self):
-        pass
+        host = self.TestHost("https://www.example.com", ())
+        host.parse()
+        self.assertEqual(host.protocol, "https")
 
     def test_default_protocol(self):
-        pass
-
-    def test_https_protocol(self):
-        pass
+        host = self.TestHost("127.0.0.1", ())
+        host.parse()
+        self.assertEqual(host.protocol, "http")
 
     def test_invalid_protocol(self):
-        pass
+        with self.assertRaises(HostHandlerException):
+            host = self.TestHost("ftp://www.example.com", ())
+            host.parse()
 
     def test_ip_detected(self):
-        pass
+        host = self.TestHost("10.10.10.75", ())
+        host.parse()
+        self.assertEqual(host.is_ip, True)
 
     def test_fqdn_detected(self):
-        pass
+        host = self.TestHost("https://www.example.com", ())
+        host.parse()
+        self.assertEqual(host.fqdn, "www.example.com")
 
     def test_naked_detected(self):
-        pass
+        host = self.TestHost("https://www.example.com", ())
+        host.parse()
+        self.assertEqual(host.naked, "example.com")
