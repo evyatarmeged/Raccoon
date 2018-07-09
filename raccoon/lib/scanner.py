@@ -49,7 +49,7 @@ class Scanner:
     @classmethod
     def run(cls, scan):
         scan.logger.debug("Nmap script to run: {}".format(" ".join(scan.script)))
-        scan.logger.info("Starting Nmap scan")
+        scan.logger.info("Nmap scan started")
         process = Popen(
             scan.script,
             stdout=PIPE,

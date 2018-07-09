@@ -87,110 +87,116 @@ def main(target,
          outdir,
          quiet,
          verbose):
+    try:
+        # ------ Arg validation ------
+        # Set logging level and Logger instance
+        log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
+        logger = SystemOutLogger(log_level)
 
-    # ------ Arg validation ------
-
-    # Set logging level and Logger instance
-    log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
-    logger = SystemOutLogger(log_level)
-
-    if proxy_list and not os.path.isfile(proxy_list):
-        raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
-
-    if wordlist and not os.path.isfile(wordlist):
-        raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
-
-    if subdomain_list and not os.path.isfile(subdomain_list):
-        raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
-
-    HelperUtilities.create_output_directory(outdir)
-
-    HelperUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
-
-    if tor_routing:
-        logger.info("Routing traffic using TOR service")
-    elif proxy_list:
         if proxy_list and not os.path.isfile(proxy_list):
             raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
-        else:
-            logger.info("Routing traffic using proxies from list {}".format(proxy_list))
-    elif proxy:
-        logger.info("Routing traffic through proxy {}".format(proxy))
 
-    # TODO: Sanitize delay argument
+        if wordlist and not os.path.isfile(wordlist):
+            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
 
-    dns_records = tuple(dns_records.split(","))
+        if subdomain_list and not os.path.isfile(subdomain_list):
+            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
 
-    ignored_response_codes = tuple(int(code) for code in ignored_response_codes.split(","))
+        HelperUtilities.create_output_directory(outdir)
 
-    if port_range:
-        HelperUtilities.validate_port_range(port_range)
+        HelperUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
 
-    # ------ /Arg validation ------
+        if tor_routing:
+            logger.info("Routing traffic using TOR service")
+        elif proxy_list:
+            if proxy_list and not os.path.isfile(proxy_list):
+                raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+            else:
+                logger.info("Routing traffic using proxies from list {}".format(proxy_list))
+        elif proxy:
+            logger.info("Routing traffic through proxy {}".format(proxy))
 
-    # Set Request Handler instance
-    request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
+        # TODO: Sanitize delay argument
 
-    intro(logger)
+        dns_records = tuple(dns_records.split(","))
 
-    if not no_health_check:
-        HelperUtilities.validate_target_is_up(target)
+        ignored_response_codes = tuple(int(code) for code in ignored_response_codes.split(","))
 
-    main_loop = asyncio.get_event_loop()
+        if port_range:
+            HelperUtilities.validate_port_range(port_range)
 
-    # TODO: Populate array when multiple targets are supported
-    # hosts = []
-    host = Host(target=target, dns_records=dns_records)
-    host.parse()
+        # ------ /Arg validation ------
 
-    logger.info("Setting Nmap scan to run in the background")
-    nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
-    # # TODO: Populate array when multiple targets are supported
-    # nmap_threads = []
-    nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
-    # Run Nmap scan in the background. Can take some time
-    nmap_thread.start()
+        # Set Request Handler instance
+        request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
 
-    # Run first set of checks - TLS, Web/WAF Data, DNS data
-    waf = WAF(host)
-    tls_info_scanner = TLSHandler(host, tls_port)
-    web_app_scanner = WebApplicationScanner(host)
-    tasks = (
-        asyncio.ensure_future(tls_info_scanner.run()),
-        asyncio.ensure_future(waf.detect()),
-        asyncio.ensure_future(DNSHandler.grab_whois(host)),
-        asyncio.ensure_future(web_app_scanner.run_scan())
-    )
-    main_loop.run_until_complete(asyncio.wait(tasks))
+        intro(logger)
 
-    dns_mapping_thread = threading.Thread(
-        target=DNSHandler.generate_dns_dumpster_mapping, args=(host, logger))
-    dns_mapping_thread.start()
+        if not no_health_check:
+            HelperUtilities.validate_target_is_up(target)
 
-    # Second set of checks - URL fuzzing, Subdomain enumeration
-    fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist, follow_redirects)
-    main_loop.run_until_complete(fuzzer.fuzz_all())
+        main_loop = asyncio.get_event_loop()
 
-    if not host.is_ip:
-        sans = tls_info_scanner.sni_data.get("SANs")
-        subdomain_enumerator = SubDomainEnumerator(
-            host,
-            domain_list=subdomain_list,
-            sans=sans,
-            ignored_response_codes=ignored_response_codes,
-            num_threads=threads,
-            follow_redirects=follow_redirects
+        # TODO: Populate array when multiple targets are supported
+        # hosts = []
+        host = Host(target=target, dns_records=dns_records)
+        host.parse()
+
+        logger.info("Setting Nmap scan to run in the background")
+        nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
+        # # TODO: Populate array when multiple targets are supported
+        # nmap_threads = []
+        nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
+        # Run Nmap scan in the background. Can take some time
+        nmap_thread.start()
+
+        # Run first set of checks - TLS, Web/WAF Data, DNS data
+        waf = WAF(host)
+        tls_info_scanner = TLSHandler(host, tls_port)
+        web_app_scanner = WebApplicationScanner(host)
+        tasks = (
+            asyncio.ensure_future(tls_info_scanner.run()),
+            asyncio.ensure_future(waf.detect()),
+            asyncio.ensure_future(DNSHandler.grab_whois(host)),
+            asyncio.ensure_future(web_app_scanner.run_scan())
         )
-        main_loop.run_until_complete(subdomain_enumerator.run())
 
-    if nmap_thread.is_alive():
-        logger.info("All scans done. Waiting for Nmap scan to wrap up.\n"
-                    "Time left may vary depending on scan type and port range")
+        main_loop.run_until_complete(asyncio.wait(tasks))
 
-        while nmap_thread.is_alive():
-            time.sleep(15)
+        dns_mapping_thread = threading.Thread(
+            target=DNSHandler.generate_dns_dumpster_mapping, args=(host, logger))
+        dns_mapping_thread.start()
 
-    logger.info("\nRaccoon scan finished\n")
+        # Second set of checks - URL fuzzing, Subdomain enumeration
+        fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist, follow_redirects)
+        main_loop.run_until_complete(fuzzer.fuzz_all())
+
+        if not host.is_ip:
+            sans = tls_info_scanner.sni_data.get("SANs")
+            subdomain_enumerator = SubDomainEnumerator(
+                host,
+                domain_list=subdomain_list,
+                sans=sans,
+                ignored_response_codes=ignored_response_codes,
+                num_threads=threads,
+                follow_redirects=follow_redirects
+            )
+            main_loop.run_until_complete(subdomain_enumerator.run())
+
+        if nmap_thread.is_alive():
+            logger.info("All scans done. Waiting for Nmap scan to wrap up.\n"
+                        "Time left may vary depending on scan type and port range")
+
+            while nmap_thread.is_alive():
+                time.sleep(15)
+
+        logger.info("\nRaccoon scan finished\n")
+
+    except KeyboardInterrupt:
+        print("Keyboard Interrupt detected. Exiting")
+        # Fix F'd up terminal after CTRL+C
+        os.system("stty sane")
+        exit(42)
 
 # TODO: Change relative paths in default wordlist/subdomain list/etc
 

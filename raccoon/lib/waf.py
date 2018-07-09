@@ -1,5 +1,6 @@
 from requests.exceptions import TooManyRedirects, ConnectionError
-from raccoon.utils.exceptions import WAFException
+from raccoon.utils.web_server_validator import WebServerValidator
+from raccoon.utils.exceptions import WAFException, WebServerValidatorException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
@@ -57,6 +58,7 @@ class WAF:
         self.host = host
         self.cnames = host.dns_results.get('CNAME')
         self.request_handler = RequestHandler()
+        self.web_server_validator = WebServerValidator()
         self.waf_cname_map = {
             "incapdns": "Incapsula",
             "edgekey": "Akamai",
@@ -84,7 +86,12 @@ class WAF:
         self.logger.info("Trying to detect WAF presence on {}".format(self.host))
         if self.cnames:
             self._detect_by_cname()
-        self._detect_by_application()
+        try:
+            self.web_server_validator.validate_target_webserver(self.host)
+            self._detect_by_application()
+        except WebServerValidatorException:
+            self.logger.info("Target does not seem to have an active web server on port: {}\n"
+                             "No WAF could be detected on an application level.".format(self.host.port))
 
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:

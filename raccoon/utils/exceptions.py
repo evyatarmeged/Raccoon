@@ -63,3 +63,11 @@ class WebAppScannerException(RaccoonException):
 
     def __str__(self):
         return self._message
+
+
+class WebServerValidatorException(RaccoonException):
+    def __init__(self, message='Web Server Validator Exception'):
+        super().__init__(message)
+
+    def __str__(self):
+        return self._message

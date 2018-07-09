@@ -66,8 +66,8 @@ class TLSHandler(TLSCipherSuiteChecker):
         Validate that both certificates exist.
         :returns: True if they are identical, False otherwise
         """
-        sni_cert = self.sni_data["Certificate_details"]
-        non_sni_cert = self.non_sni_data["Certificate_details"]
+        sni_cert = self.sni_data.get("Certificate_details")
+        non_sni_cert = self.non_sni_data.get("Certificate_details")
         if all(cert for cert in (sni_cert, non_sni_cert) if cert) and sni_cert == non_sni_cert:
             return True
         return
