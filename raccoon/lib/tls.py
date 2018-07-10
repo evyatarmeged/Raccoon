@@ -21,11 +21,11 @@ class TLSCipherSuiteChecker:
         if process.returncode != 0:
             parsed = err.decode().strip()
         else:
-            parsed = self._parse_nmap_outpt(result)
+            parsed = self._parse_cipher_scan_outpt(result)
         return parsed
 
     @staticmethod
-    def _parse_nmap_outpt(result):
+    def _parse_cipher_scan_outpt(result):
         result = result.decode().strip().split("\n")
         return '\n'.join([line for line in result if "|" in line]).strip().rstrip()
 
@@ -50,8 +50,8 @@ class TLSHandler(TLSCipherSuiteChecker):
 
     def _tls_results_exist(self):
         if all(not x for x in (self.ciphers, *self.non_sni_data.values(), *self.sni_data.values())):
-            return True
-        return
+            return
+        return True
 
     def _are_certificates_identical(self):
         """

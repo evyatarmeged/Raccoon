@@ -1,6 +1,7 @@
 from subprocess import PIPE, Popen
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
+from raccoon.utils.coloring import COLOR
 
 
 class NmapScan:
@@ -16,8 +17,8 @@ class NmapScan:
         self.scripts = scripts
         self.services = services
         self.port_range = port_range
-        path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(self.target))
-        self.logger = Logger(path)
+        self.path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(self.target))
+        self.logger = Logger(self.path)
         self.script = self.build_script()
 
     def build_script(self):
@@ -57,10 +58,25 @@ class Scanner:
         )
         result, err = process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
+        if result:
+            parsed_result = Scanner._parse_scan_output(result)
+            scan.logger.info(parsed_result)
         Scanner.write_up(scan, result, err)
 
     @classmethod
+    def _parse_scan_output(cls, result):
+        parsed_output = ""
+        for line in result.split("\n"):
+            if "PORT" in line and "STATE" in line:
+                parsed_output += "The following ports were found from Nmap scan:\n"
+            if "/tcp" in line or "/udp" in line and "open" in line:
+                line = line.split()
+                parsed_output += "\t{}{}{} {}\n".format(COLOR.GREEN, line[0], COLOR.RESET, " ".join(line[1:]))
+        return parsed_output
+
+    @classmethod
     def write_up(cls, scan, result, err):
+        open(scan.path, "w").close()
         if result:
             scan.logger.debug(result+"\n")
         if err:

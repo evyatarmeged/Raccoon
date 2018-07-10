@@ -2,6 +2,7 @@ from requests.exceptions import TooManyRedirects, ConnectionError
 from raccoon.utils.web_server_validator import WebServerValidator
 from raccoon.utils.exceptions import WAFException, WebServerValidatorException
 from raccoon.utils.request_handler import RequestHandler
+from raccoon.utils.coloring import COLOR
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
 
@@ -59,6 +60,7 @@ class WAF:
         self.cnames = host.dns_results.get('CNAME')
         self.request_handler = RequestHandler()
         self.web_server_validator = WebServerValidator()
+        self.waf_present = False
         self.waf_cname_map = {
             "incapdns": "Incapsula",
             "edgekey": "Akamai",
@@ -80,7 +82,9 @@ class WAF:
         self.logger = Logger(log_file)
 
     def _waf_detected(self, name):
-        self.logger.info("Detected WAF presence in web application: {}".format(name))
+        self.logger.info(
+            "{}Detected WAF presence in web application: {}{}".format(COLOR.RED, name, COLOR.RESET))
+        self.waf_present = True
 
     async def detect(self):
         self.logger.info("Trying to detect WAF presence on {}".format(self.host))
@@ -96,9 +100,10 @@ class WAF:
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
-                self.logger.info(
-                    "Detected WAF presence in CNAME: {}".format(self.waf_cname_map.get(waf))
+                self.logger.info("{}Detected WAF presence in CNAME: {}{}".format(
+                    COLOR.RED, self.waf_cname_map.get(waf), COLOR.RESET)
                 )
+                self.waf_present = True
 
     def _detect_by_application(self):
         try:

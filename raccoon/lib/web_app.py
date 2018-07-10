@@ -58,8 +58,9 @@ class WebApplicationScanner:
             )
 
     def _detect_xss_protection(self):
-        if self.headers.get("X-XSS-PROTECTION") == "1":
-            self.logger.info("Found X-XSS-PROTECTION")
+        xss_header = self.headers.get("X-XSS-PROTECTION")
+        if xss_header and "1" in xss_header:
+            self.logger.info("Found X-XSS-PROTECTION header")
 
     def _cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
