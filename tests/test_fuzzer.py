@@ -1,20 +1,23 @@
 import unittest
 import asyncio
 from raccoon.lib.fuzzer import URLFuzzer
+from raccoon.lib.host import Host
 from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
+from raccoon.utils.logger import SystemOutLogger
 
 
 class TestURLFuzzer(unittest.TestCase):
 
     def setUp(self):
+        self.TestHost = Host
+        self.TestHost.create_host_dir_and_set_file_logger = lambda _: None
+        self.TestFuzzer = URLFuzzer
+        self.TestFuzzer.get_log_file_path = lambda _, __: SystemOutLogger()
         self.loop = asyncio.get_event_loop()
 
     def test_bad_wordlist(self):
-        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="no/such/path", num_threads=1)
+        host = self.TestHost("127.0.0.1", ())
+        fuzzer = self.TestFuzzer(host, (), wordlist="no/such/path", num_threads=1)
         with self.assertRaises(FuzzerException):
             self.loop.run_until_complete(fuzzer.fuzz_all())
 
-    def test_bad_host(self):
-        fuzzer = URLFuzzer("127.0.0.1", (), wordlist="../raccoon/wordlists/mock_wordlist", num_threads=1)
-        with self.assertRaises(RequestHandlerException):
-            self.loop.run_until_complete(fuzzer.fuzz_all())

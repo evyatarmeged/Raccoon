@@ -38,6 +38,7 @@ def intro(logger):
 @click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through TOR.\n"
                                                   "Slows total runtime significantly")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic\n"
+                                   "A proxy from the list will be chosen at random for each request. "
                                    "Slows total runtime")
 @click.option("--proxy", help="Proxy address to route HTTP traffic through\n"
                               "Slows total runtime")

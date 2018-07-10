@@ -48,18 +48,10 @@ class TLSHandler(TLSCipherSuiteChecker):
         log_file = HelperUtilities.get_output_path("{}/tls_report.txt".format(self.target))
         self.logger = Logger(log_file)
 
-    async def run(self, sni=True):
-        self.logger.info("Started collecting TLS data")
-        self.ciphers = await self.scan_ciphers(self.port)
-        self.non_sni_data = await self._execute_ssl_data_extraction()
-        if sni:
-            self.sni_data = await self._execute_ssl_data_extraction(sni=sni)
-        await self.is_heartbleed_vulnerable()
-        self.logger.info("Done collecting TLS data")
-
-        if self._are_certificates_identical():
-            self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
-        self.write_up()
+    def _tls_results_exist(self):
+        if all(not x for x in (self.ciphers, *self.non_sni_data.values(), *self.sni_data.values())):
+            return True
+        return
 
     def _are_certificates_identical(self):
         """
@@ -190,3 +182,22 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.logger.debug("-"*80+"\n")
         self.logger.debug("non-SNI Data:\n")
         self._dictionary_log_procedure(self.non_sni_data)
+
+    async def run(self, sni=True):
+        self.logger.info("Started collecting TLS data")
+        self.ciphers = await self.scan_ciphers(self.port)
+        self.non_sni_data = await self._execute_ssl_data_extraction()
+        if sni:
+            self.sni_data = await self._execute_ssl_data_extraction(sni=sni)
+        await self.is_heartbleed_vulnerable()
+
+        if self._tls_results_exist():
+            self.logger.info("Done collecting TLS data")
+            if self._are_certificates_identical():
+                self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
+            self.write_up()
+        else:
+            self.logger.info(
+                "Could not obtain any TLS data from target on port {}.\n"
+                "Target may not support SSL/TLS or supports it on a different port.".format(self.port)
+            )
