@@ -46,13 +46,8 @@ class HelperUtilities:
                                    "--tor-routing, --proxy-list, --proxy")
 
     @classmethod
-    def validate_verbosity_args(cls, verbosity, quiet):
-        if verbosity and quiet:
-            raise RaccoonException("\nCannot specify both --verbose and --quiet")
-
-        if verbosity:
-            return "DEBUG"
-        elif quiet:
+    def determine_verbosity(cls, quiet):
+        if quiet:
             return "CRITICAL"
         else:
             return "INFO"

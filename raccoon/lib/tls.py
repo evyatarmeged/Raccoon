@@ -2,6 +2,7 @@ import re
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.coloring import COLOR
 from raccoon.utils.logger import Logger
 
 
@@ -25,9 +26,26 @@ class TLSCipherSuiteChecker:
         return parsed
 
     @staticmethod
-    def _parse_cipher_scan_outpt(result):
-        result = result.decode().strip().split("\n")
-        return '\n'.join([line for line in result if "|" in line]).strip().rstrip()
+    def color_warnings_and_weak_ciphers(result):
+        for index, line in enumerate(result):
+            if line.endswith("- C") or line.endswith("- D") or line.endswith("- E"):
+                colored = "{}{}{}".format(COLOR.GREEN, line, COLOR.RESET)
+                result.insert(index, colored)
+                result.pop(index+1)
+            # TODO: Fix warnings not showing in color or at all :<>
+            elif "warnings" in line:
+                curr = index+1
+                while "TLSv" not in result[curr] or "least strength" not in result[curr]:
+                    colored = "{}{}{}".format(COLOR.GREEN, result[curr], COLOR.RESET)
+                    result.insert(curr, colored)
+                    result.pop(curr+1)
+                    curr += 1
+        return result[1:]
+
+    def _parse_cipher_scan_outpt(self, result):
+        result = [line for line in result.decode().strip().split("\n") if "|" in line]
+        result = self.color_warnings_and_weak_ciphers(result)
+        return '\n'.join(result)
 
 
 # noinspection PyTypeChecker
@@ -174,8 +192,8 @@ class TLSHandler(TLSCipherSuiteChecker):
                 self.logger.debug("{}: {}\n".format(k, v))
 
     def write_up(self):
-        self.logger.debug("Supporting Ciphers:\n")
-        self.logger.debug(self.ciphers+"\n")
+        self.logger.info("Supporting Ciphers:\n")
+        self.logger.info(self.ciphers+"\n")
         self.logger.debug("-"*80+"\n")
         self.logger.debug("SNI Data:\n")
         self._dictionary_log_procedure(self.sni_data)
@@ -184,7 +202,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         self._dictionary_log_procedure(self.non_sni_data)
 
     async def run(self, sni=True):
-        self.logger.info("Started collecting TLS data")
+        self.logger.info("{}Started collecting TLS data for {}{}".format(COLOR.BLUE, self.target, COLOR.RESET))
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._execute_ssl_data_extraction()
         if sni:
@@ -198,6 +216,7 @@ class TLSHandler(TLSCipherSuiteChecker):
             self.write_up()
         else:
             self.logger.info(
-                "Could not obtain any TLS data from target on port {}.\n"
-                "Target may not support SSL/TLS or supports it on a different port.".format(self.port)
+                "{}Could not obtain any TLS data from target on port {}.\n"
+                "Target may not support SSL/TLS or supports it on a different port.{}".format(
+                    COLOR.RED, self.port, COLOR.RESET)
             )

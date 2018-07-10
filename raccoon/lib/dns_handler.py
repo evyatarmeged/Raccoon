@@ -4,6 +4,7 @@ from asyncio.subprocess import PIPE, create_subprocess_exec
 from requests.exceptions import ConnectionError
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
+from raccoon.utils.coloring import COLOR
 from raccoon.utils.request_handler import RequestHandler
 
 
@@ -69,9 +70,10 @@ class DNSHandler:
             "targetip": target,
             "csrfmiddlewaretoken": None
         }
-        sout_logger.info("Trying to generate DNS Mapping for {} from DNS dumpster".format(host))
+        sout_logger.info("{}Trying to generate DNS Mapping for {} from DNS dumpster{}".format(
+            COLOR.BLUE, host, COLOR.RESET))
         try:
-            dnsdumpster_session.get(url)
+            dnsdumpster_session.get(url, timeout=10)
             jar = dnsdumpster_session.cookies
             for c in jar:
                 if not c.__dict__.get("name") == "csrftoken":
@@ -86,6 +88,8 @@ class DNSHandler:
                 path = HelperUtilities.get_output_path("{}/dns_mapping.png".format(host.target))
                 with open(path, "wb") as target_image:
                     target_image.write(page.content)
-            sout_logger.info("Successfully fetched DNS mapping for {}".format(host.target))
+            sout_logger.info("{}Successfully fetched DNS mapping for {}{}".format(
+                COLOR.GREEN, host.target, COLOR.RESET)
+            )
         except ConnectionError:
             sout_logger.info("Failed to generate DNS mapping. A connection error occurred.")

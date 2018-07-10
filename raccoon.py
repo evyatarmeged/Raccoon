@@ -62,10 +62,6 @@ def intro(logger):
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
-@click.option("-v", "--verbose", is_flag=True,
-              help="Increase stdout output verbosity\nVerbose output can be messy as\n"
-                   "scans are ran in parallel and may output together.\n"
-                   "Verbose output is being logged to file whether verbose arg was passed or not.")
 @click.option("-o", "--outdir", default="Raccoon_scan_results",
               help="Directory destination for scan output")
 def main(target,
@@ -86,12 +82,11 @@ def main(target,
          follow_redirects,
          # delay,
          outdir,
-         quiet,
-         verbose):
+         quiet):
     try:
         # ------ Arg validation ------
         # Set logging level and Logger instance
-        log_level = HelperUtilities.validate_verbosity_args(verbose, quiet)
+        log_level = HelperUtilities.determine_verbosity(quiet)
         logger = SystemOutLogger(log_level)
 
         if proxy_list and not os.path.isfile(proxy_list):
@@ -164,9 +159,8 @@ def main(target,
 
         main_loop.run_until_complete(asyncio.wait(tasks))
 
-        dns_mapping_thread = threading.Thread(
-            target=DNSHandler.generate_dns_dumpster_mapping, args=(host, logger))
-        dns_mapping_thread.start()
+        # DNS dumpster visualization
+        DNSHandler.generate_dns_dumpster_mapping(host, logger)
 
         # Second set of checks - URL fuzzing, Subdomain enumeration
         fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist, follow_redirects)
