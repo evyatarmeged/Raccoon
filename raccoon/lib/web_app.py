@@ -22,7 +22,12 @@ class WebApplicationScanner:
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
 
-    def _detect_cms(self):
+    def _detect_cms(self, tries=0):
+        """
+        Detect CMS using whatcms.org.
+        Has a re-try mechanism because false negatives may occur
+        :param tries: Count of tries for CMS discovery
+        """
         page = requests.get("https://whatcms.org/?s={}".format(self.host.target))
         soup = BeautifulSoup(page.text, "lxml")
         found = soup.select(".panel.panel-success")
@@ -32,7 +37,15 @@ class WebApplicationScanner:
                 self.logger.info("{} CMS detected: target is using {}{}{}".format(
                     COLORED_COMBOS.GOOD, COLOR.GREEN, cms.get("title"), COLOR.RESET))
             except IndexError:
-                pass
+                if tries >= 4:
+                    return
+                else:
+                    self._detect_cms(tries=tries + 1)
+        else:
+            if tries >= 4:
+                return
+            else:
+                self._detect_cms(tries=tries + 1)
 
     def _gather_cookie_info(self, jar):
         for cookie in jar:
