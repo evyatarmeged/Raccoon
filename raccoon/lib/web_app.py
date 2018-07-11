@@ -52,7 +52,7 @@ class WebApplicationScanner:
     def _gather_server_info(self):
         if self.headers.get("server"):
             self.logger.info("{}Web server detected:"
-                             " {}{}".format(COLOR.GREEN, self.headers.get("server"), COLOR.RESET))
+                             " {}{}".format(COLOR.YELLOW, self.headers.get("server"), COLOR.RESET))
 
     def _detect_anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):

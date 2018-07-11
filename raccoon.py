@@ -27,7 +27,7 @@ def intro(logger):
      | | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
      |_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
 
-    {} By Evyatar Meged\n
+    {} https://github.com/evyatarmeged/Raccoon\n
     """.format(COLOR.BLUE, COLOR.RESET))
 
 

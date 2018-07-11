@@ -32,10 +32,9 @@ class TLSCipherSuiteChecker:
                 colored = "{}{}{}".format(COLOR.GREEN, line, COLOR.RESET)
                 result.insert(index, colored)
                 result.pop(index+1)
-            # TODO: Fix warnings not showing in color or at all :<>
             elif "warnings" in line:
                 curr = index+1
-                while "TLSv" not in result[curr] or "least strength" not in result[curr]:
+                while "TLSv" not in result[curr] and "least strength" not in result[curr]:
                     colored = "{}{}{}".format(COLOR.GREEN, result[curr], COLOR.RESET)
                     result.insert(curr, colored)
                     result.pop(curr+1)

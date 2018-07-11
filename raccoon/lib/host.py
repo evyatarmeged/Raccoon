@@ -3,6 +3,7 @@ from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.coloring import COLOR
 from raccoon.utils.logger import Logger, SystemOutLogger
 
 
@@ -23,7 +24,7 @@ class Host:
         self.logger = SystemOutLogger()
 
     def __str__(self):
-        return "[{}]".format(self.target)
+        return self.target
 
     def __repr__(self):
         return self.__dict__
@@ -48,7 +49,7 @@ class Host:
         try:
             self.target, self.port = addr.split(":")
             self.port = int(self.port)
-            self.logger.info("Port detected: {}".format(self.port))
+            self.logger.info("{}Port detected: {}{}".format(COLOR.GRAY, self.port, COLOR.RESET))
         except IndexError:
             self.logger.info("Did not detect port. Using default port 80")
             return
