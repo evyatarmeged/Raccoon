@@ -1,7 +1,7 @@
 from subprocess import PIPE, Popen
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 
 
 class NmapScan:
@@ -28,19 +28,19 @@ class NmapScan:
             HelperUtilities.validate_port_range(self.port_range)
             script.append("-p")
             script.append(self.port_range)
-            self.logger.info("Added port range {} to Nmap script".format(self.port_range))
+            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.INFO, self.port_range))
 
         if self.full_scan:
             script.append("-sV")
             script.append("-sC")
-            self.logger.info("Added scripts and services to Nmap script")
+            self.logger.info("{} Added scripts and services to Nmap script".format(COLORED_COMBOS.INFO))
             return script
         else:
             if self.scripts:
-                self.logger.info("Added script scan to Nmap script")
+                self.logger.info("{} Added safe-scripts scan to Nmap script".format(COLORED_COMBOS.INFO))
                 script.append("-sC")
             if self.services:
-                self.logger.info("Added service scan to Nmap script")
+                self.logger.info("{} Added service scan to Nmap script".format(COLORED_COMBOS.INFO))
                 script.append("-sV")
         return script
 
@@ -49,8 +49,8 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        scan.logger.info("Nmap script to run: {}".format(" ".join(scan.script)))
-        scan.logger.info("Nmap scan started")
+        scan.logger.info("{} Nmap script to run: {}".format(COLORED_COMBOS.GOOD, " ".join(scan.script)))
+        scan.logger.info("{} Nmap scan started\n".format(COLORED_COMBOS.GOOD))
         process = Popen(
             scan.script,
             stdout=PIPE,
@@ -68,7 +68,7 @@ class Scanner:
         parsed_output = ""
         for line in result.split("\n"):
             if "PORT" in line and "STATE" in line:
-                parsed_output += "The following ports were found from Nmap scan:\n"
+                parsed_output += "{} Nmap discovered the following ports:\n".format(COLORED_COMBOS.GOOD)
             if "/tcp" in line or "/udp" in line and "open" in line:
                 line = line.split()
                 parsed_output += "\t{}{}{} {}\n".format(COLOR.GREEN, line[0], COLOR.RESET, " ".join(line[1:]))

@@ -2,7 +2,7 @@ from requests.exceptions import TooManyRedirects, ConnectionError
 from raccoon.utils.web_server_validator import WebServerValidator
 from raccoon.utils.exceptions import WAFException, WebServerValidatorException
 from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
 
@@ -83,11 +83,12 @@ class WAF:
 
     def _waf_detected(self, name):
         self.logger.info(
-            "{}Detected WAF presence in web application: {}{}".format(COLOR.RED, name, COLOR.RESET))
+            "{} Detected WAF presence in web application: {}{}{}".format(
+                COLORED_COMBOS.BAD, COLOR.RED, name, COLOR.RESET))
         self.waf_present = True
 
     async def detect(self):
-        self.logger.info("{}Trying to detect WAF presence in {}{}".format(COLOR.BLUE, self.host, COLOR.RESET))
+        self.logger.info("{} Trying to detect WAF presence in {}".format(COLORED_COMBOS.INFO, self.host))
         if self.cnames:
             self._detect_by_cname()
         try:
@@ -95,17 +96,17 @@ class WAF:
             self._detect_by_application()
 
             if not self.waf_present:
-                self.logger.info("{}Could not detect WAF presence in target{}".format(COLOR.GREEN, COLOR.RESET))
+                self.logger.info("{} Could not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
         except WebServerValidatorException:
-            self.logger.info("{}Target does not seem to have an active web server on port: {}\n"
-                             "No WAF could be detected on an application level.{}".format(
-                COLOR.YELLOW, self.host.port, COLOR.YELLOW)),
+            self.logger.info(
+                "{} Target does not seem to have an active web server on port: {}\n"
+                "No WAF could be detected on an application level.".format(COLORED_COMBOS.WARNING, self.host.port))
 
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
-                self.logger.info("{}Detected WAF presence in CNAME: {}{}".format(
-                    COLOR.RED, self.waf_cname_map.get(waf), COLOR.RESET)
+                self.logger.info("{} Detected WAF presence in CNAME: {}{}{}".format(
+                    COLORED_COMBOS.BAD, COLOR.RED, self.waf_cname_map.get(waf), COLOR.RESET)
                 )
                 self.waf_present = True
 

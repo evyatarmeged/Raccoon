@@ -4,7 +4,7 @@ from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon.utils.web_server_validator import WebServerValidator
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.exceptions import WebAppScannerException, WebServerValidatorException
 from raccoon.utils.logger import Logger
 
@@ -29,8 +29,8 @@ class WebApplicationScanner:
         if found:
             try:
                 cms = [a for a in soup.select("a") if "/c/" in a.get("href")][0]
-                self.logger.info("{}CMS detected: target is using {}{}".format(
-                    COLOR.GREEN, cms.get("title"), COLOR.RESET))
+                self.logger.info("{} CMS detected: target is using {}{}{}".format(
+                    COLORED_COMBOS.GOOD, COLOR.GREEN, cms.get("title"), COLOR.RESET))
             except IndexError:
                 pass
 
@@ -44,31 +44,31 @@ class WebApplicationScanner:
                 if domain in self.host.target or self.host.target in domain:
                     if not secure:
                         self.logger.info(
-                            "%sFound cookie without secure flag: {%s: %s}%s" % (COLOR.GREEN, key, value, COLOR.RESET)
+                            "%s Found cookie without secure flag: {%s: %s}" % (COLORED_COMBOS.GOOD, key, value)
                         )
             except TypeError:
                 continue
 
     def _gather_server_info(self):
         if self.headers.get("server"):
-            self.logger.info("{}Web server detected:"
-                             " {}{}".format(COLOR.YELLOW, self.headers.get("server"), COLOR.RESET))
+            self.logger.info("{} Web server detected: {}{}{}".format(
+                COLORED_COMBOS.WARNING, COLOR.YELLOW, self.headers.get("server"), COLOR.RESET))
 
     def _detect_anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
             self.logger.info(
-                "{}X-Frame-Options header not detected - target might be vulnerable to"
-                " clickjacking{}".format(COLOR.GREEN, COLOR.RESET)
+                "{} X-Frame-Options header not detected - target might be vulnerable to clickjacking".format(
+                    COLORED_COMBOS.GOOD)
             )
 
     def _detect_xss_protection(self):
         xss_header = self.headers.get("X-XSS-PROTECTION")
         if xss_header and "1" in xss_header:
-            self.logger.info("{}Found X-XSS-PROTECTION header{}".format(COLOR.RED, COLOR.RESET))
+            self.logger.info("{} Found X-XSS-PROTECTION header".format(COLORED_COMBOS.BAD))
 
     def _cors_wildcard(self):
         if self.headers.get("Access-Control-Allow-Origin") == "*":
-            self.logger.info("{}CORS wildcard detected{}".format(COLOR.GREEN, COLOR.RESET))
+            self.logger.info("{} CORS wildcard detected".format(COLORED_COMBOS.GOOD))
 
     def _get_robots_txt(self):
         res = self.request_handler.send(
@@ -79,22 +79,22 @@ class WebApplicationScanner:
                 self.host.port
             )
         )
-        if res.status_code == 200 and res.text:
-            self.logger.info("{}Found robots.txt{}".format(COLOR.GREEN, COLOR.RESET))
+        if res.status_code != 404 and res.text and "<!DOCTYPE html>" not in res.text:
+            self.logger.info("{} Found robots.txt".format(COLORED_COMBOS.GOOD))
             with open("{}/robots.txt".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
     def _get_sitemap(self):
         res = self.request_handler.send(
             "GET",
-            url="{}://{}:{}/robots.txt".format(
+            url="{}://{}:{}/sitemap.xml".format(
                 self.host.protocol,
                 self.host.target,
                 self.host.port
             )
         )
-        if res.status_code == 200 and res.text:
-            self.logger.info("{}Found sitemap.xml{}".format(COLOR.GREEN, COLOR.RESET))
+        if res.status_code != 404 and res.text and "<!DOCTYPE html>" not in res.text:
+            self.logger.info("{} Found sitemap.xml".format(COLORED_COMBOS.GOOD))
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
@@ -114,6 +114,7 @@ class WebApplicationScanner:
                 self.headers = response.headers
                 self._detect_cms()
                 self._get_robots_txt()
+                self._get_sitemap()
                 self._gather_server_info()
                 self._cors_wildcard()
                 self._detect_xss_protection()
@@ -125,12 +126,12 @@ class WebApplicationScanner:
                                          "Caused due to exception: {}".format(str(e)))
 
     async def run_scan(self):
-        self.logger.info("{}Trying to collect {} web application data{}".format(COLOR.BLUE, self.host, COLOR.RESET))
+        self.logger.info("{} Trying to collect {} web application data".format(COLORED_COMBOS.INFO, self.host))
         try:
             self.web_server_validator.validate_target_webserver(self.host)
             self.get_web_application_info()
         except WebServerValidatorException:
             self.logger.info(
-                "{}Target does not seem to have an active web server on port: {}\n"
-                "No web application data will be gathered.{}".format(COLOR.RED, self.host.port, COLOR.RESET))
+                "{} Target does not seem to have an active web server on port: {}\n"
+                "No web application data will be gathered.".format(COLORED_COMBOS.WARNING, self.host.port))
             return

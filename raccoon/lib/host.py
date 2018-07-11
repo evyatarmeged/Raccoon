@@ -3,7 +3,7 @@ from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.logger import Logger, SystemOutLogger
 
 
@@ -49,9 +49,9 @@ class Host:
         try:
             self.target, self.port = addr.split(":")
             self.port = int(self.port)
-            self.logger.info("{}Port detected: {}{}".format(COLOR.GRAY, self.port, COLOR.RESET))
+            self.logger.info("{} Port detected: {}".format(COLORED_COMBOS.GOOD, self.port))
         except IndexError:
-            self.logger.info("Did not detect port. Using default port 80")
+            self.logger.info("{} Did not detect port. Using default port 80".format(COLORED_COMBOS.WARNING))
             return
         return
 
@@ -66,7 +66,7 @@ class Host:
         return
 
     def write_up(self):
-        self.logger.info("Writing {} DNS query results".format(self))
+        self.logger.info("{} Writing DNS query results".format(COLORED_COMBOS.GOOD, self))
 
         for record in self.dns_results:
             self.logger.debug(record+"\n")
@@ -88,7 +88,7 @@ class Host:
         if self._is_proto(self.target):
             try:
                 self.protocol, self.target = self.target.split("://")
-                self.logger.info("Protocol detected: {}".format(self.protocol))
+                self.logger.info("{} Protocol detected: {}".format(COLORED_COMBOS.GOOD, self.protocol))
                 if self.protocol.lower() == "https" and self.port == 80:
                     self.port = 443
             except ValueError:
@@ -98,7 +98,7 @@ class Host:
             self._extract_port(self.target)
 
         if self.validate_ip(self.target):
-            self.logger.info("Detected {} as an IP address.".format(self.target))
+            self.logger.info("{} Detected {} as an IP address.".format(COLORED_COMBOS.GOOD, self.target))
             self.is_ip = True
         else:
             domains = []
@@ -115,7 +115,9 @@ class Host:
 
             if self.dns_results.get("CNAME"):
                 # Naked domains shouldn't hold CNAME records according to RFC regulations
-                self.logger.info("Found {} to be an FQDN by present CNAME record ".format(self.target))
+                self.logger.info("{} Found {} to be an FQDN by CNAME presence in DNS records".format(
+                    COLORED_COMBOS.GOOD, self.target))
+
                 self.fqdn = self.target
                 self.naked = ".".join(self.fqdn.split('.')[1:])
         self.create_host_dir_and_set_file_logger()

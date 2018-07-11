@@ -3,7 +3,7 @@ import asyncio
 import threading
 import click
 import time
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.logger import SystemOutLogger
@@ -20,15 +20,19 @@ from raccoon.lib.web_app import WebApplicationScanner
 
 def intro(logger):
     logger.info("""{}
-      _____                _____    _____    ____     ____    _   _ 
-     |  __ \      /\      / ____|  / ____|  / __ \   / __ \  | \ | |
-     | |__) |    /  \    | |      | |      | |  | | | |  | | |  \| |
-     |  _  /    / /\ \   | |      | |      | |  | | | |  | | | . ` |
-     | | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
-     |_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
+ _____                _____    _____    ____     ____    _   _ 
+|  __ \      /\      / ____|  / ____|  / __ \   / __ \  | \ | |
+| |__) |    /  \    | |      | |      | |  | | | |  | | |  \| |
+|  _  /    / /\ \   | |      | |      | |  | | | |  | | | . ` |
+| | \ \   / ____ \  | |____  | |____  | |__| | | |__| | | |\  |
+|_|  \_\ /_/    \_\  \_____|  \_____|  \____/   \____/  |_| \_|
+{}
 
-    {} https://github.com/evyatarmeged/Raccoon\n
-    """.format(COLOR.BLUE, COLOR.RESET))
+4841434b544845504c414e4554
+    
+https://github.com/evyatarmeged/Raccoon
+-------------------------------------------------------------------
+    """.format(COLOR.GRAY, COLOR.RESET))
 
 
 @click.command()
@@ -57,7 +61,8 @@ def intro(logger):
 @click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("--follow-redirects", is_flag=True, help="Follow redirects when fuzzing")
+@click.option("--follow-redirects", is_flag=True, help="Follow redirects when fuzzing."
+                                                       "Default: True")
 # @click.option("-d", "--delay", default="0.25-1",
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
@@ -89,6 +94,8 @@ def main(target,
         log_level = HelperUtilities.determine_verbosity(quiet)
         logger = SystemOutLogger(log_level)
 
+        target = target.lower()
+
         if proxy_list and not os.path.isfile(proxy_list):
             raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
 
@@ -103,14 +110,14 @@ def main(target,
         HelperUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
 
         if tor_routing:
-            logger.info("Routing traffic using TOR service")
+            logger.info("{} Routing traffic using TOR service".format(COLORED_COMBOS.INFO))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
             else:
-                logger.info("Routing traffic using proxies from list {}".format(proxy_list))
+                logger.info("{} Routing traffic using proxies from list {}".format(COLORED_COMBOS.INFO, proxy_list))
         elif proxy:
-            logger.info("Routing traffic through proxy {}".format(proxy))
+            logger.info("Routing traffic through proxy {}".format(COLORED_COMBOS.INFO, proxy))
 
         # TODO: Sanitize delay argument
 
@@ -133,14 +140,16 @@ def main(target,
 
         main_loop = asyncio.get_event_loop()
 
+        logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.BLUE, COLOR.RESET))
+        logger.info("{} Trying to gather information about host: {}".format(COLORED_COMBOS.INFO, target))
         # TODO: Populate array when multiple targets are supported
         # hosts = []
         host = Host(target=target, dns_records=dns_records)
         host.parse()
 
-        logger.info("Setting Nmap scan to run in the background")
+        logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
         nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
-        # # TODO: Populate array when multiple targets are supported
+        # # # TODO: Populate array when multiple targets are supported
         # nmap_threads = []
         nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
         # Run Nmap scan in the background. Can take some time
@@ -179,16 +188,17 @@ def main(target,
             main_loop.run_until_complete(subdomain_enumerator.run())
 
         if nmap_thread.is_alive():
-            logger.info("All scans done. Waiting for Nmap scan to wrap up.\n"
-                        "Time left may vary depending on scan type and port range")
+            logger.info("{} All scans done. Waiting for Nmap scan to wrap up.\n"
+                        "Time left may vary depending on scan type and port range".format(COLORED_COMBOS.INFO))
 
             while nmap_thread.is_alive():
                 time.sleep(15)
 
-        logger.info("\nRaccoon scan finished\n")
+        logger.info("\n{}### Raccoon scan finished ###{}\n".format(COLOR.BLUE, COLOR.RESET))
+        os.system("stty sane")
 
     except KeyboardInterrupt:
-        print("Keyboard Interrupt detected. Exiting")
+        print("{}Keyboard Interrupt detected. Exiting{}".format(COLOR.RED, COLOR.RESET))
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)

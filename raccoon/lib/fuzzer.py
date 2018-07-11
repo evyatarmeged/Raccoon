@@ -2,10 +2,10 @@ import time
 from functools import partial
 from multiprocessing.pool import ThreadPool
 from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.logger import Logger
+from raccoon.utils.logger import Logger, SystemOutLogger
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
@@ -92,6 +92,6 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        self.logger.info("Fuzzing from {}".format(self.wordlist))
+        self.logger.info("{} Fuzzing from {}".format(COLORED_COMBOS.INFO, self.wordlist))
         pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)

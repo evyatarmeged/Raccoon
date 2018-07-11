@@ -4,7 +4,7 @@ from asyncio.subprocess import PIPE, create_subprocess_exec
 from requests.exceptions import ConnectionError
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.request_handler import RequestHandler
 
 
@@ -44,7 +44,6 @@ class DNSHandler:
         script = "whois {}".format(host.naked).split()
         log_file = HelperUtilities.get_output_path("{}/whois.txt".format(host.target))
         logger = Logger(log_file)
-        logger.info("Retrieving WHOIS Information for {}".format(host))
 
         process = await create_subprocess_exec(
             *script,
@@ -53,9 +52,11 @@ class DNSHandler:
         )
         result, err = await process.communicate()
 
-        for line in result.decode().strip().split("\n"):
-                if ":" in line:
-                    logger.debug(line)
+        if process.returncode == 0:
+            logger.info("{} {} WHOIS information retrieved".format(COLORED_COMBOS.GOOD, host))
+            for line in result.decode().strip().split("\n"):
+                    if ":" in line:
+                        logger.debug(line)
 
     @classmethod
     def generate_dns_dumpster_mapping(cls, host, sout_logger):
@@ -70,8 +71,8 @@ class DNSHandler:
             "targetip": target,
             "csrfmiddlewaretoken": None
         }
-        sout_logger.info("{}Trying to generate DNS Mapping for {} from DNS dumpster{}".format(
-            COLOR.BLUE, host, COLOR.RESET))
+        sout_logger.info("{} Trying to generate DNS Mapping for {} from DNS dumpster".format(
+            COLORED_COMBOS.INFO, host))
         try:
             dnsdumpster_session.get(url, timeout=10)
             jar = dnsdumpster_session.cookies
@@ -88,8 +89,9 @@ class DNSHandler:
                 path = HelperUtilities.get_output_path("{}/dns_mapping.png".format(host.target))
                 with open(path, "wb") as target_image:
                     target_image.write(page.content)
-            sout_logger.info("{}Successfully fetched DNS mapping for {}{}".format(
-                COLOR.GREEN, host.target, COLOR.RESET)
+            sout_logger.info("{} Successfully fetched DNS mapping for {}".format(
+                COLORED_COMBOS.GOOD, host.target)
             )
         except ConnectionError:
-            sout_logger.info("Failed to generate DNS mapping. A connection error occurred.")
+            sout_logger.info("{} Failed to generate DNS mapping. A connection error occurred.".format(
+                COLORED_COMBOS.BAD))

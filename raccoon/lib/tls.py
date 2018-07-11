@@ -2,7 +2,7 @@ import re
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from raccoon.utils.helper_utils import HelperUtilities
-from raccoon.utils.coloring import COLOR
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.logger import Logger
 
 
@@ -29,13 +29,13 @@ class TLSCipherSuiteChecker:
     def color_warnings_and_weak_ciphers(result):
         for index, line in enumerate(result):
             if line.endswith("- C") or line.endswith("- D") or line.endswith("- E"):
-                colored = "{}{}{}".format(COLOR.GREEN, line, COLOR.RESET)
+                colored = line + " - {}WEAK{}".format(COLOR.RED, COLOR.RESET)
                 result.insert(index, colored)
                 result.pop(index+1)
-            elif "warnings" in line:
+            elif "warnings:" in line:
                 curr = index+1
                 while "TLSv" not in result[curr] and "least strength" not in result[curr]:
-                    colored = "{}{}{}".format(COLOR.GREEN, result[curr], COLOR.RESET)
+                    colored = "{}{}{}".format(COLOR.RED, result[curr], COLOR.RESET)
                     result.insert(curr, colored)
                     result.pop(curr+1)
                     curr += 1
@@ -116,7 +116,8 @@ class TLSHandler(TLSCipherSuiteChecker):
         result, err = await process.communicate()
         try:
             if "server extension \"heartbeat\" (id=15)" in result.decode().strip():
-                self.logger.info("Target seems to be vulnerable to Heartbleed - CVE-2014-0160")
+                self.logger.info("{} Target seems to be vulnerable to Heartbleed - CVE-2014-0160".format(
+                    COLORED_COMBOS.GOOD))
         except TypeError:  # Type error means no result
             pass
 
@@ -201,7 +202,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         self._dictionary_log_procedure(self.non_sni_data)
 
     async def run(self, sni=True):
-        self.logger.info("{}Started collecting TLS data for {}{}".format(COLOR.BLUE, self.target, COLOR.RESET))
+        self.logger.info("{} Started collecting TLS data for {}".format(COLORED_COMBOS.INFO, self.target))
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._execute_ssl_data_extraction()
         if sni:
@@ -209,13 +210,13 @@ class TLSHandler(TLSCipherSuiteChecker):
         await self.is_heartbleed_vulnerable()
 
         if self._tls_results_exist():
-            self.logger.info("Done collecting TLS data")
+            self.logger.info("{} Done collecting TLS data".format(COLORED_COMBOS.GOOD))
             if self._are_certificates_identical():
                 self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
             self.write_up()
         else:
             self.logger.info(
-                "{}Could not obtain any TLS data from target on port {}.\n"
-                "Target may not support SSL/TLS or supports it on a different port.{}".format(
-                    COLOR.RED, self.port, COLOR.RESET)
+                "{} Could not obtain any TLS data from target on port {}.\n"
+                "Target may not support SSL/TLS or supports it on a different port.".format(
+                    COLORED_COMBOS.BAD, self.port)
             )

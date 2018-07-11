@@ -4,6 +4,7 @@ from raccoon.utils.request_handler import RequestHandler
 from raccoon.lib.fuzzer import URLFuzzer
 from raccoon.utils.helper_utils import HelperUtilities
 from raccoon.utils.logger import Logger
+from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 
 
 class SubDomainEnumerator:
@@ -28,12 +29,12 @@ class SubDomainEnumerator:
         self.logger = Logger(log_file)
 
     async def run(self):
-        self.logger.info("Enumerating Subdomains")
+        self.logger.info("\n{} Enumerating Subdomains".format(COLORED_COMBOS.INFO))
         if self.sans:
             self.find_subdomains_in_sans()
         self.google_dork()
         await self.bruteforce()
-        self.logger.info("Done enumerating Subdomains")
+        self.logger.info("\n{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
 
     def find_subdomains_in_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""
@@ -48,10 +49,10 @@ class SubDomainEnumerator:
 
         for san in self.sans:
             if (tld_less in san or domain in san) and self.target != san:
-                self.logger.info("Subdomain detected: {}".format(san))
+                self.logger.info("{} Subdomain detected: {}".format(COLORED_COMBOS.GOOD, san))
 
     def google_dork(self):
-        self.logger.info("Trying to discover subdomains in Google")
+        self.logger.info("{} Trying to discover subdomains in Google".format(COLORED_COMBOS.INFO))
         page = self.request_handler.send(
             "GET",
             url="https://www.google.com/search?q=site:{}&num=100".format(self.target)
@@ -60,7 +61,8 @@ class SubDomainEnumerator:
         results = set(re.findall(r"\w+\.{}".format(self.target), soup.text))
         for subdomain in results:
             if "www." not in subdomain:
-                self.logger.info("Detected subdomain through Google dorking: {}".format(subdomain))
+                self.logger.info("{} Detected subdomain through Google dorking: {}".format(
+                    COLORED_COMBOS.GOOD, subdomain))
 
     async def bruteforce(self):
         path = "{}/subdomain_fuzz.txt".format(self.host.target)
@@ -69,7 +71,7 @@ class SubDomainEnumerator:
         if self.host.naked:
             self.host.target = self.host.naked
 
-        self.logger.info("Fuzzing Subdomains")
+        self.logger.info("{} Bruteforcing subdomains".format(COLORED_COMBOS.INFO))
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
             wordlist=self.domain_list,
