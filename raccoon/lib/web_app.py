@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon.utils.web_server_validator import WebServerValidator
 from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.exceptions import WebAppScannerException, WebServerValidatorException
 from raccoon.utils.logger import Logger
@@ -18,7 +18,7 @@ class WebApplicationScanner:
         self.web_scan_results = []
         self.headers = None
         self.robots = None
-        log_file = HelperUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
+        log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
 

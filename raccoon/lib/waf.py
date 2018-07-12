@@ -3,7 +3,7 @@ from raccoon.utils.web_server_validator import WebServerValidator
 from raccoon.utils.exceptions import WAFException, WebServerValidatorException
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.logger import Logger
 
 
@@ -78,7 +78,7 @@ class WAF:
             "Edgecast": WAFApplicationMethods.detect_edgecast,
             "Distil Networks": WAFApplicationMethods.detect_distil
         }
-        log_file = HelperUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
+        log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
 
     def _waf_detected(self, name):

@@ -2,7 +2,7 @@ import os
 from ipaddress import ip_address
 from raccoon.lib.dns_handler import DNSHandler
 from raccoon.utils.exceptions import HostHandlerException
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.logger import Logger, SystemOutLogger
 
@@ -74,7 +74,7 @@ class Host:
                 self.logger.debug("\t{}".format(value))
 
     def create_host_dir_and_set_file_logger(self):
-        log_file = HelperUtilities.get_output_path("{}/dns_records.txt".format(self.target))
+        log_file = HelpUtilities.get_output_path("{}/dns_records.txt".format(self.target))
         self._create_host_dir(log_file)
         self.logger = Logger(log_file)
 

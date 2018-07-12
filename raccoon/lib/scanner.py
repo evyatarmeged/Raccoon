@@ -1,5 +1,5 @@
 from subprocess import PIPE, Popen
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.logger import Logger
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 
@@ -17,7 +17,7 @@ class NmapScan:
         self.scripts = scripts
         self.services = services
         self.port_range = port_range
-        self.path = HelperUtilities.get_output_path("{}/nmap_scan.txt".format(self.target))
+        self.path = HelpUtilities.get_output_path("{}/nmap_scan.txt".format(self.target))
         self.logger = Logger(self.path)
         self.script = self.build_script()
 
@@ -25,7 +25,7 @@ class NmapScan:
         script = ["nmap", "-Pn", self.target]
 
         if self.port_range:
-            HelperUtilities.validate_port_range(self.port_range)
+            HelpUtilities.validate_port_range(self.port_range)
             script.append("-p")
             script.append(self.port_range)
             self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.INFO, self.port_range))

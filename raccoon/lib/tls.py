@@ -1,7 +1,7 @@
 import re
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.logger import Logger
 
@@ -62,7 +62,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.sni_data = {}
         self.non_sni_data = {}
         self.ciphers = ""
-        log_file = HelperUtilities.get_output_path("{}/tls_report.txt".format(self.target))
+        log_file = HelpUtilities.get_output_path("{}/tls_report.txt".format(self.target))
         self.logger = Logger(log_file)
 
     def _tls_results_exist(self):
@@ -216,7 +216,7 @@ class TLSHandler(TLSCipherSuiteChecker):
             self.write_up()
         else:
             self.logger.info(
-                "{} Could not obtain any TLS data from target on port {}.\n"
+                "{} Could not obtain any TLS data from target on port {}. "
                 "Target may not support SSL/TLS or supports it on a different port.".format(
                     COLORED_COMBOS.BAD, self.port)
             )

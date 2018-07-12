@@ -6,7 +6,7 @@ from requests.exceptions import ConnectionError
 from raccoon.utils.exceptions import RaccoonException, ScannerException
 
 
-class HelperUtilities:
+class HelpUtilities:
 
     PATH = ""
 
@@ -26,6 +26,17 @@ class HelperUtilities:
             except ConnectionError:
                 raise RaccoonException("Target {} seems to be down.\n"
                                        "Run with --no-health-check to ignore hosts considered as down.".format(host))
+
+    @classmethod
+    def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):
+        if proxy_list and not os.path.isfile(proxy_list):
+            raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
+
+        if wordlist and not os.path.isfile(wordlist):
+            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
+
+        if subdomain_list and not os.path.isfile(subdomain_list):
+            raise FileNotFoundError("Not a valid file path, {}".format(wordlist))
 
     @classmethod
     def validate_port_range(cls, port_range):

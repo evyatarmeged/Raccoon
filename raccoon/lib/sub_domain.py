@@ -2,7 +2,7 @@ import re
 from bs4 import BeautifulSoup
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.lib.fuzzer import URLFuzzer
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.logger import Logger
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 
@@ -25,7 +25,7 @@ class SubDomainEnumerator:
         self.follow_redirects = follow_redirects
         self.request_handler = RequestHandler()
         self.sub_domains = set()
-        log_file = HelperUtilities.get_output_path("{}/subdomains.txt".format(self.target))
+        log_file = HelpUtilities.get_output_path("{}/subdomains.txt".format(self.target))
         self.logger = Logger(log_file)
 
     async def run(self):

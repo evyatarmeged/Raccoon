@@ -4,7 +4,7 @@ from multiprocessing.pool import ThreadPool
 from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.helper_utils import HelperUtilities
+from raccoon.utils.help_utils import HelpUtilities
 from raccoon.utils.logger import Logger, SystemOutLogger
 
 
@@ -74,7 +74,7 @@ class URLFuzzer:
         else:
             log_file = "{}/url_fuzz.txt".format(self.target)
 
-        return Logger(HelperUtilities.get_output_path(log_file))
+        return Logger(HelpUtilities.get_output_path(log_file))
 
     async def fuzz_all(self, sub_domain=False, log_file_path=None):
         """
