@@ -110,7 +110,7 @@ def main(target,
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
-            logger.info("{} Routing traffic anonymously through TORl\n".format(COLORED_COMBOS.WARNING))
+            logger.info("{} Routing traffic anonymously through Tor\n".format(COLORED_COMBOS.WARNING))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
@@ -203,8 +203,6 @@ def main(target,
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)
-
-# TODO: Change relative paths in default wordlist/subdomain list/etc
 
 
 main()

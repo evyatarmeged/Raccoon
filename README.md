@@ -1,7 +1,8 @@
+#  Raccoon
 ![Racoon](raccoon.png)
 
-### Offensive Security Scanner and Reconnaissance Tool<br>(**WORK IN PROGRESS**)
-#### Features
+#### Offensive Security Scanner and Reconnaissance Tool
+##### Features
 - [x] DNS Details
 - [x] DNS visual mapping using DNS dumpster
 - [x] WHOIS Records
@@ -14,13 +15,13 @@ Certificate details and SANs
 - [x] Web Application Data (CMS, Web Server info, robots & sitemap
 extraction)
 - [x] Detects Known WAFs
-- [x] Supports Tor / Proxy routing
+- [x] Supports Anonymous Routing Through Tor/Proxies
 - [x] Uses AsyncIO For Improved Performance
 - [x] Saves output to files - separates targets by folders
 and modules by files
 
 
-#### Road Map
+##### Road Map
 - [ ] Support Multiple Hosts
 - [ ] CIDR Notation Support
 - [ ] IP Ranges
@@ -28,3 +29,16 @@ and modules by files
 - [ ] OWASP Vulnerabilities Scan (RFI, RCE, XSS, SQLi etc.)
 - [ ] Run SearchSploit on results
 - [ ] More output formats
+
+
+### About
+
+### Installation
+
+###### Prerequisites
+
+### Usage
+
+### Screenshots
+
+### Contributions
