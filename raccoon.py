@@ -40,23 +40,22 @@ https://github.com/evyatarmeged/Raccoon
 
 
 @click.command()
-@click.option("-t", "--target", help="Target to scan")
+@click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-dr", "--dns-records", default="A,MX,NS,CNAME,SOA",
               help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
-@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through TOR.\n"
-                                                  "Slows total runtime significantly")
-@click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic\n"
-                                   "A proxy from the list will be chosen at random for each request. "
-                                   "Slows total runtime")
-@click.option("--proxy", help="Proxy address to route HTTP traffic through\n"
-                              "Slows total runtime")
+@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through TOR."
+                                                  " Slows total runtime significantly")
+@click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic."
+                                   " A proxy from the list will be chosen at random for each request."
+                                   " Slows total runtime")
+@click.option("--proxy", help="Proxy address to route HTTP traffic through. Slows total runtime")
 @click.option("-w", "--wordlist", default=os.path.join(MY_PATH, "./raccoon/wordlists/fuzzlist"),
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25,
               help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25")
 @click.option("--ignored-response-codes", default="301,400,401,402,403,404,504",
-              help="Comma separated list of HTTP status code to ignore for fuzzing.\n"
-                   "Defaults to: 301,400,401,403,402,404,504")
+              help="Comma separated list of HTTP status code to ignore for fuzzing."
+                   " Defaults to: 301,400,401,403,402,404,504")
 @click.option("--subdomain-list", default=os.path.join(MY_PATH, "./raccoon/wordlists/subdomains"),
               help="Path to subdomain list file that would be used for enumeration")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
@@ -111,7 +110,7 @@ def main(target,
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
-            logger.info("{} Routing traffic using TOR service\n".format(COLORED_COMBOS.WARNING))
+            logger.info("{} Routing traffic anonymously through TORl\n".format(COLORED_COMBOS.WARNING))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))

@@ -47,7 +47,7 @@ class WebApplicationScanner:
             else:
                 self._detect_cms(tries=tries + 1)
 
-    def _gather_cookie_info(self, jar):
+    def _cookie_info(self, jar):
         for cookie in jar:
             key = cookie.__dict__.get("name")
             value = cookie.__dict__.get("value")
@@ -62,19 +62,24 @@ class WebApplicationScanner:
             except TypeError:
                 continue
 
-    def _gather_server_info(self):
+    def _server_info(self):
         if self.headers.get("server"):
             self.logger.info("{} Web server detected: {}{}{}".format(
-                COLORED_COMBOS.WARNING, COLOR.YELLOW, self.headers.get("server"), COLOR.RESET))
+                COLORED_COMBOS.GOOD, COLOR.GREEN, self.headers.get("server"), COLOR.RESET))
 
-    def _detect_anti_clickjacking(self):
+    def _x_powered_by(self):
+        if self.headers.get("X-Powered-By"):
+            self.logger.info("{} X-Powered-By header detected: {}{}{}".format(
+                COLORED_COMBOS.GOOD, COLOR.GREEN, self.headers.get("X-Powered-By"), COLOR.RESET))
+
+    def _anti_clickjacking(self):
         if not self.headers.get("X-Frame-Options"):
             self.logger.info(
                 "{} X-Frame-Options header not detected - target might be vulnerable to clickjacking".format(
                     COLORED_COMBOS.GOOD)
             )
 
-    def _detect_xss_protection(self):
+    def _xss_protection(self):
         xss_header = self.headers.get("X-XSS-PROTECTION")
         if xss_header and "1" in xss_header:
             self.logger.info("{} Found X-XSS-PROTECTION header".format(COLORED_COMBOS.BAD))
@@ -83,7 +88,7 @@ class WebApplicationScanner:
         if self.headers.get("Access-Control-Allow-Origin") == "*":
             self.logger.info("{} CORS wildcard detected".format(COLORED_COMBOS.GOOD))
 
-    def _get_robots_txt(self):
+    def _robots(self):
         res = self.request_handler.send(
             "GET",
             url="{}://{}:{}/robots.txt".format(
@@ -97,7 +102,7 @@ class WebApplicationScanner:
             with open("{}/robots.txt".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
-    def _get_sitemap(self):
+    def _sitemap(self):
         res = self.request_handler.send(
             "GET",
             url="{}://{}:{}/sitemap.xml".format(
@@ -126,13 +131,14 @@ class WebApplicationScanner:
                 )
                 self.headers = response.headers
                 self._detect_cms()
-                self._get_robots_txt()
-                self._get_sitemap()
-                self._gather_server_info()
+                self._robots()
+                self._sitemap()
+                self._server_info()
+                self._x_powered_by()
                 self._cors_wildcard()
-                self._detect_xss_protection()
-                self._detect_anti_clickjacking()
-                self._gather_cookie_info(session.cookies)
+                self._xss_protection()
+                self._anti_clickjacking()
+                self._cookie_info(session.cookies)
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
@@ -145,6 +151,6 @@ class WebApplicationScanner:
             self.get_web_application_info()
         except WebServerValidatorException:
             self.logger.info(
-                "{} Target does not seem to have an active web server on port: {}\n"
+                "{} Target does not seem to have an active web server on port: {}. "
                 "No web application data will be gathered.".format(COLORED_COMBOS.WARNING, self.host.port))
             return

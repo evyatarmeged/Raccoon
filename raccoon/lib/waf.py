@@ -87,21 +87,6 @@ class WAF:
                 COLORED_COMBOS.BAD, COLOR.RED, name, COLOR.RESET))
         self.waf_present = True
 
-    async def detect(self):
-        self.logger.info("{} Trying to detect WAF presence in {}".format(COLORED_COMBOS.INFO, self.host))
-        if self.cnames:
-            self._detect_by_cname()
-        try:
-            self.web_server_validator.validate_target_webserver(self.host)
-            self._detect_by_application()
-
-            if not self.waf_present:
-                self.logger.info("{} Could not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
-        except WebServerValidatorException:
-            self.logger.info(
-                "{} Target does not seem to have an active web server on port: {}\n"
-                "No WAF could be detected on an application level.".format(COLORED_COMBOS.WARNING, self.host.port))
-
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
@@ -130,3 +115,18 @@ class WAF:
         except (ConnectionError, TooManyRedirects) as e:
             raise WAFException("Couldn't get response from server.\n"
                                "Caused due to exception: {}".format(str(e)))
+
+    async def detect(self):
+        self.logger.info("{} Trying to detect WAF presence in {}".format(COLORED_COMBOS.INFO, self.host))
+        if self.cnames:
+            self._detect_by_cname()
+        try:
+            self.web_server_validator.validate_target_webserver(self.host)
+            self._detect_by_application()
+
+            if not self.waf_present:
+                self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
+        except WebServerValidatorException:
+            self.logger.info(
+                "{} Target does not seem to have an active web server on port: {}\n"
+                "No WAF could be detected on an application level.".format(COLORED_COMBOS.WARNING, self.host.port))

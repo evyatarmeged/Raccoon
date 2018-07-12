@@ -41,7 +41,8 @@ class URLFuzzer:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        self.logger.info("{}[{}]{} {} ".format(color, code, COLOR.RESET, url))
+        self.logger.info("{}[{}]{} {}".format(
+            color, code, COLOR.RESET, url))
 
     def _fetch(self, uri, sub_domain=False):
         """

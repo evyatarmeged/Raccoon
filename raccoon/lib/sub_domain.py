@@ -38,7 +38,7 @@ class SubDomainEnumerator:
 
     def find_subdomains_in_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""
-        self.logger.info("Trying to find Subdomains in SANs list")
+        self.logger.info("{} Trying to find Subdomains in SANs list".format(COLORED_COMBOS.INFO))
         if self.host.naked:
             domain = self.host.naked
             tld_less = domain.split(".")[0]
