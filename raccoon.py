@@ -41,9 +41,9 @@ https://github.com/evyatarmeged/Raccoon
 
 @click.command()
 @click.option("-t", "--target", required=True, help="Target to scan")
-@click.option("-dr", "--dns-records", default="A,MX,NS,CNAME,SOA",
-              help="DNS Records to query. Defaults to: A, MX, NS, CNAME, SOA")
-@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through TOR."
+@click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA",
+              help="Comma separated DNS records to query. Defaults to: A, MX, NS, CNAME, SOA")
+@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through Tor."
                                                   " Slows total runtime significantly")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic."
                                    " A proxy from the list will be chosen at random for each request."
@@ -61,10 +61,10 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")
 @click.option("-s", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
-@click.option("-pr", "--port-range", help="Use this port range for Nmap scan instead of the default")
+@click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("--follow-redirects", is_flag=True, help="Follow redirects when fuzzing.")
+@click.option("-fr", "--follow-redirects", is_flag=True, help="Follow redirects when fuzzing. Default: True")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
 @click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
 # @click.option("-d", "--delay", default="0.25-1",
@@ -85,7 +85,7 @@ def main(target,
          full_scan,
          scripts,
          services,
-         port_range,
+         port,
          tls_port,
          no_health_check,
          follow_redirects,
@@ -126,8 +126,8 @@ def main(target,
 
         ignored_response_codes = tuple(int(code) for code in ignored_response_codes.split(","))
 
-        if port_range:
-            HelpUtilities.validate_port_range(port_range)
+        if port:
+            HelpUtilities.validate_port_range(port)
 
         # ------ /Arg validation ------
 
@@ -148,7 +148,7 @@ def main(target,
         host.parse()
 
         logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
-        nmap_scan = NmapScan(host, full_scan, scripts, services, port_range)
+        nmap_scan = NmapScan(host, full_scan, scripts, services, port)
         # # # TODO: Populate array when multiple targets are supported
         # nmap_threads = []
         nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
@@ -203,6 +203,3 @@ def main(target,
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)
-
-
-main()
