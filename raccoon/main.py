@@ -49,14 +49,14 @@ https://github.com/evyatarmeged/Raccoon
                                    " A proxy from the list will be chosen at random for each request."
                                    " Slows total runtime")
 @click.option("--proxy", help="Proxy address to route HTTP traffic through. Slows total runtime")
-@click.option("-w", "--wordlist", default=os.path.join(MY_PATH, "./raccoon/wordlists/fuzzlist"),
+@click.option("-w", "--wordlist", default=os.path.join(MY_PATH, "wordlists/fuzzlist"),
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25,
               help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25")
 @click.option("--ignored-response-codes", default="301,400,401,402,403,404,504",
               help="Comma separated list of HTTP status code to ignore for fuzzing."
                    " Defaults to: 301,400,401,403,402,404,504")
-@click.option("--subdomain-list", default=os.path.join(MY_PATH, "./raccoon/wordlists/subdomains"),
+@click.option("--subdomain-list", default=os.path.join(MY_PATH, "wordlists/subdomains"),
               help="Path to subdomain list file that would be used for enumeration")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")

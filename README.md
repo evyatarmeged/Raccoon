@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.1-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.2-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -40,7 +40,7 @@ and modules by files
 Raccoon is a tool made for reconnaissance and information gathering with an emphasis on simplicity.<br> It will do everything from
 fetching DNS records, retrieving WHOIS information, obtaining TLS data, detecting WAF presence and up to threaded dir busting and
 subdomain enumeration. Every scan outputs to a corresponding file.<br>
-It utilizes Python's asyncio for running most scans asynchronously.<br>
+It utilizes Python's asyncio to run most scans asynchronously.<br>
 
 Raccoon supports Tor/proxy for anonymous routing. It uses default wordlists (for URL fuzzing and subdomain discovery)
 from the amazing [SecLists](https://github.com/danielmiessler/SecLists) repository but different lists can be passed as arguments.<br>
@@ -49,9 +49,15 @@ For more options - see "Usage".
 
 ### Installation
 For the latest stable version:<br>
-```pip install raccoon-scanner```<br>
+```
+pip install raccoon-scanner
+```
 Or clone the GitHub repository for the latest features and changes:<br>
-```git clone https://github.com/evyatarmeged/Raccoon.git```
+```
+git clone https://github.com/evyatarmeged/Raccoon.git
+cd Raccoon
+python raccoon/main.py
+```
 
 ##### Prerequisites
 Raccoon uses [Nmap](https://github.com/nmap/nmap) to scan ports as well as utilizes some other Nmap scripts
@@ -99,7 +105,7 @@ Options:
 ```
 
 ### Screenshots
-![poc](/screenshots/poc.png)
-![poc2](/screenshots/poc2.png)
+![poc](./screenshots/poc.png)
+![poc2](./screenshots/poc2.png)
 ### Contributing
 Any contributions, issues, features and tips are welcome.
