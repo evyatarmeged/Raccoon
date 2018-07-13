@@ -108,4 +108,4 @@ Options:
 ![poc](./screenshots/poc.png)
 ![poc2](./screenshots/poc2.png)
 ### Contributing
-Any contributions, issues, features and tips are welcome.
+Any and all contributions, issues, features and tips are welcome.
