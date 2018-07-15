@@ -95,3 +95,4 @@ class URLFuzzer:
         self.logger.info("{} Fuzzing from {}".format(COLORED_COMBOS.INFO, self.wordlist))
         pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
+        self.logger.info("Done fuzzing URLs")

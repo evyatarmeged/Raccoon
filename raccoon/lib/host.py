@@ -32,7 +32,7 @@ class Host:
     @staticmethod
     def _create_host_dir(path):
         try:
-            os.mkdir("/".join(path.split("/")[:-1]))
+            os.makedirs("/".join(path.split("/")[:-1]), exist_ok=True)
         except FileExistsError:
             pass
 

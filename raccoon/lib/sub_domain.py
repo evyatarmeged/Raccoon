@@ -16,7 +16,7 @@ class SubDomainEnumerator:
                  ignored_response_codes,
                  num_threads,
                  follow_redirects,
-                 bruteforce_subdomains):
+                 no_sub_enum):
         self.host = host
         self.target = host.target
         self.sans = sans
@@ -24,7 +24,7 @@ class SubDomainEnumerator:
         self.ignored_error_codes = ignored_response_codes
         self.num_threads = num_threads
         self.follow_redirects = follow_redirects
-        self.bruteforce_subdomains = bruteforce_subdomains
+        self.no_sub_enum = no_sub_enum
         self.request_handler = RequestHandler()
         self.sub_domains = set()
         log_file = HelpUtilities.get_output_path("{}/subdomains.txt".format(self.target))
@@ -35,7 +35,7 @@ class SubDomainEnumerator:
         if self.sans:
             self.find_subdomains_in_sans()
         self.google_dork()
-        if self.bruteforce_subdomains:
+        if not self.no_sub_enum:
             await self.bruteforce()
         self.logger.info("\n{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
 

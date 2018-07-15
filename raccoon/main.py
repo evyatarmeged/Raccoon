@@ -47,7 +47,7 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA",
               help="Comma separated DNS records to query. Defaults to: A, MX, NS, CNAME, SOA")
-@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through Tor."
+@click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through Tor (uses port 9050)."
                                                   " Slows total runtime significantly")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic."
                                    " A proxy from the list will be chosen at random for each request."
@@ -192,7 +192,7 @@ def main(target,
                 ignored_response_codes=ignored_response_codes,
                 num_threads=threads,
                 follow_redirects=follow_redirects,
-                bruteforce_subdomains=no_sub_enum
+                no_sub_enum=no_sub_enum
             )
             main_loop.run_until_complete(subdomain_enumerator.run())
 
