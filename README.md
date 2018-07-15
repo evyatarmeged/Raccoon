@@ -66,7 +66,7 @@ and features. It is mandatory that you have it installed before running Raccoon.
 
 ### Usage
 ```
-Usage: raccoon.py [OPTIONS]
+Usage: raccoon [OPTIONS]
 
 Options:
   -t, --target TEXT              Target to scan  [required]

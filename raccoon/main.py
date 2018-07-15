@@ -176,7 +176,7 @@ def main(target,
             fuzzer = URLFuzzer(host, ignored_response_codes, threads, wordlist, follow_redirects)
             main_loop.run_until_complete(fuzzer.fuzz_all())
 
-        if not host.is_ip and not no_sub_enum:
+        if not host.is_ip:
             sans = tls_info_scanner.sni_data.get("SANs")
             subdomain_enumerator = SubDomainEnumerator(
                 host,
@@ -184,7 +184,8 @@ def main(target,
                 sans=sans,
                 ignored_response_codes=ignored_response_codes,
                 num_threads=threads,
-                follow_redirects=follow_redirects
+                follow_redirects=follow_redirects,
+                bruteforce_subdomains=no_sub_enum
             )
             main_loop.run_until_complete(subdomain_enumerator.run())
 
