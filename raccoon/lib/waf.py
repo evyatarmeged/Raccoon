@@ -97,8 +97,8 @@ class WAF:
 
     def _detect_by_application(self):
         try:
-            response = self.request_handler.send(
-                "HEAD",
+            session = self.request_handler.get_new_session()
+            response = session.get(
                 timeout=20,
                 allow_redirects=True,
                 url="{}://{}:{}".format(

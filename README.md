@@ -27,6 +27,9 @@ and modules by files
 
 
 ##### Roadmap and TODOs
+- [ ] Have a parallel-all option run in integration with the -q argument. Essentially, make all scans 
+run together when there is no stdout output for much quicker scan times. Running everything in parallel,
+ especially dirbusting, messes output entirely.
 - [ ] Support multiple hosts (read from file)
 - [ ] CIDR notation support
 - [ ] IP ranges support
@@ -61,8 +64,8 @@ python raccoon/main.py
 
 ##### Prerequisites
 Raccoon uses [Nmap](https://github.com/nmap/nmap) to scan ports as well as utilizes some other Nmap scripts
-and features. It is mandatory that you have it installed before running Raccoon.
-
+and features. It is mandatory that you have it installed before running Raccoon.<br>
+OpenSSL is also used for TLS/SSL scans and should be installed as well.
 
 ### Usage
 ```
