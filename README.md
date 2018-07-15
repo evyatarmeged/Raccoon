@@ -108,7 +108,8 @@ Options:
 ```
 
 ### Screenshots
+![poc2](./screenshots/poc2.png)<br>
+
 ![poc](./screenshots/poc.png)
-![poc2](./screenshots/poc2.png)
 ### Contributing
 Any and all contributions, issues, features and tips are welcome.
