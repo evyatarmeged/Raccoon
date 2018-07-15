@@ -13,6 +13,7 @@ class WebServerValidator(metaclass=Singleton):
     def validate_target_webserver(self, host):
         try:
             self.request_handler.send(
+                "GET",
                 timeout=20,
                 url="{}://{}:{}".format(
                     host.protocol,

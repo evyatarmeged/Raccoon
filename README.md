@@ -109,7 +109,8 @@ Options:
 
 ### Screenshots
 ![poc2](./screenshots/poc2.png)<br>
-
-![poc](./screenshots/poc.png)
+![poc](./screenshots/poc.png)<br>
+###### Results folder tree after a scan:<br>
+![poc3](./screenshots/poc3.png)
 ### Contributing
 Any and all contributions, issues, features and tips are welcome.

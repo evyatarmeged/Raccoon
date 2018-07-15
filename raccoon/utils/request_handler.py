@@ -1,6 +1,5 @@
 import random
 import requests
-import threading
 from fake_useragent import UserAgent
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import LocationParseError, NewConnectionError

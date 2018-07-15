@@ -1,11 +1,10 @@
-import time
 from functools import partial
 from multiprocessing.pool import ThreadPool
 from raccoon.utils.exceptions import FuzzerException, RequestHandlerException
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.request_handler import RequestHandler
 from raccoon.utils.help_utils import HelpUtilities
-from raccoon.utils.logger import Logger, SystemOutLogger
+from raccoon.utils.logger import Logger
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.
@@ -41,7 +40,7 @@ class URLFuzzer:
             color = COLOR.RED
         else:
             color = COLOR.RESET
-        self.logger.info("{}[{}]{} {}".format(
+        self.logger.info("\t{}[{}]{} {}".format(
             color, code, COLOR.RESET, url))
 
     def _fetch(self, uri, sub_domain=False):

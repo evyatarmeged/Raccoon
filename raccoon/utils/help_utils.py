@@ -1,4 +1,5 @@
 import os
+import distutils.spawn
 import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
@@ -62,6 +63,21 @@ class HelpUtilities:
             return "CRITICAL"
         else:
             return "INFO"
+
+    @classmethod
+    def find_nmap_executable(cls):
+        return distutils.spawn.find_executable("nmap")
+
+    @classmethod
+    def find_openssl_executable(cls):
+        return distutils.spawn.find_executable("openssl")
+
+    @classmethod
+    def validate_executables(cls):
+        if not (HelpUtilities.find_nmap_executable() and HelpUtilities.find_openssl_executable()):
+            raise RaccoonException("Could not find Nmap or OpenSSL "
+                                   "installed. Please install them and run Raccoon again.")
+        return
 
     @classmethod
     def create_output_directory(cls, outdir):

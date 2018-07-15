@@ -1,8 +1,13 @@
-import os
 import time
 import asyncio
 import threading
 import click
+import sys
+import os
+
+# Python imports will be the end of us all
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+
 from raccoon.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon.utils.exceptions import RaccoonException
 from raccoon.utils.request_handler import RequestHandler
@@ -16,7 +21,6 @@ from raccoon.lib.dns_handler import DNSHandler
 from raccoon.lib.waf import WAF
 from raccoon.lib.tls import TLSHandler
 from raccoon.lib.web_app import WebApplicationScanner
-
 
 # Set path for relative access to builtin files.
 MY_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -94,7 +98,6 @@ def main(target,
          # delay,
          outdir,
          quiet):
-
     try:
         # ------ Arg validation ------
 
@@ -104,7 +107,11 @@ def main(target,
         intro(logger)
 
         target = target.lower()
-
+        try:
+            HelpUtilities.validate_executables()
+        except RaccoonException as e:
+            logger.critical(e.__str__())
+            exit(9)
         HelpUtilities.validate_wordlist_args(proxy_list, wordlist, subdomain_list)
         HelpUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
         HelpUtilities.create_output_directory(outdir)
@@ -151,7 +158,7 @@ def main(target,
         nmap_scan = NmapScan(host, full_scan, scripts, services, port)
         # # # TODO: Populate array when multiple targets are supported
         # nmap_threads = []
-        nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan, ))
+        nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
         # Run Nmap scan in the background. Can take some time
         nmap_thread.start()
 
