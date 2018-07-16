@@ -13,42 +13,52 @@ SERVER = "Server"
 class WAFApplicationMethods:
 
     @classmethod
-    def detect_cloudfront(cls, headers):
+    def detect_cloudfront(cls, res):
         service = "CloudFront"
         waf_headers = ("Via", "X-cache")
-        if any(h in headers.keys() for h in waf_headers) and any(service.lower() in val for val in headers.values()):
+        if any(h in res.headers.keys() for h in waf_headers) and any(service.lower() in val for val in res.headers.values()):
             return True
-        if headers.get(SERVER) == service:
-            return True
-        return
-
-    @classmethod
-    def detect_incapsula(cls, headers):
-        if "X-Iinfo" in headers.keys() or headers.get("X-CDN") == "Incapsula":
+        if res.headers.get(SERVER) == service:
             return True
         return
 
     @classmethod
-    def detect_distil(cls, headers):
-        if headers.get("x-distil-cs"):
+    def detect_incapsula(cls, res):
+        if "X-Iinfo" in res.headers.keys() or res.headers.get("X-CDN") == "Incapsula":
             return True
         return
 
     @classmethod
-    def detect_cloudflare(cls, headers):
-        if "CF-RAY" in headers.keys() or headers.get(SERVER) == "cloudflare":
+    def detect_distil(cls, res):
+        if res.headers.get("x-distil-cs"):
             return True
         return
 
     @classmethod
-    def detect_edgecast(cls, headers):
-        if SERVER in headers.keys() and "ECD" in headers[SERVER]:
+    def detect_cloudflare(cls, res):
+        if "CF-RAY" in res.headers.keys() or res.headers.get(SERVER) == "cloudflare":
             return True
         return
 
     @classmethod
-    def detect_maxcdn(cls, headers):
-        if SERVER in headers.keys() and "NetDNA-cache" in headers[SERVER]:
+    def detect_edgecast(cls, res):
+        if SERVER in res.headers.keys() and "ECD" in res.headers[SERVER]:
+            return True
+        return
+
+    @classmethod
+    def detect_maxcdn(cls, res):
+        if SERVER in res.headers.keys() and "NetDNA-cache" in res.headers[SERVER]:
+            return True
+        return
+
+    @classmethod
+    def detect_sucuri(cls, res):
+        if any((
+                res.headers.get(SERVER) == "Sucuri/Cloudproxy",
+                "X-Sucuri-ID" in res.headers.keys(),
+                "X-Sucuri-Cache"in res.headers.keys(),
+                "Access Denied - Sucuri Website Firewall" in res.text)):
             return True
         return
 
@@ -76,7 +86,8 @@ class WAF:
             "Incapsula": WAFApplicationMethods.detect_incapsula,
             "MaxCDN": WAFApplicationMethods.detect_maxcdn,
             "Edgecast": WAFApplicationMethods.detect_edgecast,
-            "Distil Networks": WAFApplicationMethods.detect_distil
+            "Distil Networks": WAFApplicationMethods.detect_distil,
+            "Sucuri": WAFApplicationMethods.detect_sucuri
         }
         log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
@@ -99,7 +110,7 @@ class WAF:
         try:
             session = self.request_handler.get_new_session()
             response = session.get(
-                timeout=20,
+                timeout=10,
                 allow_redirects=True,
                 url="{}://{}:{}".format(
                     self.host.protocol,
@@ -108,7 +119,7 @@ class WAF:
                 )
             )
             for waf, method in self.waf_app_method_map.items():
-                result = method(response.headers)
+                result = method(response)
                 if result:
                     self._waf_detected(waf)
 

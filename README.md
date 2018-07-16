@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.5-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.52-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -30,13 +30,12 @@ and modules by files
 - [ ] Have a parallel-all option run in integration with the -q argument. Essentially, make all scans 
 run together when there is no stdout output for much quicker scan times. Running everything in parallel,
  especially dirbusting, messes output entirely.
-- [ ] Detect WAF using ASNs/IP ranges databases like Hurricane BGP
 - [ ] Support multiple hosts (read from file)
-- [ ] CIDR notation support
-- [ ] IP ranges support
 - [ ] Rate limit evasion
 - [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
 - [ ] SearchSploit lookup on results
+- [ ] IP ranges support
+- [ ] CIDR notation support
 - [ ] More output formats
 
 

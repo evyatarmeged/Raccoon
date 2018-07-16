@@ -122,7 +122,7 @@ class WebApplicationScanner:
             with session:
                 # Test if target is serving HTTP requests
                 response = session.get(
-                    timeout=20,
+                    timeout=10,
                     url="{}://{}:{}".format(
                         self.host.protocol,
                         self.host.target,
