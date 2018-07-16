@@ -30,6 +30,7 @@ and modules by files
 - [ ] Have a parallel-all option run in integration with the -q argument. Essentially, make all scans 
 run together when there is no stdout output for much quicker scan times. Running everything in parallel,
  especially dirbusting, messes output entirely.
+- [ ] Detect WAF using ASNs/IP ranges databases like Hurricane BGP
 - [ ] Support multiple hosts (read from file)
 - [ ] CIDR notation support
 - [ ] IP ranges support
