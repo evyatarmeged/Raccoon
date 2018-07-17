@@ -13,7 +13,6 @@ class DNSHandler:
     """Handles DNS queries and lookups"""
 
     resolver = resolver.Resolver()
-    request_handler = RequestHandler()
 
     @classmethod
     def query_dns(cls, domains, records):
@@ -61,7 +60,8 @@ class DNSHandler:
     @classmethod
     def generate_dns_dumpster_mapping(cls, host, sout_logger):
         # Start DNS Dumpster session for the token
-        dnsdumpster_session = DNSHandler.request_handler.get_new_session()
+        request_handler = RequestHandler()
+        dnsdumpster_session = request_handler.get_new_session()
         url = "https://dnsdumpster.com"
         if host.naked:
             target = host.naked

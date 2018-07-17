@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.55-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.6-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -43,7 +43,9 @@ run together when there is no stdout output for much quicker scan times. Running
 Raccoon is a tool made for reconnaissance and information gathering with an emphasis on simplicity.<br> It will do everything from
 fetching DNS records, retrieving WHOIS information, obtaining TLS data, detecting WAF presence and up to threaded dir busting and
 subdomain enumeration. Every scan outputs to a corresponding file.<br>
-It utilizes Python's asyncio to run most scans asynchronously.<br>
+
+As most of Raccoon's scans are independent and do not rely on each other's results,
+it utilizes Python's asyncio to run most scans asynchronously.<br>
 
 Raccoon supports Tor/proxy for anonymous routing. It uses default wordlists (for URL fuzzing and subdomain discovery)
 from the amazing [SecLists](https://github.com/danielmiessler/SecLists) repository but different lists can be passed as arguments.<br>

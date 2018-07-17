@@ -8,7 +8,7 @@ setup(
     name='raccoon-scanner',
     packages=find_packages(exclude="tests"),
     license="MIT",
-    version='0.0.55',
+    version='0.0.6',
     description='Offensive Security Tool for Reconnaissance and Information Gathering',
     long_description=long_description,
     long_description_content_type="text/markdown",

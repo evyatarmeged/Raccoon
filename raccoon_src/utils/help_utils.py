@@ -1,10 +1,10 @@
 import os
 import distutils.spawn
-import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
-from raccoon_src.utils.exceptions import RaccoonException, ScannerException
+from raccoon_src.utils.exceptions import RaccoonException, ScannerException, RequestHandlerException
+from raccoon_src.utils.request_handler import RequestHandler
 
 
 class HelpUtilities:
@@ -22,9 +22,10 @@ class HelpUtilities:
             try:
                 if "http" not in host:
                     host = "http://" + host
-                requests.get(host, timeout=10)
+                rh = RequestHandler()
+                rh.send("GET", url=host, timeout=10)
                 return
-            except ConnectionError:
+            except (ConnectionError, RequestHandlerException):
                 raise RaccoonException("Target {} seems to be down.\n"
                                        "Run with --no-health-check to ignore hosts considered as down.".format(host))
 

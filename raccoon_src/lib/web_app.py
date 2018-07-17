@@ -28,7 +28,8 @@ class WebApplicationScanner:
         Has a re-try mechanism because false negatives may occur
         :param tries: Count of tries for CMS discovery
         """
-        page = requests.get("https://whatcms.org/?s={}".format(self.host.target))
+        # WhatCMS is under CloudFlare which detects and blocks proxied/Tor traffic, hence normal request.
+        page = requests.get(url="https://whatcms.org/?s={}".format(self.host.target))
         soup = BeautifulSoup(page.text, "lxml")
         found = soup.select(".panel.panel-success")
         if found:
@@ -122,7 +123,7 @@ class WebApplicationScanner:
             with session:
                 # Test if target is serving HTTP requests
                 response = session.get(
-                    timeout=10,
+                    timeout=20,
                     url="{}://{}:{}".format(
                         self.host.protocol,
                         self.host.target,

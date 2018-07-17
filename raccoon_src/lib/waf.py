@@ -110,7 +110,7 @@ class WAF:
         try:
             session = self.request_handler.get_new_session()
             response = session.get(
-                timeout=10,
+                timeout=20,
                 allow_redirects=True,
                 url="{}://{}:{}".format(
                     self.host.protocol,
@@ -139,5 +139,5 @@ class WAF:
                 self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
         except WebServerValidatorException:
             self.logger.info(
-                "{} Target does not seem to have an active web server on port: {}\n"
+                "{} Target does not seem to have an active web server on port: {}. "
                 "No WAF could be detected on an application level.".format(COLORED_COMBOS.WARNING, self.host.port))
