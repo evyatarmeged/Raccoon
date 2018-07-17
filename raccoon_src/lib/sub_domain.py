@@ -1,10 +1,10 @@
 import re
 from bs4 import BeautifulSoup
-from src.utils.request_handler import RequestHandler
-from src.lib.fuzzer import URLFuzzer
-from src.utils.help_utils import HelpUtilities
-from src.utils.logger import Logger
-from src.utils.coloring import COLOR, COLORED_COMBOS
+from raccoon_src.utils.request_handler import RequestHandler
+from raccoon_src.lib.fuzzer import URLFuzzer
+from raccoon_src.utils.help_utils import HelpUtilities
+from raccoon_src.utils.logger import Logger
+from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 
 
 class SubDomainEnumerator:

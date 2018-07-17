@@ -4,7 +4,7 @@ import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
-from src.utils.exceptions import RaccoonException, ScannerException
+from raccoon_src.utils.exceptions import RaccoonException, ScannerException
 
 
 class HelpUtilities:

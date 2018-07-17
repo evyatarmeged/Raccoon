@@ -1,12 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, TooManyRedirects
-from src.utils.web_server_validator import WebServerValidator
-from src.utils.request_handler import RequestHandler
-from src.utils.help_utils import HelpUtilities
-from src.utils.coloring import COLOR, COLORED_COMBOS
-from src.utils.exceptions import WebAppScannerException, WebServerValidatorException
-from src.utils.logger import Logger
+from raccoon_src.utils.web_server_validator import WebServerValidator
+from raccoon_src.utils.request_handler import RequestHandler
+from raccoon_src.utils.help_utils import HelpUtilities
+from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
+from raccoon_src.utils.exceptions import WebAppScannerException, WebServerValidatorException
+from raccoon_src.utils.logger import Logger
 
 
 class WebApplicationScanner:

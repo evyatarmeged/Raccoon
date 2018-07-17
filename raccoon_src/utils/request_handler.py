@@ -2,8 +2,8 @@ import random
 import requests
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import LocationParseError, NewConnectionError
-from src.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
-from src.utils.singleton import Singleton
+from raccoon_src.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
+from raccoon_src.utils.singleton import Singleton
 from fake_useragent.errors import FakeUserAgentError
 
 try:

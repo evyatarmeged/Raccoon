@@ -1,10 +1,10 @@
 from functools import partial
 from multiprocessing.pool import ThreadPool
-from src.utils.exceptions import FuzzerException, RequestHandlerException
-from src.utils.coloring import COLOR, COLORED_COMBOS
-from src.utils.request_handler import RequestHandler
-from src.utils.help_utils import HelpUtilities
-from src.utils.logger import Logger
+from raccoon_src.utils.exceptions import FuzzerException, RequestHandlerException
+from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
+from raccoon_src.utils.request_handler import RequestHandler
+from raccoon_src.utils.help_utils import HelpUtilities
+from raccoon_src.utils.logger import Logger
 
 
 # Really wanted to use Aiohttp, doesn't play nice with proxies or TOR, disconnects unexpectedly, etc.

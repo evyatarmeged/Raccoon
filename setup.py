@@ -9,7 +9,7 @@ setup(
     packages=find_packages(exclude="tests"),
     license="MIT",
     # version='0.0.52',
-    version="0.0.53",
+    version="0.0.0.6",
     description='Offensive Security Tool for Reconnaissance and Information Gathering',
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,17 +24,14 @@ setup(
                       "fake-useragent",
                       "requests[socks]"],
     package_data={
-        "raccoon": [
-            "wordlists/*",
-            "requirements.txt",
-            "README.md",
-            "LICENSE"
+        "raccoon_src": [
+            "wordlists/*"
         ]
     },
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'raccoon=src.main:main'
+            'raccoon=raccoon_src.main:main'
         ]
     },
 )

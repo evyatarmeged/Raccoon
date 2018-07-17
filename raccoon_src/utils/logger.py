@@ -1,7 +1,7 @@
 import logging
 from os import path
 from sys import stdout
-from src.utils.singleton import Singleton
+from raccoon_src.utils.singleton import Singleton
 
 
 class SystemOutLogger(metaclass=Singleton):

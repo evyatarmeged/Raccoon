@@ -2,10 +2,10 @@ import time
 from dns import resolver
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from requests.exceptions import ConnectionError
-from src.utils.help_utils import HelpUtilities
-from src.utils.logger import Logger
-from src.utils.coloring import COLOR, COLORED_COMBOS
-from src.utils.request_handler import RequestHandler
+from raccoon_src.utils.help_utils import HelpUtilities
+from raccoon_src.utils.logger import Logger
+from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
+from raccoon_src.utils.request_handler import RequestHandler
 
 
 # noinspection PyUnboundLocalVariable

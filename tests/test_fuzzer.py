@@ -1,9 +1,9 @@
 import unittest
 import asyncio
-from src.lib.fuzzer import URLFuzzer
-from src.lib.host import Host
-from src.utils.exceptions import FuzzerException, RequestHandlerException
-from src.utils.logger import SystemOutLogger
+from raccoon_src.lib.fuzzer import URLFuzzer
+from raccoon_src.lib.host import Host
+from raccoon_src.utils.exceptions import FuzzerException, RequestHandlerException
+from raccoon_src.utils.logger import SystemOutLogger
 
 
 class TestURLFuzzer(unittest.TestCase):

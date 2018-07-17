@@ -8,19 +8,19 @@ import os
 # Python imports will be the end of us all
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
-from src.utils.coloring import COLOR, COLORED_COMBOS
-from src.utils.exceptions import RaccoonException
-from src.utils.request_handler import RequestHandler
-from src.utils.logger import SystemOutLogger
-from src.utils.help_utils import HelpUtilities
-from src.lib.fuzzer import URLFuzzer
-from src.lib.host import Host
-from src.lib.scanner import Scanner, NmapScan
-from src.lib.sub_domain import SubDomainEnumerator
-from src.lib.dns_handler import DNSHandler
-from src.lib.waf import WAF
-from src.lib.tls import TLSHandler
-from src.lib.web_app import WebApplicationScanner
+from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
+from raccoon_src.utils.exceptions import RaccoonException
+from raccoon_src.utils.request_handler import RequestHandler
+from raccoon_src.utils.logger import SystemOutLogger
+from raccoon_src.utils.help_utils import HelpUtilities
+from raccoon_src.lib.fuzzer import URLFuzzer
+from raccoon_src.lib.host import Host
+from raccoon_src.lib.scanner import Scanner, NmapScan
+from raccoon_src.lib.sub_domain import SubDomainEnumerator
+from raccoon_src.lib.dns_handler import DNSHandler
+from raccoon_src.lib.waf import WAF
+from raccoon_src.lib.tls import TLSHandler
+from raccoon_src.lib.web_app import WebApplicationScanner
 
 # Set path for relative access to builtin files.
 MY_PATH = os.path.abspath(os.path.dirname(__file__))
