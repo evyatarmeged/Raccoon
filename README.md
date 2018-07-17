@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.54-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.55-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -59,7 +59,7 @@ Or clone the GitHub repository for the latest features and changes:<br>
 ```
 git clone https://github.com/evyatarmeged/Raccoon.git
 cd Raccoon
-python raccoon/main.py
+python raccoon_src/main.py
 ```
 
 ##### Prerequisites

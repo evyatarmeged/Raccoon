@@ -24,7 +24,7 @@ class RequestHandler(metaclass=Singleton):
         self.delay = delay
         self.single_proxy = single_proxy
         self.proxies = self.set_instance_proxies()
-        self.ua = UserAgent()
+        self.ua = UserAgent(verify_ssl=False)
 
     def set_instance_proxies(self):
         """
