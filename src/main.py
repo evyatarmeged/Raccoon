@@ -211,5 +211,3 @@ def main(target,
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)
-
-main()

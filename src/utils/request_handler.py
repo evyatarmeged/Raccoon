@@ -9,7 +9,6 @@ from fake_useragent.errors import FakeUserAgentError
 try:
     from fake_useragent import UserAgent
 except FakeUserAgentError:
-    print("DID I GET THE RROR?")
     pass
 
 

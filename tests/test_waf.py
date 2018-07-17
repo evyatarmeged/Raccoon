@@ -7,39 +7,43 @@ SERVER = "Server"
 
 class TestWAFHttp(unittest.TestCase):
 
-    # def setUp(self):
+    def setUp(self):
+        class Response:
+            headers = {}
+
+        self.response = Response()
 
     def test_cloudflare_detection_by_headers(self):
-        headers = {"CF-RAY": None}
-        self.assertTrue(WAFApplicationMethods.detect_cloudflare(headers))
+        self.response.headers = {"CF-RAY": None}
+        self.assertTrue(WAFApplicationMethods.detect_cloudflare(self.response))
 
     def test_cloudflare_detection_by_server(self):
-        headers = {SERVER: "cloudflare"}
-        self.assertTrue(WAFApplicationMethods.detect_cloudflare(headers))
+        self.response.headers = {SERVER: "cloudflare"}
+        self.assertTrue(WAFApplicationMethods.detect_cloudflare(self.response))
 
     def test_cloudfront_detection_by_headers(self):
-        headers = {"Via": "cloudfront"}
-        self.assertTrue(WAFApplicationMethods.detect_cloudfront(headers))
-        headers = {"X-cache": "cloudfront"}
-        self.assertTrue(WAFApplicationMethods.detect_cloudfront(headers))
+        self.response.headers = {"Via": "cloudfront"}
+        self.assertTrue(WAFApplicationMethods.detect_cloudfront(self.response))
+        self.response.headers = {"X-cache": "cloudfront"}
+        self.assertTrue(WAFApplicationMethods.detect_cloudfront(self.response))
 
     def test_cloudfront_detection_by_server(self):
-        headers = {SERVER: "CloudFront"}
-        self.assertTrue(WAFApplicationMethods.detect_cloudfront(headers))
+        self.response.headers = {SERVER: "CloudFront"}
+        self.assertTrue(WAFApplicationMethods.detect_cloudfront(self.response))
 
     def test_incapsula_detection_by_headers(self):
-        headers = {"X-Iinfo": None}
-        self.assertTrue(WAFApplicationMethods.detect_incapsula(headers))
-        headers = {"X-CDN": "Incapsula"}
-        self.assertTrue(WAFApplicationMethods.detect_incapsula(headers))
+        self.response.headers = {"X-Iinfo": None}
+        self.assertTrue(WAFApplicationMethods.detect_incapsula(self.response))
+        self.response.headers = {"X-CDN": "Incapsula"}
+        self.assertTrue(WAFApplicationMethods.detect_incapsula(self.response))
 
     def test_maxcdn_detection_by_server(self):
-        headers = {SERVER: "NetDNA-cache"}
-        self.assertTrue(WAFApplicationMethods.detect_maxcdn(headers))
+        self.response.headers = {SERVER: "NetDNA-cache"}
+        self.assertTrue(WAFApplicationMethods.detect_maxcdn(self.response))
 
     def test_edgecast_detection_by_server(self):
-        headers = {SERVER: "ECD-conglom"}
-        self.assertTrue(WAFApplicationMethods.detect_edgecast(headers))
+        self.response.headers = {SERVER: "ECD-conglom"}
+        self.assertTrue(WAFApplicationMethods.detect_edgecast(self.response))
 
 
 class TestWAFCName(unittest.TestCase):
