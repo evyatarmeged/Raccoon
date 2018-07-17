@@ -8,19 +8,19 @@ import os
 # Python imports will be the end of us all
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
-from raccoon.utils.coloring import COLOR, COLORED_COMBOS
-from raccoon.utils.exceptions import RaccoonException
-from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.logger import SystemOutLogger
-from raccoon.utils.help_utils import HelpUtilities
-from raccoon.lib.fuzzer import URLFuzzer
-from raccoon.lib.host import Host
-from raccoon.lib.scanner import Scanner, NmapScan
-from raccoon.lib.sub_domain import SubDomainEnumerator
-from raccoon.lib.dns_handler import DNSHandler
-from raccoon.lib.waf import WAF
-from raccoon.lib.tls import TLSHandler
-from raccoon.lib.web_app import WebApplicationScanner
+from src.utils.coloring import COLOR, COLORED_COMBOS
+from src.utils.exceptions import RaccoonException
+from src.utils.request_handler import RequestHandler
+from src.utils.logger import SystemOutLogger
+from src.utils.help_utils import HelpUtilities
+from src.lib.fuzzer import URLFuzzer
+from src.lib.host import Host
+from src.lib.scanner import Scanner, NmapScan
+from src.lib.sub_domain import SubDomainEnumerator
+from src.lib.dns_handler import DNSHandler
+from src.lib.waf import WAF
+from src.lib.tls import TLSHandler
+from src.lib.web_app import WebApplicationScanner
 
 # Set path for relative access to builtin files.
 MY_PATH = os.path.abspath(os.path.dirname(__file__))
@@ -211,3 +211,5 @@ def main(target,
         # Fix F'd up terminal after CTRL+C
         os.system("stty sane")
         exit(42)
+
+main()

@@ -1,8 +1,8 @@
 from urllib3.exceptions import HTTPError
 from requests.exceptions import ConnectionError, TooManyRedirects
-from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.singleton import Singleton
-from raccoon.utils.exceptions import WebServerValidatorException, RequestHandlerException
+from src.utils.request_handler import RequestHandler
+from src.utils.singleton import Singleton
+from src.utils.exceptions import WebServerValidatorException, RequestHandlerException
 
 
 class WebServerValidator(metaclass=Singleton):

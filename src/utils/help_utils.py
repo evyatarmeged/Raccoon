@@ -4,7 +4,7 @@ import requests
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
-from raccoon.utils.exceptions import RaccoonException, ScannerException
+from src.utils.exceptions import RaccoonException, ScannerException
 
 
 class HelpUtilities:
@@ -74,7 +74,7 @@ class HelpUtilities:
 
     @classmethod
     def validate_executables(cls):
-        if not (HelpUtilities.find_nmap_executable() and HelpUtilities.find_openssl_executable()):
+        if not (cls.find_nmap_executable() and cls.find_openssl_executable()):
             raise RaccoonException("Could not find Nmap or OpenSSL "
                                    "installed. Please install them and run Raccoon again.")
         return

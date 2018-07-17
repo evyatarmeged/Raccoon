@@ -1,10 +1,10 @@
 from requests.exceptions import TooManyRedirects, ConnectionError
-from raccoon.utils.web_server_validator import WebServerValidator
-from raccoon.utils.exceptions import WAFException, WebServerValidatorException
-from raccoon.utils.request_handler import RequestHandler
-from raccoon.utils.coloring import COLOR, COLORED_COMBOS
-from raccoon.utils.help_utils import HelpUtilities
-from raccoon.utils.logger import Logger
+from src.utils.web_server_validator import WebServerValidator
+from src.utils.exceptions import WAFException, WebServerValidatorException
+from src.utils.request_handler import RequestHandler
+from src.utils.coloring import COLOR, COLORED_COMBOS
+from src.utils.help_utils import HelpUtilities
+from src.utils.logger import Logger
 
 
 SERVER = "Server"

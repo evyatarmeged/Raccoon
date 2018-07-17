@@ -1,10 +1,16 @@
 import random
 import requests
-from fake_useragent import UserAgent
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import LocationParseError, NewConnectionError
-from raccoon.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
-from raccoon.utils.singleton import Singleton
+from src.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
+from src.utils.singleton import Singleton
+from fake_useragent.errors import FakeUserAgentError
+
+try:
+    from fake_useragent import UserAgent
+except FakeUserAgentError:
+    print("DID I GET THE RROR?")
+    pass
 
 
 class RequestHandler(metaclass=Singleton):

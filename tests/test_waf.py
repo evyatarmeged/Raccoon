@@ -1,5 +1,5 @@
 import unittest
-from raccoon.lib.waf import WAFApplicationMethods
+from src.lib.waf import WAFApplicationMethods
 
 
 SERVER = "Server"

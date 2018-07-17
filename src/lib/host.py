@@ -1,10 +1,10 @@
 import os
 from ipaddress import ip_address
-from raccoon.lib.dns_handler import DNSHandler
-from raccoon.utils.exceptions import HostHandlerException
-from raccoon.utils.help_utils import HelpUtilities
-from raccoon.utils.coloring import COLOR, COLORED_COMBOS
-from raccoon.utils.logger import Logger, SystemOutLogger
+from src.lib.dns_handler import DNSHandler
+from src.utils.exceptions import HostHandlerException
+from src.utils.help_utils import HelpUtilities
+from src.utils.coloring import COLOR, COLORED_COMBOS
+from src.utils.logger import Logger, SystemOutLogger
 
 
 class Host:
