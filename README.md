@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.6-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.62-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -77,8 +77,8 @@ Options:
   -t, --target TEXT              Target to scan  [required]
   -d, --dns-records TEXT         Comma separated DNS records to query.
                                  Defaults to: A, MX, NS, CNAME, SOA
-  --tor-routing                  Route HTTP traffic through Tor. Slows total
-                                 runtime significantly
+  --tor-routing                  Route HTTP traffic through Tor (uses port
+                                 9050). Slows total runtime significantly
   --proxy-list TEXT              Path to proxy list file that would be used
                                  for routing HTTP traffic. A proxy from the
                                  list will be chosen at random for each
@@ -91,22 +91,23 @@ Options:
                                  Fuzzing/Subdomain enumeration. Default: 25
   --ignored-response-codes TEXT  Comma separated list of HTTP status code to
                                  ignore for fuzzing. Defaults to:
-                                 301,400,401,403,402,404,504
+                                 302,400,401,402,403,404,503,504
   --subdomain-list TEXT          Path to subdomain list file that would be
                                  used for enumeration
-  -f, --full-scan                Run Nmap scan with both -sV and -sC
   -S, --scripts                  Run Nmap scan with -sC flag
   -s, --services                 Run Nmap scan with -sV flag
+  -f, --full-scan                Run Nmap scan with both -sV and -sC
   -p, --port TEXT                Use this port range for Nmap scan instead of
                                  the default
   --tls-port INTEGER             Use this port for TLS queries. Default: 443
-  --no-health-check              Do not test for target host availability
+  --skip-health-check            Do not test for target host availability
   -fr, --follow-redirects        Follow redirects when fuzzing. Default: True
   --no-url-fuzzing               Do not fuzz URLs
   --no-sub-enum                  Do not bruteforce subdomains
   -q, --quiet                    Do not output to stdout
   -o, --outdir TEXT              Directory destination for scan output
   --help                         Show this message and exit.
+
 ```
 
 ### Screenshots

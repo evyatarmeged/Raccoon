@@ -1,5 +1,6 @@
 import os
 from ipaddress import ip_address
+from dns.exception import Timeout
 from raccoon_src.lib.dns_handler import DNSHandler
 from raccoon_src.utils.exceptions import HostHandlerException
 from raccoon_src.utils.help_utils import HelpUtilities
@@ -111,7 +112,10 @@ class Host:
                 # Can't be sure if FQDN or just naked domain
                 domains.append(self.target)
 
-            self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
+            try:
+                self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
+            except Timeout:
+                raise HostHandlerException("DNS Query timed out. Maybe target has DNS protection ?")
 
             if self.dns_results.get("CNAME"):
                 # Naked domains shouldn't hold CNAME records according to RFC regulations

@@ -45,7 +45,7 @@ https://github.com/evyatarmeged/Raccoon
 @click.command()
 @click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA",
-              help="Comma separated DNS records to query. Defaults to: A, MX, NS, CNAME, SOA")
+              help="Comma separated DNS records to query. Defaults to: A,MX,NS,CNAME,SOA")
 @click.option("--tor-routing", is_flag=True, help="Route HTTP traffic through Tor (uses port 9050)."
                                                   " Slows total runtime significantly")
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic."
@@ -56,18 +56,19 @@ https://github.com/evyatarmeged/Raccoon
               help="Path to wordlist that would be used for URL fuzzing")
 @click.option("-T", "--threads", default=25,
               help="Number of threads to use for URL Fuzzing/Subdomain enumeration. Default: 25")
-@click.option("--ignored-response-codes", default="301,400,401,402,403,404,504",
+@click.option("--ignored-response-codes", default="302,400,401,402,403,404,503,504",
               help="Comma separated list of HTTP status code to ignore for fuzzing."
-                   " Defaults to: 301,400,401,403,402,404,504")
+                   " Defaults to: 302,400,401,402,403,404,503,504")
 @click.option("--subdomain-list", default=os.path.join(MY_PATH, "wordlists/subdomains"),
               help="Path to subdomain list file that would be used for enumeration")
-@click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")
 @click.option("-s", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
+@click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
-@click.option("--no-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("-fr", "--follow-redirects", is_flag=True, help="Follow redirects when fuzzing. Default: True")
+@click.option("--skip-health-check", is_flag=True, help="Do not test for target host availability")
+@click.option("-fr", "--follow-redirects", is_flag=True, default=True,
+              help="Follow redirects when fuzzing. Default: True")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
 @click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
 # @click.option("-d", "--delay", default="0.25-1",
@@ -90,7 +91,7 @@ def main(target,
          services,
          port,
          tls_port,
-         no_health_check,
+         skip_health_check,
          follow_redirects,
          no_url_fuzzing,
          no_sub_enum,
@@ -116,7 +117,7 @@ def main(target,
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
-            logger.info("{} Routing traffic anonymously through Tor\n".format(COLORED_COMBOS.WARNING))
+            logger.info("{} Testing that Tor service is up...\n".format(COLORED_COMBOS.WARNING))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
@@ -143,11 +144,13 @@ def main(target,
         if tor_routing:
             try:
                 HelpUtilities.confirm_traffic_routs_through_tor()
+                logger.info("{} Validated Tor service is up. Routing traffic anonymously\n".format(
+                    COLORED_COMBOS.WARNING))
             except RaccoonException as err:
                 print("{}{}{}".format(COLOR.RED, err.__str__(), COLOR.RESET))
                 exit(3)
 
-        if not no_health_check:
+        if not skip_health_check:
             HelpUtilities.validate_target_is_up(target)
 
         main_loop = asyncio.get_event_loop()
