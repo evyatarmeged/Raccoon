@@ -17,8 +17,8 @@ certificate details and SANs
 - [x] Services and scripts scan
 - [x] URL fuzzing and directory detection
 - [x] Subdomain enumeration - uses Google dorking, bruteforce and SAN discovery
-- [x] Web application data (CMS, Web Server info, robots & sitemap
-extraction)
+- [x] Web application data (CMS detection, Web Server info, robots & sitemap
+extraction, Cookies inspection)
 - [x] Detects known WAFs
 - [x] Supports anonymous routing through Tor/Proxies
 - [x] Uses asyncio for improved performance

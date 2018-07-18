@@ -7,7 +7,6 @@ import os
 # Python imports will be the end of us all
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
-import requests
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.exceptions import RaccoonException
 from raccoon_src.utils.request_handler import RequestHandler
@@ -140,6 +139,13 @@ def main(target,
 
         # Set Request Handler instance
         request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
+
+        if tor_routing:
+            try:
+                HelpUtilities.confirm_traffic_routs_through_tor()
+            except RaccoonException as err:
+                print("{}{}{}".format(COLOR.RED, err.__str__(), COLOR.RESET))
+                exit(3)
 
         if not no_health_check:
             HelpUtilities.validate_target_is_up(target)

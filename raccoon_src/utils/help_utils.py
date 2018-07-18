@@ -94,6 +94,18 @@ class HelpUtilities:
         return "{}/{}".format(cls.PATH, module_path)
 
     @classmethod
+    def confirm_traffic_routs_through_tor(cls):
+        rh = RequestHandler()
+        try:
+            page = rh.send("GET", url="https://check.torproject.org")
+            if "Congratulations. This browser is configured to use Tor." in page.text:
+                return
+            elif "Sorry. You are not using Tor" in page.text:
+                raise RaccoonException("Traffic does not seem to be routed through Tor.\nExiting")
+        except RequestHandlerException:
+            raise RaccoonException("Tor service seems to be down - not able to connect to 127.0.0.1:9050.\nExiting")
+
+    @classmethod
     def extract_hosts_from_cidr(cls):
         pass
 
