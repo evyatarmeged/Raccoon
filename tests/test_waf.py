@@ -2,15 +2,14 @@ import unittest
 from raccoon_src.lib.waf import WAFApplicationMethods
 
 
-SERVER = "Server"
+class Response:
+    headers = {}
 
 
 class TestWAFHttp(unittest.TestCase):
 
     def setUp(self):
-        class Response:
-            headers = {}
-
+        self.server = "Server"
         self.response = Response()
 
     def test_cloudflare_detection_by_headers(self):
@@ -18,7 +17,7 @@ class TestWAFHttp(unittest.TestCase):
         self.assertTrue(WAFApplicationMethods.detect_cloudflare(self.response))
 
     def test_cloudflare_detection_by_server(self):
-        self.response.headers = {SERVER: "cloudflare"}
+        self.response.headers = {self.server: "cloudflare"}
         self.assertTrue(WAFApplicationMethods.detect_cloudflare(self.response))
 
     def test_cloudfront_detection_by_headers(self):
@@ -28,7 +27,7 @@ class TestWAFHttp(unittest.TestCase):
         self.assertTrue(WAFApplicationMethods.detect_cloudfront(self.response))
 
     def test_cloudfront_detection_by_server(self):
-        self.response.headers = {SERVER: "CloudFront"}
+        self.response.headers = {self.server: "CloudFront"}
         self.assertTrue(WAFApplicationMethods.detect_cloudfront(self.response))
 
     def test_incapsula_detection_by_headers(self):
@@ -38,11 +37,11 @@ class TestWAFHttp(unittest.TestCase):
         self.assertTrue(WAFApplicationMethods.detect_incapsula(self.response))
 
     def test_maxcdn_detection_by_server(self):
-        self.response.headers = {SERVER: "NetDNA-cache"}
+        self.response.headers = {self.server: "NetDNA-cache"}
         self.assertTrue(WAFApplicationMethods.detect_maxcdn(self.response))
 
     def test_edgecast_detection_by_server(self):
-        self.response.headers = {SERVER: "ECD-conglom"}
+        self.response.headers = {self.server: "ECD-conglom"}
         self.assertTrue(WAFApplicationMethods.detect_edgecast(self.response))
 
 
