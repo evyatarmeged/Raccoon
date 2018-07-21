@@ -1,11 +1,11 @@
 #  Raccoon
-![Racoon](raccoon.png)
+![Racoon](https://image.ibb.co/dkAq4J/raccoon.png)
 
 #### Offensive Security Tool for Reconnaissance and Information Gathering
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.62-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.7-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -67,7 +67,7 @@ python raccoon_src/main.py
 ##### Prerequisites
 Raccoon uses [Nmap](https://github.com/nmap/nmap) to scan ports as well as utilizes some other Nmap scripts
 and features. It is mandatory that you have it installed before running Raccoon.<br>
-OpenSSL is also used for TLS/SSL scans and should be installed as well.
+[OpenSSL](https://github.com/openssl/openssl) is also used for TLS/SSL scans and should be installed as well.
 
 ### Usage
 ```
@@ -111,9 +111,12 @@ Options:
 ```
 
 ### Screenshots
-![poc2](./screenshots/poc2.png)<br>
-![poc](./screenshots/poc.png)<br>
-###### Results folder tree after a scan:<br>
-![poc3](./screenshots/poc3.png)
+![poc2](https://image.ibb.co/iR3XJd/poc2.png)<br>
+
+**[HTB](https://www.hackthebox.eu/) challenge example scan:**<br>
+![poc](https://image.ibb.co/dwtMBy/poc.png)<br>
+
+**Results folder tree after a scan:**<br>
+![poc3](https://image.ibb.co/iyaCJd/poc3.png)
 ### Contributing
 Any and all contributions, issues, features and tips are welcome.
