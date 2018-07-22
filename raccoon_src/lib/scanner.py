@@ -28,19 +28,19 @@ class NmapScan:
             HelpUtilities.validate_port_range(self.port_range)
             script.append("-p")
             script.append(self.port_range)
-            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.INFO, self.port_range))
+            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.NOTIFY, self.port_range))
 
         if self.full_scan:
             script.append("-sV")
             script.append("-sC")
-            self.logger.info("{} Added scripts and services to Nmap script".format(COLORED_COMBOS.INFO))
+            self.logger.info("{} Added scripts and services to Nmap script".format(COLORED_COMBOS.NOTIFY))
             return script
         else:
             if self.scripts:
-                self.logger.info("{} Added safe-scripts scan to Nmap script".format(COLORED_COMBOS.INFO))
+                self.logger.info("{} Added safe-scripts scan to Nmap script".format(COLORED_COMBOS.NOTIFY))
                 script.append("-sC")
             if self.services:
-                self.logger.info("{} Added service scan to Nmap script".format(COLORED_COMBOS.INFO))
+                self.logger.info("{} Added service scan to Nmap script".format(COLORED_COMBOS.NOTIFY))
                 script.append("-sV")
         return script
 
@@ -49,7 +49,7 @@ class Scanner:
 
     @classmethod
     def run(cls, scan):
-        scan.logger.info("{} Nmap script to run: {}".format(COLORED_COMBOS.GOOD, " ".join(scan.script)))
+        scan.logger.info("{} Nmap script to run: {}".format(COLORED_COMBOS.INFO, " ".join(scan.script)))
         scan.logger.info("{} Nmap scan started\n".format(COLORED_COMBOS.GOOD))
         process = Popen(
             scan.script,

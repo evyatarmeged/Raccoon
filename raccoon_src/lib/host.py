@@ -50,9 +50,9 @@ class Host:
         try:
             self.target, self.port = addr.split(":")
             self.port = int(self.port)
-            self.logger.info("{} Port detected: {}".format(COLORED_COMBOS.GOOD, self.port))
+            self.logger.info("{} Port detected: {}".format(COLORED_COMBOS.NOTIFY, self.port))
         except IndexError:
-            self.logger.info("{} Did not detect port. Using default port 80".format(COLORED_COMBOS.WARNING))
+            self.logger.info("{} Did not detect port. Using default port 80".format(COLORED_COMBOS.NOTIFY))
             return
         return
 
@@ -89,7 +89,7 @@ class Host:
         if self._is_proto(self.target):
             try:
                 self.protocol, self.target = self.target.split("://")
-                self.logger.info("{} Protocol detected: {}".format(COLORED_COMBOS.GOOD, self.protocol))
+                self.logger.info("{} Protocol detected: {}".format(COLORED_COMBOS.NOTIFY, self.protocol))
                 if self.protocol.lower() == "https" and self.port == 80:
                     self.port = 443
             except ValueError:
@@ -99,7 +99,7 @@ class Host:
             self._extract_port(self.target)
 
         if self.validate_ip(self.target):
-            self.logger.info("{} Detected {} as an IP address.".format(COLORED_COMBOS.GOOD, self.target))
+            self.logger.info("{} Detected {} as an IP address.".format(COLORED_COMBOS.NOTIFY, self.target))
             self.is_ip = True
         else:
             domains = []
@@ -120,7 +120,7 @@ class Host:
             if self.dns_results.get("CNAME"):
                 # Naked domains shouldn't hold CNAME records according to RFC regulations
                 self.logger.info("{} Found {} to be an FQDN by CNAME presence in DNS records".format(
-                    COLORED_COMBOS.GOOD, self.target))
+                    COLORED_COMBOS.NOTIFY, self.target))
 
                 self.fqdn = self.target
                 self.naked = ".".join(self.fqdn.split('.')[1:])

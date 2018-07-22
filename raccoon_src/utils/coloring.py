@@ -12,9 +12,9 @@ COLOR = Color(
     "\033[0;0m"    # reset
 )
 
-ColoredCombos = namedtuple("ColoredCombos", ["INFO", "GOOD", "BAD", "WARNING"])
+ColoredCombos = namedtuple("ColoredCombos", ["INFO", "GOOD", "BAD", "NOTIFY"])
 COLORED_COMBOS = ColoredCombos(
-    "{}[?]{}".format(COLOR.BLUE, COLOR.RESET),
+    "{}[#]{}".format(COLOR.BLUE, COLOR.RESET),
     "{}[v]{}".format(COLOR.GREEN, COLOR.RESET),
     "{}[x]{}".format(COLOR.RED, COLOR.RESET),
     "{}[!]{}".format(COLOR.YELLOW, COLOR.RESET))

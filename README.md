@@ -17,8 +17,8 @@ certificate details and SANs
 - [x] Services and scripts scan
 - [x] URL fuzzing and dir/file detection
 - [x] Subdomain enumeration - uses Google dorking, bruteforce and SAN discovery
-- [x] Web application data (CMS detection, Web Server info, robots & sitemap
-extraction, Cookies inspection)
+- [x] Web application data - CMS detection, Web Server info, robots & sitemap
+extraction, Cookies inspection, Fuzzable URLs and HTML forms discovery
 - [x] Detects known WAFs
 - [x] Supports anonymous routing through Tor/Proxies
 - [x] Uses asyncio for improved performance
@@ -108,10 +108,10 @@ Options:
 ```
 
 ### Screenshots
-![poc2](https://image.ibb.co/iR3XJd/poc2.png)<br>
+![poc2](https://image.ibb.co/iyLreJ/aaaaaaaaaaaaa.png)<br>
 
 **[HTB](https://www.hackthebox.eu/) challenge example scan:**<br>
-![poc](https://image.ibb.co/dwtMBy/poc.png)<br>
+![poc](https://image.ibb.co/bGKTRy/bbbbbbb.png)<br>
 
 **Results folder tree after a scan:**<br>
 ![poc3](https://image.ibb.co/iyaCJd/poc3.png)

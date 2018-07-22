@@ -192,7 +192,7 @@ class TLSHandler(TLSCipherSuiteChecker):
                 self.logger.debug("{}: {}\n".format(k, v))
 
     def write_up(self):
-        self.logger.info("Supporting Ciphers:\n")
+        self.logger.info("{} Supported Ciphers:\n".format(COLORED_COMBOS.GOOD))
         self.logger.info(self.ciphers+"\n")
         self.logger.debug("-"*80+"\n")
         self.logger.debug("SNI Data:\n")
@@ -209,7 +209,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         await self.is_heartbleed_vulnerable()
 
         if self._tls_results_exist():
-            self.logger.info("{} Done collecting TLS data".format(COLORED_COMBOS.GOOD))
+            self.logger.info("{} Done collecting TLS data".format(COLORED_COMBOS.INFO))
             if self._are_certificates_identical():
                 self.non_sni_data["Certificate_details"] = "Same as SNI Certificate"
             self.write_up()

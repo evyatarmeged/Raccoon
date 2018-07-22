@@ -139,5 +139,5 @@ class WAF:
                 self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))
         except WebServerValidatorException:
             self.logger.info(
-                "{} Target does not seem to have an active web server on port: {}. "
-                "No WAF could be detected on an application level.".format(COLORED_COMBOS.WARNING, self.host.port))
+                "{} Target does not seem to have an active web server on port {}. "
+                "No WAF could be detected on an application level.".format(COLORED_COMBOS.NOTIFY, self.host.port))

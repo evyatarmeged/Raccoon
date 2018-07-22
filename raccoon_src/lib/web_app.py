@@ -15,9 +15,10 @@ class WebApplicationScanner:
         self.host = host
         self.request_handler = RequestHandler()
         self.web_server_validator = WebServerValidator()
-        self.web_scan_results = []
         self.headers = None
         self.robots = None
+        self.forms = None
+        self.fuzzable_urls = set()
         log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
@@ -117,27 +118,26 @@ class WebApplicationScanner:
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
-    def _fuzzable_urls(self, soup):
-        fuzzables = set()
+    def _find_fuzzable_urls(self, soup):
         for url in soup.select("a"):
             href = url.get("href")
             if "?" in href and "=" in href:
-                fuzzables.add(url)
-        if fuzzables:
-            self.logger.info("{} Found {} fuzzable URLs in target".format(COLORED_COMBOS.GOOD, len(fuzzables)))
+                self.fuzzable_urls.add(href)
+        if self.fuzzable_urls:
+            self.logger.info("{} {} fuzzable URLs discovered".format(COLORED_COMBOS.NOTIFY, len(self.fuzzable_urls)))
 
-        base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
-        for url in fuzzables:
-            if url.startswith("/"):
-                self.logger.debug("\t{}{}".format(base_target, url))
-            else:
-                self.logger.debug("\t{}".format(url))
+            base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
+            for url in self.fuzzable_urls:
+                if url.startswith("/"):
+                    self.logger.debug("\t{}{}".format(base_target, url))
+                else:
+                    self.logger.debug("\t{}".format(url))
 
     def _find_forms(self, soup):
-        forms = soup.select("form")
-        if forms:
-            self.logger.info("{} Found {} forms in target".format(COLORED_COMBOS.GOOD, len(forms)))
-            for form in forms:
+        self.forms = soup.select("form")
+        if self.forms:
+            self.logger.info("{} {} HTML forms discovered".format(COLORED_COMBOS.NOTIFY, len(self.forms)))
+            for form in self.forms:
                 form_id = form.get("id")
                 form_class = form.get("class")
                 form_method = form.get("method")
@@ -174,7 +174,7 @@ class WebApplicationScanner:
                 self._cookie_info(session.cookies)
 
                 soup = BeautifulSoup(response.text, "lxml")
-                self._fuzzable_urls(soup)
+                self._find_fuzzable_urls(soup)
                 self._find_forms(soup)
 
         except (ConnectionError, TooManyRedirects) as e:
@@ -189,5 +189,5 @@ class WebApplicationScanner:
         except WebServerValidatorException:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port: {}. "
-                "No web application data will be gathered.".format(COLORED_COMBOS.WARNING, self.host.port))
+                "No web application data will be gathered.".format(COLORED_COMBOS.NOTIFY, self.host.port))
             return

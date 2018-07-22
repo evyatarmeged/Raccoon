@@ -37,7 +37,7 @@ class SubDomainEnumerator:
         self.google_dork()
         if not self.no_sub_enum:
             await self.bruteforce()
-        self.logger.info("\n{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
+        self.logger.info("\n{} Done enumerating Subdomains".format(COLORED_COMBOS.NOTIFY))
 
     def find_subdomains_in_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""

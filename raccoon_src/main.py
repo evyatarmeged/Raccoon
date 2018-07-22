@@ -118,15 +118,15 @@ def main(target,
         HelpUtilities.create_output_directory(outdir)
 
         if tor_routing:
-            logger.info("{} Testing that Tor service is up...\n".format(COLORED_COMBOS.WARNING))
+            logger.info("{} Testing that Tor service is up...".format(COLORED_COMBOS.NOTIFY))
         elif proxy_list:
             if proxy_list and not os.path.isfile(proxy_list):
                 raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
             else:
                 logger.info("{} Routing traffic using proxies from list {}\n".format(
-                    COLORED_COMBOS.WARNING, proxy_list))
+                    COLORED_COMBOS.NOTIFY, proxy_list))
         elif proxy:
-            logger.info("Routing traffic through proxy {}\n".format(COLORED_COMBOS.WARNING, proxy))
+            logger.info("Routing traffic through proxy {}\n".format(COLORED_COMBOS.NOTIFY, proxy))
 
         # TODO: Sanitize delay argument
 
@@ -146,7 +146,7 @@ def main(target,
             try:
                 HelpUtilities.confirm_traffic_routs_through_tor()
                 logger.info("{} Validated Tor service is up. Routing traffic anonymously\n".format(
-                    COLORED_COMBOS.WARNING))
+                    COLORED_COMBOS.NOTIFY))
             except RaccoonException as err:
                 print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
@@ -156,7 +156,7 @@ def main(target,
 
         main_loop = asyncio.get_event_loop()
 
-        logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.BLUE, COLOR.RESET))
+        logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.GRAY, COLOR.RESET))
         logger.info("{} Trying to gather information about host: {}".format(COLORED_COMBOS.INFO, target))
 
         # TODO: Populate array when multiple targets are supported
@@ -213,7 +213,7 @@ def main(target,
             while nmap_thread.is_alive():
                 time.sleep(15)
 
-        logger.info("\n{}### Raccoon scan finished ###{}\n".format(COLOR.BLUE, COLOR.RESET))
+        logger.info("\n{}### Raccoon scan finished ###{}\n".format(COLOR.GRAY, COLOR.RESET))
         os.system("stty sane")
 
     except KeyboardInterrupt:
