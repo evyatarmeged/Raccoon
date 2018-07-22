@@ -117,6 +117,38 @@ class WebApplicationScanner:
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
+    def _fuzzable_urls(self, soup):
+        fuzzables = set()
+        for url in soup.select("a"):
+            href = url.get("href")
+            if "?" in href and "=" in href:
+                fuzzables.add(url)
+        if fuzzables:
+            self.logger.info("{} Found {} fuzzable URLs in target".format(COLORED_COMBOS.GOOD, len(fuzzables)))
+
+        base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
+        for url in fuzzables:
+            if url.startswith("/"):
+                self.logger.debug("\t{}{}".format(base_target, url))
+            else:
+                self.logger.debug("\t{}".format(url))
+
+    def _find_forms(self, soup):
+        forms = soup.select("form")
+        if forms:
+            self.logger.info("{} Found {} forms in target".format(COLORED_COMBOS.GOOD, len(forms)))
+            for form in forms:
+                form_id = form.get("id")
+                form_class = form.get("class")
+                form_method = form.get("method")
+                form_action = form.get("action")
+                self.logger.debug("Form details: ID: {}, Class: {}, Method: {}, action: {}".format(
+                    form_id, form_class, form_method, form_action
+                ))
+
+    def _find_emails(self, soup):
+        pass
+
     def get_web_application_info(self):
         session = self.request_handler.get_new_session()
         try:
@@ -140,6 +172,10 @@ class WebApplicationScanner:
                 self._xss_protection()
                 self._anti_clickjacking()
                 self._cookie_info(session.cookies)
+
+                soup = BeautifulSoup(response.text, "lxml")
+                self._fuzzable_urls(soup)
+                self._find_forms(soup)
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
