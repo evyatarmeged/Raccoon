@@ -15,7 +15,7 @@
 certificate details and SANs
 - [x] Port Scan
 - [x] Services and scripts scan
-- [x] URL fuzzing and directory detection
+- [x] URL fuzzing and dir/file detection
 - [x] Subdomain enumeration - uses Google dorking, bruteforce and SAN discovery
 - [x] Web application data (CMS detection, Web Server info, robots & sitemap
 extraction, Cookies inspection)
@@ -27,9 +27,6 @@ and modules by files
 
 
 ##### Roadmap and TODOs
-- [ ] Have a parallel-all option run in integration with the -q argument. Essentially, make all scans 
-run together when there is no stdout output for much quicker scan times. Running everything in parallel,
- especially dirbusting, messes output entirely.
 - [ ] Support multiple hosts (read from file)
 - [ ] Rate limit evasion
 - [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
@@ -74,9 +71,10 @@ and features. It is mandatory that you have it installed before running Raccoon.
 Usage: raccoon [OPTIONS]
 
 Options:
+  --version                      Show the version and exit.
   -t, --target TEXT              Target to scan  [required]
   -d, --dns-records TEXT         Comma separated DNS records to query.
-                                 Defaults to: A, MX, NS, CNAME, SOA
+                                 Defaults to: A,MX,NS,CNAME,SOA,TXT
   --tor-routing                  Route HTTP traffic through Tor (uses port
                                  9050). Slows total runtime significantly
   --proxy-list TEXT              Path to proxy list file that would be used
@@ -107,7 +105,6 @@ Options:
   -q, --quiet                    Do not output to stdout
   -o, --outdir TEXT              Directory destination for scan output
   --help                         Show this message and exit.
-
 ```
 
 ### Screenshots

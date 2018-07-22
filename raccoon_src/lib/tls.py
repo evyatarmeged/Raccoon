@@ -201,12 +201,11 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.logger.debug("non-SNI Data:\n")
         self._dictionary_log_procedure(self.non_sni_data)
 
-    async def run(self, sni=True):
+    async def run(self):
         self.logger.info("{} Started collecting TLS data for {}".format(COLORED_COMBOS.INFO, self.target))
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._execute_ssl_data_extraction()
-        if sni:
-            self.sni_data = await self._execute_ssl_data_extraction(sni=sni)
+        self.sni_data = await self._execute_ssl_data_extraction()
         await self.is_heartbleed_vulnerable()
 
         if self._tls_results_exist():

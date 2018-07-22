@@ -100,7 +100,6 @@ def main(target,
          outdir,
          quiet):
     try:
-
         # ------ Arg validation ------
 
         # Set logging level and Logger instance
@@ -112,7 +111,7 @@ def main(target,
         try:
             HelpUtilities.validate_executables()
         except RaccoonException as e:
-            logger.critical(e.__str__())
+            logger.critical(str(e))
             exit(9)
         HelpUtilities.validate_wordlist_args(proxy_list, wordlist, subdomain_list)
         HelpUtilities.validate_proxy_args(tor_routing, proxy, proxy_list)
@@ -149,7 +148,7 @@ def main(target,
                 logger.info("{} Validated Tor service is up. Routing traffic anonymously\n".format(
                     COLORED_COMBOS.WARNING))
             except RaccoonException as err:
-                print("{}{}{}".format(COLOR.RED, err.__str__(), COLOR.RESET))
+                print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
 
         if not skip_health_check:
