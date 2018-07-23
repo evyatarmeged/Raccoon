@@ -31,13 +31,13 @@ class SubDomainEnumerator:
         self.logger = Logger(log_file)
 
     async def run(self):
-        self.logger.info("\n{} Enumerating Subdomains".format(COLORED_COMBOS.INFO))
+        self.logger.info("{} Enumerating Subdomains".format(COLORED_COMBOS.INFO))
         if self.sans:
             self.find_subdomains_in_sans()
         self.google_dork()
         if not self.no_sub_enum:
             await self.bruteforce()
-        self.logger.info("\n{} Done enumerating Subdomains".format(COLORED_COMBOS.NOTIFY))
+        self.logger.info("{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
 
     def find_subdomains_in_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""

@@ -92,7 +92,12 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        self.logger.info("{} Fuzzing from {}".format(COLORED_COMBOS.INFO, self.wordlist))
+        if not sub_domain:
+            self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
+
+        self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.wordlist))
         pool = ThreadPool(self.num_threads)
         pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
-        self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))
+
+        if not sub_domain:
+            self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))

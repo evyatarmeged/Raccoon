@@ -58,15 +58,15 @@ class WebApplicationScanner:
             http_only = cookie.has_nonstandard_attr("HttpOnly")
             try:
                 if domain in self.host.target or self.host.target in domain:
-                    if not secure:
-                        self.logger.info(
-                            "%s Found cookie without secure flag: {%s: %s}" % (COLORED_COMBOS.GOOD, key, value)
-                        )
-
-                    if not http_only:
-                        self.logger.info(
-                            "{} HttpOnly flag is also absent from cookie".format(COLORED_COMBOS.GOOD)
-                        )
+                    if not secure or not http_only:
+                        current = "%s Cookie: {%s: %s} -" % (COLORED_COMBOS.GOOD, key, value)
+                        if not secure and not http_only:
+                            current += " both secure and HttpOnly flags are not set"
+                        elif not secure:
+                            current += " secure flag not set"
+                        else:
+                            current += " HttpOnly flag not set"
+                        self.logger.info(current)
 
             except TypeError:
                 continue
@@ -126,19 +126,22 @@ class WebApplicationScanner:
                 file.write(res.text)
 
     def _find_fuzzable_urls(self, soup):
-        for url in soup.select("a"):
-            href = url.get("href")
-            if "?" in href and "=" in href:
-                self.fuzzable_urls.add(href)
-        if self.fuzzable_urls:
-            self.logger.info("{} {} fuzzable URLs discovered".format(COLORED_COMBOS.NOTIFY, len(self.fuzzable_urls)))
+        urls = soup.select("a")
+        if urls:
+            for url in urls:
+                href = url.get("href")
+                if href and "?" in href and "=" in href:
+                    self.fuzzable_urls.add(href)
+            if self.fuzzable_urls:
+                self.logger.info("{} {} fuzzable URLs discovered".format(
+                    COLORED_COMBOS.NOTIFY, len(self.fuzzable_urls)))
 
-            base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
-            for url in self.fuzzable_urls:
-                if url.startswith("/"):
-                    self.logger.debug("\t{}{}".format(base_target, url))
-                else:
-                    self.logger.debug("\t{}".format(url))
+                base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
+                for url in self.fuzzable_urls:
+                    if url.startswith("/"):
+                        self.logger.debug("\t{}{}".format(base_target, url))
+                    else:
+                        self.logger.debug("\t{}".format(url))
 
     def _find_forms(self, soup):
         self.forms = soup.select("form")
