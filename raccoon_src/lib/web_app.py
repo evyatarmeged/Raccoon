@@ -55,12 +55,19 @@ class WebApplicationScanner:
             value = cookie.__dict__.get("value")
             domain = cookie.__dict__.get("domain")
             secure = cookie.__dict__.get("secure")
+            http_only = cookie.has_nonstandard_attr("HttpOnly")
             try:
                 if domain in self.host.target or self.host.target in domain:
                     if not secure:
                         self.logger.info(
                             "%s Found cookie without secure flag: {%s: %s}" % (COLORED_COMBOS.GOOD, key, value)
                         )
+
+                    if not http_only:
+                        self.logger.info(
+                            "{} HttpOnly flag is also absent from cookie".format(COLORED_COMBOS.GOOD)
+                        )
+
             except TypeError:
                 continue
 
