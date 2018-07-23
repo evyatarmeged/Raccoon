@@ -27,7 +27,7 @@ class HelpUtilities:
                 return
             except (ConnectionError, RequestHandlerException):
                 raise RaccoonException("Target {} seems to be down.\n"
-                                       "Run with --no-health-check to ignore hosts considered as down.".format(host))
+                                       "Run with --skip-health-check to ignore hosts considered as down.".format(host))
 
     @classmethod
     def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):
