@@ -59,6 +59,8 @@ class DNSHandler:
 
     @classmethod
     def generate_dns_dumpster_mapping(cls, host, sout_logger):
+        # TODO: !!! Needs to be edited to use new HELP_UTILS METHOD !!!
+
         # Start DNS Dumpster session for the token
         request_handler = RequestHandler()
         dnsdumpster_session = request_handler.get_new_session()

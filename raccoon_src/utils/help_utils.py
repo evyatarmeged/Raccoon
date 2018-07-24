@@ -105,6 +105,32 @@ class HelpUtilities:
         except RequestHandlerException:
             raise RaccoonException("Tor service seems to be down - not able to connect to 127.0.0.1:9050.\nExiting")
 
+    # @classmethod
+    # def query_dns_dumpster(cls, host):
+    #     # Start DNS Dumpster session for the token
+    #     request_handler = RequestHandler()
+    #     dnsdumpster_session = request_handler.get_new_session()
+    #     url = "https://dnsdumpster.com"
+    #     if host.naked:
+    #         target = host.naked
+    #     else:
+    #         target = host.target
+    #     payload = {
+    #         "targetip": target,
+    #         "csrfmiddlewaretoken": None
+    #     }
+    #     try:
+    #         dnsdumpster_session.get(url, timeout=10)
+    #         jar = dnsdumpster_session.cookies
+    #         for c in jar:
+    #             if not c.__dict__.get("name") == "csrftoken":
+    #                 continue
+    #             payload["csrfmiddlewaretoken"] = c.__dict__.get("value")
+    #             break
+    #         return dnsdumpster_session.post(url, data=payload, headers={"Referer": "https://dnsdumpster.com/"})
+    #     except ConnectionError:
+    #         raise RaccoonException
+    #
     @classmethod
     def extract_hosts_from_cidr(cls):
         pass
