@@ -1,6 +1,5 @@
 import re
 from bs4 import BeautifulSoup
-from requests.exceptions import ConnectionError
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.lib.fuzzer import URLFuzzer
 from raccoon_src.utils.help_utils import HelpUtilities
@@ -36,7 +35,8 @@ class SubDomainEnumerator:
         self.logger.info("{} Enumerating Subdomains".format(COLORED_COMBOS.INFO))
         if self.sans:
             self._extract_from_sans()
-        self.google_dork()
+        self._google_dork()
+        self._extract_from_dns_dumpster()
         if not self.no_sub_enum:
             await self.bruteforce()
         self.logger.info("{} Done enumerating Subdomains".format(COLORED_COMBOS.INFO))
@@ -56,7 +56,7 @@ class SubDomainEnumerator:
             if (tld_less in san or domain in san) and self.target != san:
                 self.logger.info("{} Subdomain detected: {}".format(COLORED_COMBOS.GOOD, san))
 
-    def google_dork(self):
+    def _google_dork(self):
         self.logger.info("{} Trying to discover subdomains in Google".format(COLORED_COMBOS.INFO))
         page = self.request_handler.send(
             "GET",
@@ -68,15 +68,20 @@ class SubDomainEnumerator:
             if "www." not in subdomain:
                 self.logger.info("{} Detected subdomain through Google dorking: {}".format(
                     COLORED_COMBOS.GOOD, subdomain))
-    #
-    # def _extract_from_dns_dumpster(self):
-    #     self.logger.info("{} Trying to extract subdomains from DNS dumpster")
-    #     try:
-    #         page = HelpUtilities.query_dns_dumpster(host=self.host)
-    #
-    #     except RaccoonException:
-    #         self.logger.info("{} Could not query DNS dumpster".format(COLORED_COMBOS.NOTIFY))
-    #
+
+    def _extract_from_dns_dumpster(self):
+        self.logger.info("{} Trying to extract subdomains from DNS dumpster")
+        try:
+            page = HelpUtilities.query_dns_dumpster(host=self.host)
+            soup = BeautifulSoup(page.text, "lxml")
+            hosts_table = soup.select(".table")[-1]
+            for row in hosts_table.find_all("tr"):
+                tds = row.select("td")
+                sub_domain = tds[0].text.split('\n')[0]  # Grab just the URL, truncate other information
+                self.sub_domains.add(sub_domain)
+        except RaccoonException:
+            self.logger.info("{} Failed to query DNS dumpster for subdomains".format(COLORED_COMBOS.BAD))
+
     async def bruteforce(self):
         path = "{}/subdomain_fuzz.txt".format(self.host.target)
 
@@ -93,4 +98,3 @@ class SubDomainEnumerator:
             follow_redirects=self.follow_redirects
             )
         await sub_domain_fuzzer.fuzz_all(sub_domain=True, log_file_path=path)
-
