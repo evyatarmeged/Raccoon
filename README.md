@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.72-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.73-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -16,9 +16,16 @@ certificate details and SANs
 - [x] Port Scan
 - [x] Services and scripts scan
 - [x] URL fuzzing and dir/file detection
-- [x] Subdomain enumeration - uses Google dorking, bruteforce and SAN discovery
-- [x] Web application data - CMS detection, Web Server info, robots & sitemap
-extraction, Cookies inspection, Fuzzable URLs and HTML forms discovery
+- [x] Subdomain enumeration - uses Google dorking, DNS dumpster queries,
+ SAN discovery and bruteforce
+- [x] Web application data retrieval:<br>
+  - CMS detection
+  - Web server info and X-Powered-By
+  - robots.txt and sitemap extraction
+  - Cookie inspection
+  - Extracts all fuzzable URLs
+  - Discovers HTML forms
+  - Retrieves all Email addresses
 - [x] Detects known WAFs
 - [x] Supports anonymous routing through Tor/Proxies
 - [x] Uses asyncio for improved performance
