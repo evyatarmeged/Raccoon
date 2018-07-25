@@ -43,7 +43,7 @@ class SubDomainEnumerator:
 
     def _extract_from_sans(self):
         """Looks for different TLDs as well as different sub-domains in SAN list"""
-        self.logger.info("{} Trying to find Subdomains in SANs list".format(COLORED_COMBOS.INFO))
+        self.logger.info("{} Trying to find Subdomains in SANs list".format(COLORED_COMBOS.NOTIFY))
         if self.host.naked:
             domain = self.host.naked
             tld_less = domain.split(".")[0]
@@ -53,11 +53,11 @@ class SubDomainEnumerator:
             domain = ".".join(domain[1:])
 
         for san in self.sans:
-            if (tld_less in san or domain in san) and self.target != san:
+            if (tld_less in san or domain in san) and self.target != san and not san.startswith("*"):
                 self.logger.info("{} Subdomain detected: {}".format(COLORED_COMBOS.GOOD, san))
 
     def _google_dork(self):
-        self.logger.info("{} Trying to discover subdomains in Google".format(COLORED_COMBOS.INFO))
+        self.logger.info("{} Trying to discover subdomains in Google".format(COLORED_COMBOS.NOTIFY))
         page = self.request_handler.send(
             "GET",
             url="https://www.google.com/search?q=site:{}&num=100".format(self.target)
@@ -70,7 +70,7 @@ class SubDomainEnumerator:
                     COLORED_COMBOS.GOOD, subdomain))
 
     def _extract_from_dns_dumpster(self):
-        self.logger.info("{} Trying to extract subdomains from DNS dumpster")
+        self.logger.info("{} Trying to extract subdomains from DNS dumpster".format(COLORED_COMBOS.NOTIFY))
         try:
             page = HelpUtilities.query_dns_dumpster(host=self.host)
             soup = BeautifulSoup(page.text, "lxml")
@@ -78,6 +78,7 @@ class SubDomainEnumerator:
             for row in hosts_table.find_all("tr"):
                 tds = row.select("td")
                 sub_domain = tds[0].text.split('\n')[0]  # Grab just the URL, truncate other information
+                self.logger.info("{} Found subdomain in DNS dumpster: {}".format(COLORED_COMBOS.GOOD, sub_domain))
                 self.sub_domains.add(sub_domain)
         except RaccoonException:
             self.logger.info("{} Failed to query DNS dumpster for subdomains".format(COLORED_COMBOS.BAD))
@@ -89,7 +90,7 @@ class SubDomainEnumerator:
         if self.host.naked:
             self.host.target = self.host.naked
 
-        self.logger.info("{} Bruteforcing subdomains".format(COLORED_COMBOS.INFO))
+        self.logger.info("{} Bruteforcing subdomains".format(COLORED_COMBOS.NOTIFY))
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
             wordlist=self.domain_list,

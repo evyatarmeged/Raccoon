@@ -22,5 +22,5 @@ class WebServerValidator(metaclass=Singleton):
                 )
             )
             return True
-        except (ConnectionError, TooManyRedirects, HTTPError, RequestHandlerException):
+        except RequestHandlerException:
             raise WebServerValidatorException

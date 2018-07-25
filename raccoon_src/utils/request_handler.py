@@ -90,15 +90,15 @@ class RequestHandler(metaclass=Singleton):
             # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
         except ConnectTimeout:
-            return
+            raise RequestHandlerException("Connection with server timed out")
         except NewConnectionError:
-            return
+            raise RequestHandlerException("Address cannot be resolved")
             # New connection error == Can't resolve address
         except ConnectionError:
             # TODO: Increase delay
-            raise RequestHandlerException("Error connecting to host\n")
+            raise RequestHandlerException("Error connecting to host")
         except TooManyRedirects:
-            return
+            raise RequestHandlerException("Infinite redirects detected - too many redirects error")
 
     def get_new_session(self):
         """Returns a new session using the object's proxies and headers"""
