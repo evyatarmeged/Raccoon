@@ -192,7 +192,7 @@ class TLSHandler(TLSCipherSuiteChecker):
                 self.logger.debug("{}: {}\n".format(k, v))
 
     def write_up(self):
-        self.logger.info("{} Supported Ciphers:\n".format(COLORED_COMBOS.GOOD))
+        self.logger.info("{} Supported Ciphers:".format(COLORED_COMBOS.GOOD))
         self.logger.info(self.ciphers+"\n")
         self.logger.debug("-"*80+"\n")
         self.logger.debug("SNI Data:\n")

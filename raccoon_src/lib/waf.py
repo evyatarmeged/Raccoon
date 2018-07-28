@@ -62,6 +62,13 @@ class WAFApplicationMethods:
             return True
         return
 
+    @classmethod
+    def detect_reblaze(cls, res):
+        if "Reblaze Secure Web Gateway" in res.headers.get(SERVER) or any(
+                (cookie.get("name") == "rbzid" for cookie in res.cookies)):
+            return True
+        return
+
 
 class WAF:
 
@@ -87,7 +94,8 @@ class WAF:
             "MaxCDN": WAFApplicationMethods.detect_maxcdn,
             "Edgecast": WAFApplicationMethods.detect_edgecast,
             "Distil Networks": WAFApplicationMethods.detect_distil,
-            "Sucuri": WAFApplicationMethods.detect_sucuri
+            "Sucuri": WAFApplicationMethods.detect_sucuri,
+            "Reblaze": WAFApplicationMethods.detect_reblaze
         }
         log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
