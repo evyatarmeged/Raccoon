@@ -151,9 +151,6 @@ def main(target,
                 print("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(3)
 
-        if not skip_health_check:
-            HelpUtilities.validate_target_is_up(target)
-
         main_loop = asyncio.get_event_loop()
 
         logger.info("{}### Raccoon Scan Started ###{}\n".format(COLOR.GRAY, COLOR.RESET))
@@ -163,6 +160,9 @@ def main(target,
         # hosts = []
         host = Host(target=target, dns_records=dns_records)
         host.parse()
+
+        if not skip_health_check:
+            HelpUtilities.validate_target_is_up(host)
 
         logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
         nmap_scan = NmapScan(host, full_scan, scripts, services, port)

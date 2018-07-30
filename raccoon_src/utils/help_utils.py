@@ -13,17 +13,16 @@ class HelpUtilities:
 
     @classmethod
     def validate_target_is_up(cls, host):
-        cmd = "ping -c 1 {}".format(host)
+        cmd = "ping -c 1 {}".format(host.target)
         try:
             check_call(cmd.split(), stdout=PIPE, stderr=PIPE)
             return
         except CalledProcessError:
             # Maybe ICMP is blocked. Try web server
             try:
-                if "http" not in host:
-                    host = "http://" + host
+                url = "{}://{}:{}".format(host.protocol, host.target, host.port)
                 rh = RequestHandler()
-                rh.send("GET", url=host, timeout=10)
+                rh.send("GET", url=url, timeout=10)
                 return
             except (ConnectionError, RequestHandlerException):
                 raise RaccoonException("Target {} seems to be down.\n"
