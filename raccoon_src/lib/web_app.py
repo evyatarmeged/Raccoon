@@ -19,6 +19,7 @@ class WebApplicationScanner:
         self.robots = None
         self.forms = None
         self.fuzzable_urls = set()
+        self.emails = set()
         log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
@@ -125,25 +126,45 @@ class WebApplicationScanner:
             with open("{}/sitemap.xml".format(self.target_dir), "w") as file:
                 file.write(res.text)
 
-    def _find_fuzzable_urls(self, soup):
+    def _analyze_hrefs(self, href):
+        if all(("?" in href, "=" in href, not href.startswith("mailto:"))):
+            if self.host.naked in href or self.host.target in href:
+                self.fuzzable_urls.add(href)
+        elif href.startswith("mailto:"):
+            self._add_to_emails(href)
+
+    def _log_fuzzable_urls(self):
+        base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
+        for url in self.fuzzable_urls:
+            if url.startswith("/"):
+                self.logger.debug("\t{}{}".format(base_target, url))
+            else:
+                self.logger.debug("\t{}".format(url))
+
+    def _log_emails(self):
+        for email in self.emails:
+            self.logger.debug("\t{}".format(email[7:]))
+
+    def _find_urls(self, soup):
         urls = soup.select("a")
         if urls:
             for url in urls:
                 href = url.get("href")
-                if href and "?" in href and "=" in href:
-                    self.fuzzable_urls.add(href)
+                if href:
+                    self._analyze_hrefs(href)
+
             if self.fuzzable_urls:
                 self.logger.info("{} {} fuzzable URLs discovered".format(
                     COLORED_COMBOS.NOTIFY, len(self.fuzzable_urls)))
+                self._log_fuzzable_urls()
 
-                base_target = "{}://{}:{}".format(self.host.protocol, self.host.target, self.host.port)
-                for url in self.fuzzable_urls:
-                    if url.startswith("/"):
-                        self.logger.debug("\t{}{}".format(base_target, url))
-                    else:
-                        self.logger.debug("\t{}".format(url))
+            if self.emails:
+                self.logger.info("{} {} email addresses discovered".format(
+                    COLORED_COMBOS.NOTIFY, len(self.emails)))
+                self._log_emails()
 
     def _find_forms(self, soup):
+        # TODO: Analyze interesting input names/ids/params
         self.forms = soup.select("form")
         if self.forms:
             self.logger.info("{} {} HTML forms discovered".format(COLORED_COMBOS.NOTIFY, len(self.forms)))
@@ -152,12 +173,14 @@ class WebApplicationScanner:
                 form_class = form.get("class")
                 form_method = form.get("method")
                 form_action = form.get("action")
-                self.logger.debug("Form details: ID: {}, Class: {}, Method: {}, action: {}".format(
+                if form_action == "#":
+                    continue
+                self.logger.debug("\tForm details: ID: {}, Class: {}, Method: {}, action: {}".format(
                     form_id, form_class, form_method, form_action
                 ))
 
-    def _find_emails(self, soup):
-        pass
+    def _add_to_emails(self, href):
+        self.emails.add(href)
 
     def get_web_application_info(self):
         session = self.request_handler.get_new_session()
@@ -184,7 +207,7 @@ class WebApplicationScanner:
                 self._cookie_info(session.cookies)
 
                 soup = BeautifulSoup(response.text, "lxml")
-                self._find_fuzzable_urls(soup)
+                self._find_urls(soup)
                 self._find_forms(soup)
 
         except (ConnectionError, TooManyRedirects) as e:

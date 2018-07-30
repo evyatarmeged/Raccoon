@@ -65,7 +65,7 @@ class WAFApplicationMethods:
     @classmethod
     def detect_reblaze(cls, res):
         if "Reblaze Secure Web Gateway" in res.headers.get(SERVER) or any(
-                (cookie.get("name") == "rbzid" for cookie in res.cookies)):
+                (cookie.__dict__.get("name") == "rbzid" for cookie in res.cookies)):
             return True
         return
 

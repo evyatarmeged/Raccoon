@@ -80,7 +80,7 @@ class SubDomainEnumerator:
                 sub_domain = tds[0].text.split('\n')[0]  # Grab just the URL, truncate other information
                 self.logger.info("{} Found subdomain in DNS dumpster: {}".format(COLORED_COMBOS.GOOD, sub_domain))
                 self.sub_domains.add(sub_domain)
-        except RaccoonException:
+        except (RaccoonException, IndexError):
             self.logger.info("{} Failed to query DNS dumpster for subdomains".format(COLORED_COMBOS.BAD))
 
     async def bruteforce(self):
