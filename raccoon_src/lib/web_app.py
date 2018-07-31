@@ -128,7 +128,7 @@ class WebApplicationScanner:
 
     def _analyze_hrefs(self, href):
         if all(("?" in href, "=" in href, not href.startswith("mailto:"))):
-            if self.host.naked in href or self.host.target in href or href.startswith("/"):
+            if any(((self.host.naked and self.host.naked in href), self.host.target in href, href.startswith("/"))):
                 self.fuzzable_urls.add(href)
         elif href.startswith("mailto:"):
             self._add_to_emails(href)
