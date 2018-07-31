@@ -27,7 +27,6 @@ class SubDomainEnumerator:
         self.follow_redirects = follow_redirects
         self.no_sub_enum = no_sub_enum
         self.request_handler = RequestHandler()
-        self.sub_domains = set()
         log_file = HelpUtilities.get_output_path("{}/subdomains.txt".format(self.target))
         self.logger = Logger(log_file)
 
@@ -79,7 +78,6 @@ class SubDomainEnumerator:
                 tds = row.select("td")
                 sub_domain = tds[0].text.split('\n')[0]  # Grab just the URL, truncate other information
                 self.logger.info("{} Found subdomain in DNS dumpster: {}".format(COLORED_COMBOS.GOOD, sub_domain))
-                self.sub_domains.add(sub_domain)
         except (RaccoonException, IndexError):
             self.logger.info("{} Failed to query DNS dumpster for subdomains".format(COLORED_COMBOS.BAD))
 
