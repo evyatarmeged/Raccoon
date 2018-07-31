@@ -162,7 +162,11 @@ def main(target,
         host.parse()
 
         if not skip_health_check:
-            HelpUtilities.validate_target_is_up(host)
+            try:
+                HelpUtilities.validate_target_is_up(host)
+            except RaccoonException as err:
+                logger.critical("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
+                exit(42)
 
         logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
         nmap_scan = NmapScan(host, full_scan, scripts, services, port)
