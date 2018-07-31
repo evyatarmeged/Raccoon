@@ -89,11 +89,11 @@ class URLFuzzer:
                 res = self.request_handler.send("HEAD", url=url, allow_redirects=self.follow_redirects)
                 if res.status_code == 200:
                     if sub_domain:
-                        err_msg = "Wildcard subdomain support detected (fake domains return 200)." \
+                        err_msg = "Wildcard subdomain support detected (all subdomains return 200)." \
                                   " Will not bruteforce subdomains"
                     else:
-                        err_msg = "Web server seems to redirect and eventually returns" \
-                                  " 200 even for non-existent resources. Will not bruteforce URLs"
+                        err_msg = "Web server seems to redirect requests for all resources " \
+                                  "to eventually return 200. Will not bruteforce URLs"
                     raise FuzzerException(err_msg)
 
             except RequestHandlerException as e:
@@ -119,11 +119,12 @@ class URLFuzzer:
         except FileNotFoundError:
             raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
 
-        if not sub_domain:
-            self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
-
         try:
+            # Rule out wildcard subdomain support/all resources redirect to a 200 page
             self._rule_out_false_positives(sub_domain)
+
+            if not sub_domain:
+                self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
             self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.wordlist))
             pool = ThreadPool(self.num_threads)
             pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)

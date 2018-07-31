@@ -109,8 +109,10 @@ class Host:
                 self.fqdn = self.target
                 self.naked = ".".join(self.fqdn.split('.')[1:])
             else:
-                # Can't be sure if FQDN or just naked domain
                 domains.append(self.target)
+                if len(self.target.split(".")) == 2:
+                    self.logger.info("{} Found {} to be a naked domain".format(COLORED_COMBOS.NOTIFY, self.target))
+                    self.naked = self.target
 
             try:
                 self.dns_results = DNSHandler.query_dns(domains, self.dns_records)
