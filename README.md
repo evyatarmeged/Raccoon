@@ -4,7 +4,7 @@
 #### Offensive Security Tool for Reconnaissance and Information Gathering
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
-![pythonver](https://img.shields.io/badge/python-3%2B-blue.svg)
+![pythonver](https://img.shields.io/badge/python-3.5%2B-blue.svg)
 ![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.74-lightgrey.svg)
 
 ##### Features
@@ -60,8 +60,11 @@ For more options - see "Usage".
 For the latest stable version:<br>
 ```
 pip install raccoon-scanner
+# To run:
+raccoon [OPTIONS]
 ```
-Or clone the GitHub repository for the latest features and changes:<br>
+Please note Raccoon requires Python3.5+ so may need to use `pip3 install raccoon-scanner`.<br>
+You can also clone the GitHub repository for the latest features and changes:<br>
 ```
 git clone https://github.com/evyatarmeged/Raccoon.git
 cd Raccoon
