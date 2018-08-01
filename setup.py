@@ -21,7 +21,8 @@ setup(
                       "lxml",
                       "click",
                       "fake-useragent",
-                      "requests[socks]"],
+                      "requests[socks]",
+                      "xmltodict"],
     package_data={
         "raccoon_src": [
             "wordlists/*"

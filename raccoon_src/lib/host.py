@@ -110,7 +110,8 @@ class Host:
                 self.naked = ".".join(self.fqdn.split('.')[1:])
             else:
                 domains.append(self.target)
-                if len(self.target.split(".")) == 2:
+                domain_levels = self.target.split(".")
+                if len(domain_levels) == 2 or (len(domain_levels) == 3 and domain_levels[1] == "co"):
                     self.logger.info("{} Found {} to be a naked domain".format(COLORED_COMBOS.NOTIFY, self.target))
                     self.naked = self.target
 

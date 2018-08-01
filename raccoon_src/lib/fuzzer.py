@@ -82,11 +82,11 @@ class URLFuzzer:
         return Logger(HelpUtilities.get_output_path(log_file))
 
     def _rule_out_false_positives(self, sub_domain):
-        false_positives = (uuid.uuid4() for i in range(3))
-        for fp in false_positives:
-            url = self._build_request_url(fp, sub_domain)
+        fake_uris = (uuid.uuid4() for i in range(3))
+        for uri in fake_uris:
+            url = self._build_request_url(uri, sub_domain)
             try:
-                res = self.request_handler.send("HEAD", url=url, allow_redirects=self.follow_redirects)
+                res = self.request_handler.send("GET", url=url, allow_redirects=self.follow_redirects)
                 if res.status_code == 200:
                     if sub_domain:
                         err_msg = "Wildcard subdomain support detected (all subdomains return 200)." \

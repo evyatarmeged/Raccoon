@@ -20,13 +20,17 @@ class HelpUtilities:
         except CalledProcessError:
             # Maybe ICMP is blocked. Try web server
             try:
-                url = "{}://{}:{}".format(host.protocol, host.target, host.port)
+                if host.port == 443 or host.port == 80:
+                    url = "{}://{}".format(host.protocol, host.target)
+                else:
+                    url = "{}://{}:{}".format(host.protocol, host.target, host.port)
                 rh = RequestHandler()
-                rh.send("GET", url=url, timeout=10)
+                rh.send("GET", url=url, timeout=15)
                 return
             except (ConnectionError, RequestHandlerException):
-                raise RaccoonException("Target {} seems to be down.\n"
-                                       "Run with --skip-health-check to ignore hosts considered as down.".format(host))
+                raise RaccoonException("Target {} seems to be down (no response to ping or from a web server"
+                                       " at port {}).\nRun with --skip-health-check to ignore hosts"
+                                       " considered as down.".format(host, host.port))
 
     @classmethod
     def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):

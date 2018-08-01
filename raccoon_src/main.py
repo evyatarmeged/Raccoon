@@ -68,10 +68,11 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--skip-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("--no-redirects", is_flag=True, default=False,
+@click.option("--no-redirects", is_flag=True,
               help="Do not follow redirects when fuzzing. Default: False (will follow redirects)")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
 @click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
+@click.option("--skip-nmap-scan", is_flag=True, help="Do not scan with Nmap")
 # @click.option("-d", "--delay", default="0.25-1",
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
@@ -96,6 +97,7 @@ def main(target,
          no_redirects,
          no_url_fuzzing,
          no_sub_enum,
+         skip_nmap_scan,
          # delay,
          outdir,
          quiet):
@@ -126,7 +128,7 @@ def main(target,
                 logger.info("{} Routing traffic using proxies from list {}\n".format(
                     COLORED_COMBOS.NOTIFY, proxy_list))
         elif proxy:
-            logger.info("Routing traffic through proxy {}\n".format(COLORED_COMBOS.NOTIFY, proxy))
+            logger.info("{} Routing traffic through proxy {}\n".format(COLORED_COMBOS.NOTIFY, proxy))
 
         # TODO: Sanitize delay argument
 
@@ -168,13 +170,14 @@ def main(target,
                 logger.critical("{}{}{}".format(COLOR.RED, str(err), COLOR.RESET))
                 exit(42)
 
-        logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
-        nmap_scan = NmapScan(host, full_scan, scripts, services, port)
-        # # # TODO: Populate array when multiple targets are supported
-        # nmap_threads = []
-        nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
-        # Run Nmap scan in the background. Can take some time
-        nmap_thread.start()
+        if not skip_nmap_scan:
+            logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
+            nmap_scan = NmapScan(host, full_scan, scripts, services, port)
+            # # # TODO: Populate array when multiple targets are supported
+            # nmap_threads = []
+            nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
+            # Run Nmap scan in the background. Can take some time
+            nmap_thread.start()
 
         # Run first set of checks - TLS, Web/WAF Data, DNS data
         waf = WAF(host)
@@ -210,12 +213,13 @@ def main(target,
             )
             main_loop.run_until_complete(subdomain_enumerator.run())
 
-        if nmap_thread.is_alive():
-            logger.info("{} All scans done. Waiting for Nmap scan to wrap up. "
-                        "Time left may vary depending on scan type and port range".format(COLORED_COMBOS.INFO))
+        if not skip_nmap_scan:
+            if nmap_thread.is_alive():
+                logger.info("{} All scans done. Waiting for Nmap scan to wrap up. "
+                            "Time left may vary depending on scan type and port range".format(COLORED_COMBOS.INFO))
 
-            while nmap_thread.is_alive():
-                time.sleep(15)
+                while nmap_thread.is_alive():
+                    time.sleep(15)
 
         logger.info("\n{}### Raccoon scan finished ###{}\n".format(COLOR.GRAY, COLOR.RESET))
         os.system("stty sane")
