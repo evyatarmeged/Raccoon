@@ -43,7 +43,7 @@ https://github.com/evyatarmeged/Raccoon
 
 
 @click.command()
-@click.version_option("0.0.74")
+@click.version_option("0.0.75")
 @click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA,TXT",
               help="Comma separated DNS records to query. Defaults to: A,MX,NS,CNAME,SOA,TXT")
@@ -68,11 +68,11 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--skip-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("--no-redirects", is_flag=True,
-              help="Do not follow redirects when fuzzing. Default: False (will follow redirects)")
+@click.option("--follow-redirects", is_flag=True, default=False,
+              help="Follow redirects when fuzzing. Default: False (will not follow redirects)")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
 @click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
-@click.option("--skip-nmap-scan", is_flag=True, help="Do not scan with Nmap")
+@click.option("--skip-nmap-scan", is_flag=True, help="Do not perform an Nmap scan")
 # @click.option("-d", "--delay", default="0.25-1",
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
@@ -94,7 +94,7 @@ def main(target,
          port,
          tls_port,
          skip_health_check,
-         no_redirects,
+         follow_redirects,
          no_url_fuzzing,
          no_sub_enum,
          skip_nmap_scan,
@@ -134,7 +134,6 @@ def main(target,
 
         dns_records = tuple(dns_records.split(","))
         ignored_response_codes = tuple(int(code) for code in ignored_response_codes.split(","))
-        follow_redirects = not no_redirects
 
         if port:
             HelpUtilities.validate_port_range(port)
@@ -187,13 +186,11 @@ def main(target,
             asyncio.ensure_future(tls_info_scanner.run()),
             asyncio.ensure_future(waf.detect()),
             asyncio.ensure_future(DNSHandler.grab_whois(host)),
-            asyncio.ensure_future(web_app_scanner.run_scan())
+            asyncio.ensure_future(web_app_scanner.run_scan()),
+            asyncio.ensure_future(DNSHandler.generate_dns_dumpster_mapping(host, logger))
         )
 
         main_loop.run_until_complete(asyncio.wait(tasks))
-
-        # DNS dumpster visualization
-        DNSHandler.generate_dns_dumpster_mapping(host, logger)
 
         # Second set of checks - URL fuzzing, Subdomain enumeration
         if not no_url_fuzzing:

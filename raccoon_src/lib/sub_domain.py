@@ -91,7 +91,7 @@ class SubDomainEnumerator:
         self.logger.info("{} Bruteforcing subdomains".format(COLORED_COMBOS.NOTIFY))
         sub_domain_fuzzer = URLFuzzer(
             host=self.host,
-            wordlist=self.domain_list,
+            path_to_wordlist=self.domain_list,
             num_threads=self.num_threads,
             ignored_response_codes=self.ignored_error_codes,
             follow_redirects=self.follow_redirects

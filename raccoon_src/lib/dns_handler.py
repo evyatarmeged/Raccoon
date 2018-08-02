@@ -57,7 +57,7 @@ class DNSHandler:
                         logger.debug(line)
 
     @classmethod
-    def generate_dns_dumpster_mapping(cls, host, sout_logger):
+    async def generate_dns_dumpster_mapping(cls, host, sout_logger):
         sout_logger.info("{} Trying to fetch DNS Mapping for {} from DNS dumpster".format(
             COLORED_COMBOS.INFO, host))
         try:

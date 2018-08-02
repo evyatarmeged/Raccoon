@@ -18,7 +18,7 @@ class URLFuzzer:
                  host,
                  ignored_response_codes,
                  num_threads,
-                 wordlist,
+                 path_to_wordlist,
                  follow_redirects=False):
 
         self.target = host.target
@@ -26,10 +26,21 @@ class URLFuzzer:
         self.proto = host.protocol
         self.port = host.port
         self.num_threads = num_threads
-        self.wordlist = wordlist
+        self.path_to_wordlist = path_to_wordlist
+        self.wordlist = self._create_set_from_wordlist_file(path_to_wordlist)
         self.follow_redirects = follow_redirects
         self.request_handler = RequestHandler()  # Will get the single, already initiated instance
         self.logger = None
+
+    @staticmethod
+    def _create_set_from_wordlist_file(wordlist):
+        try:
+            with open(wordlist, "r") as file:
+                fuzzlist = file.readlines()
+                fuzzlist = [x.replace("\n", "") for x in fuzzlist]
+                return set(fuzzlist)
+        except FileNotFoundError:
+            raise FuzzerException("Cannot open file in {}. Will not perform Fuzzing".format(wordlist))
 
     def _log_response(self, code, url, headers):
         if 300 > code >= 200:
@@ -81,53 +92,54 @@ class URLFuzzer:
 
         return Logger(HelpUtilities.get_output_path(log_file))
 
-    def _rule_out_false_positives(self, sub_domain):
-        fake_uris = (uuid.uuid4() for i in range(3))
+    @staticmethod
+    def _rule_out_false_positives(response_codes, sub_domain):
+        if any(code == 200 for code in response_codes):
+            if sub_domain:
+                err_msg = "Wildcard subdomain support detected (all subdomains return 200)." \
+                          " Will not bruteforce subdomains"
+            else:
+                err_msg = "Web server seems to redirect requests for all resources " \
+                          "to eventually return 200. Will not bruteforce URLs"
+            raise FuzzerException(err_msg)
+
+    def _generate_fake_requests(self, sub_domain):
+        response_codes = []
+        fake_uris = (uuid.uuid4(), uuid.uuid4())
+        session = self.request_handler.get_new_session()
         for uri in fake_uris:
             url = self._build_request_url(uri, sub_domain)
             try:
                 res = self.request_handler.send("GET", url=url, allow_redirects=self.follow_redirects)
-                if res.status_code == 200:
-                    if sub_domain:
-                        err_msg = "Wildcard subdomain support detected (all subdomains return 200)." \
-                                  " Will not bruteforce subdomains"
-                    else:
-                        err_msg = "Web server seems to redirect requests for all resources " \
-                                  "to eventually return 200. Will not bruteforce URLs"
-                    raise FuzzerException(err_msg)
-
+                response_codes.append(res.status_code)
+                res = session.get(url=url, allow_redirects=self.follow_redirects)
+                response_codes.append(res.status_code)
             except RequestHandlerException as e:
                 if sub_domain:  # If should-not-work.example.com doesn't resolve, no wildcard subdomain is present
-                    return
+                    return [0]
                 else:
                     raise FuzzerException("Could not get a response from {}."
                                           " Maybe target is down ?".format(self.target))
+        return response_codes
 
     async def fuzz_all(self, sub_domain=False, log_file_path=None):
         """
-        Create a pool of threads, read the wordlist and invoke fuzz_all.
+        Create a pool of threads and exhaust self.wordlist on self._fetch
         Should be run in an event loop.
         :param sub_domain: Indicate if this is subdomain enumeration or URL busting
         :param log_file_path: Log subdomain enum results to this path.
         """
-
         self.logger = self.get_log_file_path(log_file_path)
         try:
-            with open(self.wordlist, "r") as file:
-                fuzzlist = file.readlines()
-                fuzzlist = [x.replace("\n", "") for x in fuzzlist]
-        except FileNotFoundError:
-            raise FuzzerException("Cannot read URL list from {}. Will not perform Fuzzing".format(self.wordlist))
-
-        try:
             # Rule out wildcard subdomain support/all resources redirect to a 200 page
-            self._rule_out_false_positives(sub_domain)
+            response_codes = self._generate_fake_requests(sub_domain)
+            self._rule_out_false_positives(response_codes, sub_domain)
 
             if not sub_domain:
                 self.logger.info("{} Fuzzing URLs".format(COLORED_COMBOS.INFO))
-            self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.wordlist))
+            self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.path_to_wordlist))
             pool = ThreadPool(self.num_threads)
-            pool.map(partial(self._fetch, sub_domain=sub_domain), fuzzlist)
+            pool.map(partial(self._fetch, sub_domain=sub_domain), self.wordlist)
 
             if not sub_domain:
                 self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))

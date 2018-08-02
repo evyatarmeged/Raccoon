@@ -5,7 +5,7 @@
 ![Build Status](https://travis-ci.org/evyatarmeged/Raccoon.svg?branch=master)
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![pythonver](https://img.shields.io/badge/python-3.5%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.74-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/Raccoon%20version-0.0.75-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -109,9 +109,11 @@ Options:
                                  the default
   --tls-port INTEGER             Use this port for TLS queries. Default: 443
   --skip-health-check            Do not test for target host availability
-  -fr, --follow-redirects        Follow redirects when fuzzing. Default: True
+  --follow-redirects             Follow redirects when fuzzing. Default: False
+                                 (will not follow redirects)
   --no-url-fuzzing               Do not fuzz URLs
   --no-sub-enum                  Do not bruteforce subdomains
+  --skip-nmap-scan               Do not perform an Nmap scan
   -q, --quiet                    Do not output to stdout
   -o, --outdir TEXT              Directory destination for scan output
   --help                         Show this message and exit.

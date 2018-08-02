@@ -17,7 +17,7 @@ class TestURLFuzzer(unittest.TestCase):
 
     def test_bad_wordlist(self):
         host = self.TestHost("127.0.0.1", ())
-        fuzzer = self.TestFuzzer(host, (), wordlist="no/such/path", num_threads=1)
         with self.assertRaises(FuzzerException):
-            self.loop.run_until_complete(fuzzer.fuzz_all())
+            fuzzer = self.TestFuzzer(host, (), path_to_wordlist="no/such/path", num_threads=1)
+
 
