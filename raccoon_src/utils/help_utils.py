@@ -66,7 +66,30 @@ class HelpUtilities:
         """
         return HelpUtilities.ip_to_int(end_address)-HelpUtilities.ip_to_int(start_address)
 
-        
+    @staticmethod
+    def iter_ip_blocks(start_address,end_address,num_blocks):
+        """
+        an iterator that divides an ip_range into num_blocks, it yields tuples of (block_start_address,block_end_address)
+        suitable for generating values to pass off to threads or multiprocessing
+
+        >>> list(HelpUtilities.iter_ip_blocks("192.168.0.1","192.168.255.255",3)) # three cores??? o.O
+        [('192.168.0.1', '192.168.85.85'), ('192.168.85.86', '192.168.170.170'), ('192.168.170.171', '192.168.255.255')]
+
+        >>> list(HelpUtilities.iter_ip_blocks('192.168.0.1', '192.168.85.86',80))# 80 cores?        # doctest: +ELLIPSIS
+        [('192.168.0.1', '192.168.1.18'), ('192.168.1.19', '192.168.2.36'), ('192.168.2.37', '192.168.3.54'),...
+
+        :param start_address:  the first address to scan
+        :param end_address: the last address to scan
+        :param num_blocks: the number of blocks to subdivide into
+        :return:  tuple of (block_start_address,block_end_address)
+        """
+        ttl_address_count = HelpUtilities.count_ips_in_range(start_address,end_address)
+        addresses_per_block = ttl_address_count//num_blocks + 1
+        start_address_int =HelpUtilities.ip_to_int(start_address)
+        end_address_int =HelpUtilities.ip_to_int(end_address)
+        for i in range(start_address_int,end_address_int,addresses_per_block):
+            yield (HelpUtilities.int_to_ip(i),HelpUtilities.int_to_ip(i+addresses_per_block-1))
+            
     @classmethod
     def validate_target_is_up(cls, host):
         cmd = "ping -c 1 {}".format(host.target)
