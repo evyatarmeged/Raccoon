@@ -8,7 +8,7 @@ import os
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
-from raccoon_src.utils.exceptions import RaccoonException
+from raccoon_src.utils.exceptions import RaccoonException, HostHandlerException
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.utils.logger import SystemOutLogger
 from raccoon_src.utils.help_utils import HelpUtilities
@@ -159,8 +159,12 @@ def main(target,
 
         # TODO: Populate array when multiple targets are supported
         # hosts = []
-        host = Host(target=target, dns_records=dns_records)
-        host.parse()
+        try:
+            host = Host(target=target, dns_records=dns_records)
+            host.parse()
+        except HostHandlerException as e:
+            logger.critical("{}{}{}".format(COLOR.RED, str(e), COLOR.RESET))
+            exit(11)
 
         if not skip_health_check:
             try:

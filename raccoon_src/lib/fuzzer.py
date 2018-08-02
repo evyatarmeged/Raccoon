@@ -40,7 +40,7 @@ class URLFuzzer:
                 fuzzlist = [x.replace("\n", "") for x in fuzzlist]
                 return set(fuzzlist)
         except FileNotFoundError:
-            raise FuzzerException("Cannot open file in {}. Will not perform Fuzzing".format(wordlist))
+            raise FuzzerException("Cannot open file {}. Will not perform Fuzzing".format(wordlist))
 
     def _log_response(self, code, url, headers):
         if 300 > code >= 200:
