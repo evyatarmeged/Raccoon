@@ -210,9 +210,9 @@ class WebApplicationScanner:
                 self._find_urls(soup)
                 self._find_forms(soup)
 
-        except (ConnectionError, TooManyRedirects) as e:
+        except (ConnectionError, TooManyRedirects) as exception:
             raise WebAppScannerException("Couldn't get response from server.\n"
-                                         "Caused due to exception: {}".format(str(e)))
+                                         "Caused due to exception: {}".format(str(exception)))
 
     async def run_scan(self):
         self.logger.info("{} Trying to collect {} web application data".format(COLORED_COMBOS.INFO, self.host))
