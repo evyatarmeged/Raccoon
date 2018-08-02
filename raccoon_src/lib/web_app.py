@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon_src.utils.web_server_validator import WebServerValidator
+from raccoon_src.lib.storage_explorer import StorageExplorer
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
@@ -23,6 +24,7 @@ class WebApplicationScanner:
         log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
+        self.storage_explorer = StorageExplorer(self.logger, host)
 
     def _detect_cms(self, tries=0):
         """
@@ -169,12 +171,12 @@ class WebApplicationScanner:
         if self.forms:
             self.logger.info("{} {} HTML forms discovered".format(COLORED_COMBOS.NOTIFY, len(self.forms)))
             for form in self.forms:
-                form_id = form.get("id")
-                form_class = form.get("class")
-                form_method = form.get("method")
                 form_action = form.get("action")
                 if form_action == "#":
                     continue
+                form_id = form.get("id")
+                form_class = form.get("class")
+                form_method = form.get("method")
                 self.logger.debug("\tForm details: ID: {}, Class: {}, Method: {}, action: {}".format(
                     form_id, form_class, form_method, form_action
                 ))
@@ -209,6 +211,7 @@ class WebApplicationScanner:
                 soup = BeautifulSoup(response.text, "lxml")
                 self._find_urls(soup)
                 self._find_forms(soup)
+                self.storage_explorer.search_img_srcs_for_cloud_storages(soup)
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
