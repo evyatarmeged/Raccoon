@@ -26,6 +26,8 @@ certificate details and SANs
   - Extracts all fuzzable URLs
   - Discovers HTML forms
   - Retrieves all Email addresses
+  - Scans target for vulnerable S3 buckets and enumerates them
+  for sensitive files
 - [x] Detects known WAFs
 - [x] Supports anonymous routing through Tor/Proxies
 - [x] Uses asyncio for improved performance
@@ -91,6 +93,9 @@ Options:
                                  for routing HTTP traffic. A proxy from the
                                  list will be chosen at random for each
                                  request. Slows total runtime
+  -c, --cookies TEXT             Comma separated cookies to add to the
+                                 requests. Should be in the form of key:value
+                                 Example: PHPSESSID:12345,isMobile:false
   --proxy TEXT                   Proxy address to route HTTP traffic through.
                                  Slows total runtime
   -w, --wordlist TEXT            Path to wordlist that would be used for URL
@@ -102,26 +107,29 @@ Options:
                                  302,400,401,402,403,404,503,504
   --subdomain-list TEXT          Path to subdomain list file that would be
                                  used for enumeration
-  -S, --scripts                  Run Nmap scan with -sC flag
-  -s, --services                 Run Nmap scan with -sV flag
+  -sc, --scripts                 Run Nmap scan with -sC flag
+  -sv, --services                Run Nmap scan with -sV flag
   -f, --full-scan                Run Nmap scan with both -sV and -sC
   -p, --port TEXT                Use this port range for Nmap scan instead of
                                  the default
+  -fr, --follow-redirects        Follow redirects when fuzzing. Default: False
+                                 (will not follow redirects)
   --tls-port INTEGER             Use this port for TLS queries. Default: 443
   --skip-health-check            Do not test for target host availability
-  --follow-redirects             Follow redirects when fuzzing. Default: False
-                                 (will not follow redirects)
   --no-url-fuzzing               Do not fuzz URLs
   --no-sub-enum                  Do not bruteforce subdomains
   --skip-nmap-scan               Do not perform an Nmap scan
   -q, --quiet                    Do not output to stdout
   -o, --outdir TEXT              Directory destination for scan output
   --help                         Show this message and exit.
+
 ```
 
 ### Screenshots
 ![poc2](https://image.ibb.co/iyLreJ/aaaaaaaaaaaaa.png)<br>
 
+**Web application data including vulnerable S3 bucket:**<br>
+![somepoc](https://image.ibb.co/m6b3Jz/s3.png)
 **[HTB](https://www.hackthebox.eu/) challenge example scan:**<br>
 ![poc](https://image.ibb.co/bGKTRy/bbbbbbb.png)<br>
 
