@@ -43,7 +43,7 @@ https://github.com/evyatarmeged/Raccoon
 
 
 @click.command()
-@click.version_option("0.0.75")
+@click.version_option("0.0.8")
 @click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA,TXT",
               help="Comma separated DNS records to query. Defaults to: A,MX,NS,CNAME,SOA,TXT")
@@ -52,6 +52,9 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("--proxy-list", help="Path to proxy list file that would be used for routing HTTP traffic."
                                    " A proxy from the list will be chosen at random for each request."
                                    " Slows total runtime")
+@click.option("-c", "--cookies", help="Comma separated cookies to add to the requests. "
+                                      "Should be in the form of key:value\n"
+                                      "Example: PHPSESSID:12345,isMobile:false")
 @click.option("--proxy", help="Proxy address to route HTTP traffic through. Slows total runtime")
 @click.option("-w", "--wordlist", default=os.path.join(MY_PATH, "wordlists/fuzzlist"),
               help="Path to wordlist that would be used for URL fuzzing")
@@ -62,14 +65,14 @@ https://github.com/evyatarmeged/Raccoon
                    " Defaults to: 302,400,401,402,403,404,503,504")
 @click.option("--subdomain-list", default=os.path.join(MY_PATH, "wordlists/subdomains"),
               help="Path to subdomain list file that would be used for enumeration")
-@click.option("-S", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")
-@click.option("-s", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
+@click.option("-sc", "--scripts", is_flag=True, help="Run Nmap scan with -sC flag")
+@click.option("-sv", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
+@click.option("-fr", "--follow-redirects", is_flag=True, default=False,
+              help="Follow redirects when fuzzing. Default: False (will not follow redirects)")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
 @click.option("--skip-health-check", is_flag=True, help="Do not test for target host availability")
-@click.option("--follow-redirects", is_flag=True, default=False,
-              help="Follow redirects when fuzzing. Default: False (will not follow redirects)")
 @click.option("--no-url-fuzzing", is_flag=True, help="Do not fuzz URLs")
 @click.option("--no-sub-enum", is_flag=True, help="Do not bruteforce subdomains")
 @click.option("--skip-nmap-scan", is_flag=True, help="Do not perform an Nmap scan")
@@ -83,6 +86,7 @@ def main(target,
          tor_routing,
          proxy_list,
          proxy,
+         cookies,
          dns_records,
          wordlist,
          threads,
@@ -103,7 +107,6 @@ def main(target,
          quiet):
     try:
         # ------ Arg validation ------
-
         # Set logging level and Logger instance
         log_level = HelpUtilities.determine_verbosity(quiet)
         logger = SystemOutLogger(log_level)
@@ -140,8 +143,20 @@ def main(target,
 
         # ------ /Arg validation ------
 
+        if cookies:
+            try:
+                cookies = HelpUtilities.parse_cookie_arg(cookies)
+            except RaccoonException as e:
+                logger.critical("{}{}{}".format(COLOR.RED, str(e), COLOR.RESET))
+                exit(2)
+
         # Set Request Handler instance
-        request_handler = RequestHandler(proxy_list=proxy_list, tor_routing=tor_routing, single_proxy=proxy)
+        request_handler = RequestHandler(
+            proxy_list=proxy_list,
+            tor_routing=tor_routing,
+            single_proxy=proxy,
+            cookies=cookies
+        )
 
         if tor_routing:
             try:

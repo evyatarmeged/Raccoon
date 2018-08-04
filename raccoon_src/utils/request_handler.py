@@ -18,12 +18,18 @@ class RequestHandler(metaclass=Singleton):
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
 
-    def __init__(self, proxy_list=None, tor_routing=False, single_proxy=None, delay=None):
+    def __init__(self,
+                 proxy_list=None,
+                 tor_routing=False,
+                 single_proxy=None,
+                 delay=None,
+                 cookies=None):
         self.proxy_list = proxy_list
         self.tor_routing = tor_routing
         self.delay = delay
         self.single_proxy = single_proxy
         self.proxies = self.set_instance_proxies()
+        self.cookies = cookies
         self.ua = UserAgent(verify_ssl=False)
 
     def set_instance_proxies(self):
@@ -79,11 +85,11 @@ class RequestHandler(metaclass=Singleton):
 
         try:
             if method.lower() == "get":
-                return requests.get(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.get(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
             elif method.lower() == "post":
-                return requests.post(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.post(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
             elif method.lower() == "head":
-                return requests.head(proxies=proxies, headers=headers, *args, **kwargs)
+                return requests.head(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:

@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import ConnectionError, TooManyRedirects
 from raccoon_src.utils.web_server_validator import WebServerValidator
+from raccoon_src.lib.storage_explorer import StorageExplorer
 from raccoon_src.utils.request_handler import RequestHandler
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
@@ -23,6 +24,7 @@ class WebApplicationScanner:
         log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
+        self.storage_explorer = StorageExplorer(host, self.logger)
 
     def _detect_cms(self, tries=0):
         """
@@ -169,12 +171,12 @@ class WebApplicationScanner:
         if self.forms:
             self.logger.info("{} {} HTML forms discovered".format(COLORED_COMBOS.NOTIFY, len(self.forms)))
             for form in self.forms:
-                form_id = form.get("id")
-                form_class = form.get("class")
-                form_method = form.get("method")
                 form_action = form.get("action")
                 if form_action == "#":
                     continue
+                form_id = form.get("id")
+                form_class = form.get("class")
+                form_method = form.get("method")
                 self.logger.debug("\tForm details: ID: {}, Class: {}, Method: {}, action: {}".format(
                     form_id, form_class, form_method, form_action
                 ))
@@ -182,7 +184,7 @@ class WebApplicationScanner:
     def _add_to_emails(self, href):
         self.emails.add(href)
 
-    def get_web_application_info(self):
+    async def get_web_application_info(self):
         session = self.request_handler.get_new_session()
         try:
             with session:
@@ -209,6 +211,7 @@ class WebApplicationScanner:
                 soup = BeautifulSoup(response.text, "lxml")
                 self._find_urls(soup)
                 self._find_forms(soup)
+                self.storage_explorer.run(soup)
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
@@ -218,7 +221,7 @@ class WebApplicationScanner:
         self.logger.info("{} Trying to collect {} web application data".format(COLORED_COMBOS.INFO, self.host))
         try:
             self.web_server_validator.validate_target_webserver(self.host)
-            self.get_web_application_info()
+            await self.get_web_application_info()
         except WebServerValidatorException:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port: {}. "
