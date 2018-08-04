@@ -1,6 +1,7 @@
 import uuid
 from functools import partial
 from multiprocessing.pool import ThreadPool
+from requests.exceptions import ConnectionError
 from raccoon_src.utils.exceptions import FuzzerException, RequestHandlerException
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.request_handler import RequestHandler
@@ -110,7 +111,7 @@ class URLFuzzer:
         for uri in fake_uris:
             url = self._build_request_url(uri, sub_domain)
             try:
-                res = self.request_handler.send("GET", url=url, allow_redirects=self.follow_redirects)
+                res = self.request_handler.send("GET", url=url, allow_redirects=True)
                 response_codes.append(res.status_code)
                 res = session.get(url=url, allow_redirects=self.follow_redirects)
                 response_codes.append(res.status_code)
@@ -140,8 +141,13 @@ class URLFuzzer:
             self.logger.info("{} Reading from list: {}".format(COLORED_COMBOS.INFO, self.path_to_wordlist))
             pool = ThreadPool(self.num_threads)
             pool.map(partial(self._fetch, sub_domain=sub_domain), self.wordlist)
-
+            pool.close()
+            pool.join()
             if not sub_domain:
                 self.logger.info("{} Done fuzzing URLs".format(COLORED_COMBOS.INFO))
         except FuzzerException as e:
             self.logger.info("{} {}".format(COLORED_COMBOS.BAD, e))
+        except ConnectionError as e:
+            if "Remote end closed connection without response" in str(e):
+                self.logger.info("{} {}. Target is actively closing connections - will not "
+                                 "bruteforce URLs".format(COLORED_COMBOS.BAD, str(e)))

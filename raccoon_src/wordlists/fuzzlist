@@ -351,7 +351,6 @@
 .remote-sync.json
 .revision
 .rhosts
-.robots.txt
 .rsync-filter
 .rsync_cache
 .rsync_cache/
@@ -4885,7 +4884,6 @@ revision.txt
 RLcQq
 rmsadmin
 robot.txt
-robots.txt
 Root
 root
 root/
@@ -5161,7 +5159,6 @@ siteadmin/login.php
 sitedown.%EXT%
 sitemanager.xml
 sitemap
-sitemap.xml
 sitemap.xml.gz
 sites
 sites.ini

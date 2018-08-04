@@ -24,7 +24,7 @@ class WebApplicationScanner:
         log_file = HelpUtilities.get_output_path("{}/web_scan.txt".format(self.host.target))
         self.target_dir = "/".join(log_file.split("/")[:-1])
         self.logger = Logger(log_file)
-        self.storage_explorer = StorageExplorer(self.logger, host)
+        self.storage_explorer = StorageExplorer(host, self.logger)
 
     def _detect_cms(self, tries=0):
         """
@@ -184,7 +184,7 @@ class WebApplicationScanner:
     def _add_to_emails(self, href):
         self.emails.add(href)
 
-    def get_web_application_info(self):
+    async def get_web_application_info(self):
         session = self.request_handler.get_new_session()
         try:
             with session:
@@ -211,7 +211,7 @@ class WebApplicationScanner:
                 soup = BeautifulSoup(response.text, "lxml")
                 self._find_urls(soup)
                 self._find_forms(soup)
-                self.storage_explorer.search_img_srcs_for_cloud_storages(soup)
+                self.storage_explorer.run(soup)
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WebAppScannerException("Couldn't get response from server.\n"
@@ -221,7 +221,7 @@ class WebApplicationScanner:
         self.logger.info("{} Trying to collect {} web application data".format(COLORED_COMBOS.INFO, self.host))
         try:
             self.web_server_validator.validate_target_webserver(self.host)
-            self.get_web_application_info()
+            await self.get_web_application_info()
         except WebServerValidatorException:
             self.logger.info(
                 "{} Target does not seem to have an active web server on port: {}. "

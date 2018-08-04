@@ -114,7 +114,7 @@ class WAF:
                 )
                 self.waf_present = True
 
-    def _detect_by_application(self):
+    async def _detect_by_application(self):
         try:
             session = self.request_handler.get_new_session()
             response = session.get(
@@ -141,7 +141,7 @@ class WAF:
             self._detect_by_cname()
         try:
             self.web_server_validator.validate_target_webserver(self.host)
-            self._detect_by_application()
+            await self._detect_by_application()
 
             if not self.waf_present:
                 self.logger.info("{} Did not detect WAF presence in target".format(COLORED_COMBOS.GOOD))

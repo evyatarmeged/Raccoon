@@ -33,6 +33,19 @@ class HelpUtilities:
                                        " considered as down.".format(host, host.port))
 
     @classmethod
+    def parse_cookie_arg(cls, cookie_arg):
+        try:
+            cookies = {}
+            for c in cookie_arg.split(','):
+                c = c.split(":")
+                cookies[c[0]] = c[1]
+            return cookies
+        except (IndexError, TypeError):
+            raise RaccoonException("Cookie parsing error occurred, probably due to invalid cookie format.\n"
+                                   "Cookie format should be comma separated key:value pairs. Use --help "
+                                   "for more info.")
+
+    @classmethod
     def validate_wordlist_args(cls, proxy_list, wordlist, subdomain_list):
         if proxy_list and not os.path.isfile(proxy_list):
             raise FileNotFoundError("Not a valid file path, {}".format(proxy_list))
