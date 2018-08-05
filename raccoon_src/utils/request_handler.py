@@ -30,6 +30,7 @@ class RequestHandler(metaclass=Singleton):
         self.single_proxy = single_proxy
         self.proxies = self.set_instance_proxies()
         self.cookies = cookies
+        self.headers = requests.utils.default_headers()
         self.ua = UserAgent(verify_ssl=False)
 
     def set_instance_proxies(self):
@@ -81,15 +82,15 @@ class RequestHandler(metaclass=Singleton):
         :param method: Method to send request in. GET/POST/HEAD
         """
         proxies = self.get_request_proxies()
-        headers = {"User-Agent": self.ua.random}
+        self.headers["User-Agent"] = self.ua.random
 
         try:
             if method.lower() == "get":
-                return requests.get(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
+                return requests.get(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             elif method.lower() == "post":
-                return requests.post(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
+                return requests.post(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             elif method.lower() == "head":
-                return requests.head(proxies=proxies, headers=headers, cookies=self.cookies, *args, **kwargs)
+                return requests.head(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
