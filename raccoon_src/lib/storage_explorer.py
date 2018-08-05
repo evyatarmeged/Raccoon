@@ -92,7 +92,7 @@ class AmazonS3Handler(Storage):
             key = el.get("Key")
             for file in self.sensitive_files:
                 if file in key:
-                    self.logger.debug("Found {} file in bucket {}".format(file, url))
+                    self.logger.debug("Found {} file in bucket {}".format(key, url))
                     self.num_files_found += 1
 
 
@@ -127,7 +127,6 @@ class StorageExplorer(AmazonS3Handler):
         super().__init__(host, logger)
         self.host = host
         self.logger = logger  # Uses the logger from web_app module
-        self.num_files_found = 0
         self.buckets_found = set()
 
     @staticmethod
@@ -174,7 +173,7 @@ class StorageExplorer(AmazonS3Handler):
             if self.num_files_found > 0:
                 self.logger.info(
                     "{} Found {}{}{} sensitive files in S3 buckets. inspect web scan logs for more information.".format(
-                        COLORED_COMBOS.GOOD, COLOR.RED, self.num_files_found, COLOR.RESET))
+                        COLORED_COMBOS.GOOD, COLOR.GREEN, self.num_files_found, COLOR.RESET))
             elif any(b.vulnerable for b in self.s3_buckets):
                 self.logger.info("{} No sensitive files found in target's cloud storage".format(COLORED_COMBOS.BAD))
             else:
