@@ -28,12 +28,17 @@ class RequestHandler(metaclass=Singleton):
         self.tor_routing = tor_routing
         self.delay = delay
         self.single_proxy = single_proxy
-        self.proxies = self.set_instance_proxies()
+        self.proxies = self._set_instance_proxies()
         self.cookies = cookies
-        self.headers = requests.utils.default_headers()
-        self.ua = UserAgent(verify_ssl=False)
+        self.headers = self._set_headers()
 
-    def set_instance_proxies(self):
+    @staticmethod
+    def _set_headers():
+        headers = requests.utils.default_headers()
+        headers["User-Agent"] = UserAgent(verify_ssl=False).random
+        return headers
+
+    def _set_instance_proxies(self):
         """
         Set the proxies to any of the following:
         Proxy List - a list of proxies to choose randomly from for each request. Read from file.
@@ -60,7 +65,7 @@ class RequestHandler(metaclass=Singleton):
             }
         return proxies
 
-    def get_request_proxies(self):
+    def _get_request_proxies(self):
         if self.tor_routing or self.single_proxy:
             proxies = self.proxies
         elif self.proxy_list:
@@ -81,8 +86,7 @@ class RequestHandler(metaclass=Singleton):
         Send a GET/POST/HEAD request using the object's proxies and headers
         :param method: Method to send request in. GET/POST/HEAD
         """
-        proxies = self.get_request_proxies()
-        self.headers["User-Agent"] = self.ua.random
+        proxies = self._get_request_proxies()
 
         try:
             if method.lower() == "get":
@@ -110,6 +114,6 @@ class RequestHandler(metaclass=Singleton):
     def get_new_session(self):
         """Returns a new session using the object's proxies and headers"""
         session = requests.Session()
-        session.headers = {"User-Agent": self.ua.random}
-        session.proxies = self.get_request_proxies()
+        session.headers = self.headers
+        session.proxies = self._get_request_proxies()
         return session
