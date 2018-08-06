@@ -9,7 +9,7 @@ from raccoon_src.utils.coloring import COLORED_COMBOS, COLOR
 MY_PATH = os.path.abspath(os.path.dirname(__file__))
 HTTP = "http://"
 HTTPS = "https://"
-S3_URL = "s3.amazonaws.com"
+BASE_S3_URL = "s3.amazonaws.com"
 
 
 class Storage:
@@ -70,7 +70,7 @@ class AmazonS3Handler(Storage):
 
             for i in range(len(bucket_url)-1):
                 url = "/".join(bucket_url[:i+1])
-                if url == S3_URL or url in self.storage_urls_found:
+                if url == BASE_S3_URL or url in self.storage_urls_found:
                     continue
 
                 self.storage_urls_found.add(url)
@@ -117,7 +117,7 @@ class S3Bucket:
         return "".join([part for part in url.split("//") if part])
 
 
-class StorageExplorer(AmazonS3Handler):
+class StorageExplorer(AmazonS3Handler, GoogleStorageHandler, AzureStorageHandler):
     """
     Find and test privileges of target cloud storage and look for sensitive files in it.
     Can lead to finding .git/.DS_Store/etc files with tokens, passwords and more.

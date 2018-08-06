@@ -49,7 +49,13 @@ class Host:
     def _extract_port(self, addr):
         try:
             self.target, self.port = addr.split(":")
-            self.port = int(self.port)
+            try:
+                self.port = int(self.port)
+            except ValueError:
+                # Probably has a path after the port, e.g - localhost:3000/home.asp
+                raise HostHandlerException("Failed to parse port {}. Is there a path after it ?".format(
+                    self.port
+                ))
             self.logger.info("{} Port detected: {}".format(COLORED_COMBOS.NOTIFY, self.port))
         except IndexError:
             self.logger.info("{} Did not detect port. Using default port 80".format(COLORED_COMBOS.NOTIFY))

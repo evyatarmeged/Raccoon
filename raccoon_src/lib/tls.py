@@ -26,7 +26,7 @@ class TLSCipherSuiteChecker:
         return parsed
 
     @staticmethod
-    def color_warnings_and_weak_ciphers(result):
+    def _color_warnings_and_weak_ciphers(result):
         for index, line in enumerate(result):
             if line.endswith("- C") or line.endswith("- D") or line.endswith("- E"):
                 colored = line + " - {}WEAK{}".format(COLOR.RED, COLOR.RESET)
@@ -43,14 +43,14 @@ class TLSCipherSuiteChecker:
 
     def _parse_cipher_scan_outpt(self, result):
         result = [line for line in result.decode().strip().split("\n") if "|" in line]
-        result = self.color_warnings_and_weak_ciphers(result)
+        result = self._color_warnings_and_weak_ciphers(result)
         return '\n'.join(result)
 
 
 # noinspection PyTypeChecker
 class TLSHandler(TLSCipherSuiteChecker):
 
-    def __init__(self, host, port=443):
+    def __init__(self, host, port):
         super().__init__(host)
         self.target = host.target
         self.port = port
@@ -106,7 +106,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         cert_details = "\n".join(result_lines)
         return cert_details
 
-    async def is_heartbleed_vulnerable(self):
+    async def _is_heartbleed_vulnerable(self):
         script = self._base_script + "-tlsextdebug"
         process = await create_subprocess_exec(
             *script.split(),
@@ -206,7 +206,7 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.ciphers = await self.scan_ciphers(self.port)
         self.non_sni_data = await self._execute_ssl_data_extraction()
         self.sni_data = await self._execute_ssl_data_extraction()
-        await self.is_heartbleed_vulnerable()
+        await self._is_heartbleed_vulnerable()
 
         if self._tls_results_exist():
             self.logger.info("{} Done collecting TLS data".format(COLORED_COMBOS.INFO))
