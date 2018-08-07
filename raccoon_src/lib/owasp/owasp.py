@@ -18,12 +18,6 @@ class RFI:
         pass
 
 
-class Traversal:
-
-    def __init__(self):
-        pass
-
-
 class RCE:
 
     def __init__(self):
@@ -33,6 +27,7 @@ class RCE:
 class OWASPScanner:
 
     def __init__(self):
+
         self.running_threads = []
 
         # params
