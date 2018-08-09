@@ -73,6 +73,13 @@ git clone https://github.com/evyatarmeged/Raccoon.git
 cd Raccoon
 python raccoon_src/main.py
 ```
+For docker installation:<br>
+```
+# Build the docker image
+docker build -t evyatarmeged/raccoon .
+# Run a scan, As this a non-root container we need to save the output under the user's home which is /home/raccoon
+docker run --name raccoon evyatarmeged/raccoon:latest -t example.com -o /home/raccoon
+```
 
 ##### Prerequisites
 Raccoon uses [Nmap](https://github.com/nmap/nmap) to scan ports as well as utilizes some other Nmap scripts
