@@ -2,8 +2,7 @@
 
   "root: daemon: mysql:": [
     "/etc/passwd", "/etc/passwd%00", "etc/shadow%00", "etc/shadow", "/etc/group"
-  ],
-
+  ]
 
 
 }

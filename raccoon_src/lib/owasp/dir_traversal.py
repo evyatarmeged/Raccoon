@@ -22,4 +22,3 @@ class DirectoryTraversal:
 
     def _traverse(self, path, url, num):
         return self._url_encode(path * num + url)
-
