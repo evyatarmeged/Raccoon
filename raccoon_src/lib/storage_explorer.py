@@ -55,7 +55,7 @@ class AmazonS3Handler(Storage):
     def _is_s3_url(self, src):
         # Not including third party Amazon host services - aka cdn.3rdparty.com
         return any(("s3" in src and "amazonaws" in src,
-                    "cdn.{}".format(str(self.host.naked)) in src,
+                    "cdn.{}".format(str(self.host.naked)) in src,  # Can be None, hence the hacky str() wrapper
                     "cdn.{}".format(self.host.target) in src,
                     "cdn.{}".format(".".join(self.host.target.split(".")[1:])) in src,
                     "cloudfront.net" in src))
