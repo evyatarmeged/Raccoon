@@ -6,16 +6,10 @@ class XSS:
         pass
 
 
-class RCE:
-
-    def __init__(self):
-        pass
-
-
 class OWASPScanner:
 
     def __init__(self):
-
+        self._subscribers = []
         self.running_threads = []
 
         # params
