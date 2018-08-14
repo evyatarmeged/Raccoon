@@ -1,5 +1,7 @@
 import random
 import requests
+from socket import timeout
+from urllib.error import URLError
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import LocationParseError, NewConnectionError
 from raccoon_src.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
@@ -8,7 +10,7 @@ from fake_useragent.errors import FakeUserAgentError
 
 try:
     from fake_useragent import UserAgent
-except FakeUserAgentError:
+except (FakeUserAgentError, URLError, timeout):
     pass
 
 
