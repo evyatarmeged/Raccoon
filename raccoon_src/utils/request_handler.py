@@ -90,7 +90,7 @@ class RequestHandler(metaclass=Singleton):
         proxies = self._get_request_proxies()
 
         try:
-            if method.upper() in ['GET', 'POST', 'HEAD']:
+            if method.upper() in ('GET', 'POST', 'HEAD'):
                 kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
                 return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
