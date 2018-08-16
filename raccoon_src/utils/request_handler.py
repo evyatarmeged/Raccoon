@@ -91,7 +91,8 @@ class RequestHandler(metaclass=Singleton):
 
         try:
             if method.upper() in ['GET', 'POST', 'HEAD']:
-                return request(method, timeout=5, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
+                kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
+                return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
