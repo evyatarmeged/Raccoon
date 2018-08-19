@@ -1,17 +1,10 @@
 import random
-from socket import timeout
-from urllib.error import URLError
+from fake_useragent import UserAgent
 from requests import request, Session, utils as requests_utils
-from fake_useragent.errors import FakeUserAgentError
 from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
 from urllib3.exceptions import NewConnectionError
 from raccoon_src.utils.exceptions import RequestHandlerException
 from raccoon_src.utils.singleton import Singleton
-
-try:
-    from fake_useragent import UserAgent
-except (FakeUserAgentError, URLError, timeout):
-    pass
 
 
 class RequestHandler(metaclass=Singleton):
@@ -31,6 +24,7 @@ class RequestHandler(metaclass=Singleton):
         self.single_proxy = single_proxy
         self.proxies = self._set_instance_proxies()
         self.cookies = cookies
+        self.request_types = {"GET", "HEAD", "POST"}
         self.headers = self._set_headers()
 
     @staticmethod
@@ -90,7 +84,7 @@ class RequestHandler(metaclass=Singleton):
         proxies = self._get_request_proxies()
 
         try:
-            if method.upper() in ('GET', 'POST', 'HEAD'):
+            if method.upper() in self.request_types:
                 kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
                 return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
