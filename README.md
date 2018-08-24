@@ -138,7 +138,7 @@ Options:
 ### Screenshots
 ![poc2](https://image.ibb.co/iyLreJ/aaaaaaaaaaaaa.png)<br>
 
-![vulnerspoc](https://ibb.co/eNX0Q9)<br>
+![vulnerspoc](https://image.ibb.co/iaOMyU/nmap_vulners_poc.png)<br>
 
 **Web application data including vulnerable S3 bucket:**<br>
 ![somepoc](https://image.ibb.co/m6b3Jz/s3.png)
