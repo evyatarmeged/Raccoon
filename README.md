@@ -120,6 +120,8 @@ Options:
   -f, --full-scan                Run Nmap scan with both -sV and -sC
   -p, --port TEXT                Use this port range for Nmap scan instead of
                                  the default
+  --vulners-nmap-scan            Perform an NmapVulners scan
+  --vulners-path TEXT            Path to the nmap_vulners.nse script.
   -fr, --follow-redirects        Follow redirects when fuzzing. Default: False
                                  (will not follow redirects)
   --tls-port INTEGER             Use this port for TLS queries. Default: 443
@@ -135,6 +137,8 @@ Options:
 
 ### Screenshots
 ![poc2](https://image.ibb.co/iyLreJ/aaaaaaaaaaaaa.png)<br>
+
+![vulnerspoc](https://ibb.co/eNX0Q9)<br>
 
 **Web application data including vulnerable S3 bucket:**<br>
 ![somepoc](https://image.ibb.co/m6b3Jz/s3.png)
