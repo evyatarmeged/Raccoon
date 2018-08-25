@@ -24,7 +24,7 @@ class RequestHandler(metaclass=Singleton):
         self.single_proxy = single_proxy
         self.proxies = self._set_instance_proxies()
         self.cookies = cookies
-        self.request_types = {"GET", "HEAD", "POST"}
+        self.allowed_methods = {"GET", "HEAD", "POST"}
         self.headers = self._set_headers()
 
     @staticmethod
@@ -84,7 +84,7 @@ class RequestHandler(metaclass=Singleton):
         proxies = self._get_request_proxies()
 
         try:
-            if method.upper() in self.request_types:
+            if method.upper() in self.allowed_methods:
                 kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
                 return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
