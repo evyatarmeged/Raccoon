@@ -14,7 +14,7 @@ from raccoon_src.utils.logger import SystemOutLogger
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.lib.fuzzer import URLFuzzer
 from raccoon_src.lib.host import Host
-from raccoon_src.lib.scanner import Scanner, NmapScan
+from raccoon_src.lib.scanner import Scanner, NmapScan, NmapVulnersScan, VulnersScanner
 from raccoon_src.lib.sub_domain import SubDomainEnumerator
 from raccoon_src.lib.dns_handler import DNSHandler
 from raccoon_src.lib.waf import WAF
@@ -69,6 +69,9 @@ https://github.com/evyatarmeged/Raccoon
 @click.option("-sv", "--services", is_flag=True, help="Run Nmap scan with -sV flag")
 @click.option("-f", "--full-scan", is_flag=True, help="Run Nmap scan with both -sV and -sC")
 @click.option("-p", "--port", help="Use this port range for Nmap scan instead of the default")
+@click.option("--vulners-nmap-scan", is_flag=True, help="Perform an NmapVulners scan")
+@click.option("--vulners-path", default=os.path.join(MY_PATH, "vulners_nse/vulners.nse"),
+              help="Path to the nmap_vulners.nse script.")
 @click.option("-fr", "--follow-redirects", is_flag=True, default=False,
               help="Follow redirects when fuzzing. Default: False (will not follow redirects)")
 @click.option("--tls-port", default=443, help="Use this port for TLS queries. Default: 443")
@@ -96,6 +99,8 @@ def main(target,
          scripts,
          services,
          port,
+         vulners_nmap_scan,
+         vulners_path,
          tls_port,
          skip_health_check,
          follow_redirects,
@@ -189,13 +194,20 @@ def main(target,
                 exit(42)
 
         if not skip_nmap_scan:
-            logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
-            nmap_scan = NmapScan(host, full_scan, scripts, services, port)
-            # # # TODO: Populate array when multiple targets are supported
-            # nmap_threads = []
-            nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
-            # Run Nmap scan in the background. Can take some time
-            nmap_thread.start()
+            if vulners_nmap_scan:
+                logger.info("\n{} Setting NmapVulners scan to run in the background".format(COLORED_COMBOS.INFO))
+                nmap_vulners_scan = NmapVulnersScan(host, port, vulners_path)
+                nmap_thread = threading.Thread(target=VulnersScanner.run, args=(nmap_vulners_scan,))
+                # Run NmapVulners scan in the background
+                nmap_thread.start()
+            else:
+                logger.info("\n{} Setting Nmap scan to run in the background".format(COLORED_COMBOS.INFO))
+                nmap_scan = NmapScan(host, full_scan, scripts, services, port)
+                # # # TODO: Populate array when multiple targets are supported
+                # nmap_threads = []
+                nmap_thread = threading.Thread(target=Scanner.run, args=(nmap_scan,))
+                # Run Nmap scan in the background. Can take some time
+                nmap_thread.start()
 
         # Run first set of checks - TLS, Web/WAF Data, DNS data
         waf = WAF(host)

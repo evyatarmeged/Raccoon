@@ -1,3 +1,5 @@
+import re
+
 from subprocess import PIPE, Popen
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.logger import Logger
@@ -45,6 +47,32 @@ class NmapScan:
         return script
 
 
+class NmapVulnersScan:
+    """
+    Nmap scan class
+    Will run SYN/TCP scan according to privileges.
+    Start Raccoon with sudo for -sS else will run -sT
+    """
+
+    def __init__(self, host, port_range, vulners_path):
+        self.target = host.target
+        self.port_range = port_range
+        self.path = HelpUtilities.get_output_path("{}/nmap_vulners_scan.txt".format(self.target))
+        self.vulners_path = vulners_path
+        self.logger = Logger(self.path)
+        self.script = self.build_script()
+
+    def build_script(self):
+        script = ["nmap", "-Pn", "-sV", "--script", self.vulners_path, self.target]
+
+        if self.port_range:
+            HelpUtilities.validate_port_range(self.port_range)
+            script.append("-p")
+            script.append(self.port_range)
+            self.logger.info("{} Added port range {} to Nmap script".format(COLORED_COMBOS.NOTIFY, self.port_range))
+        return script
+
+
 class Scanner:
 
     @classmethod
@@ -59,7 +87,7 @@ class Scanner:
         result, err = process.communicate()
         result, err = result.decode().strip(), err.decode().strip()
         if result:
-            parsed_result = Scanner._parse_scan_output(result)
+            parsed_result = cls._parse_scan_output(result)
             scan.logger.info(parsed_result)
         Scanner.write_up(scan, result, err)
 
@@ -81,3 +109,34 @@ class Scanner:
             scan.logger.debug(result+"\n")
         if err:
             scan.logger.debug(err)
+
+
+class VulnersScanner(Scanner):
+    @classmethod
+    def _parse_scan_output(cls, result):
+
+        def parse(res):
+            ports = re.findall(r"(?:^\d+/(?:tcp|udp).*open.*$\n(?:^\|.*$\n)*)", res, re.MULTILINE)
+            out_vers = ""
+            out_none = ""
+            for port in ports:
+                if 'vulners' in port:
+                    out_vers += '\n' + '\n'.join(
+                        re.findall(r"^(\d+/(?:tcp|udp).*open.*$)[\s\S]*?(^\|.*vulners[\s\S]+?^\|_.+?$)", port,
+                                   re.MULTILINE)[0])
+                else:
+                    out_none += port
+            return out_vers, out_none
+
+        parsed_output = ""
+        out_versions, out_pure = parse(result)
+        out_versions = re.sub(r"(\d+/(?:tcp|udp))", COLOR.GREEN + r"\1" + COLOR.RESET, out_versions)
+        out_pure = re.sub(r"(\d+/(?:tcp|udp))", COLOR.GREEN + r"\1" + COLOR.RESET, out_pure)
+        if out_pure:
+            parsed_output += "{} NmapVulners discovered the following open ports:\n{}".format(COLORED_COMBOS.GOOD,
+                                                                                              out_pure)
+        if out_versions:
+            parsed_output += "{} NmapVulners discovered some vulnerable software within the following open ports:\n{}".format(
+                COLORED_COMBOS.GOOD, out_versions)
+        return parsed_output
+
