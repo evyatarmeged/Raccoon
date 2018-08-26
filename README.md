@@ -6,7 +6,7 @@
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![os](https://img.shields.io/badge/OS-Linux-yellow.svg)
 ![pythonver](https://img.shields.io/badge/python-3.5%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/version-0.8.1-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/version-0.8.2-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
@@ -40,7 +40,6 @@ and modules by files
 - [ ] Support multiple hosts (read from file)
 - [ ] Rate limit evasion
 - [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
-- [ ] SearchSploit lookup on results
 - [ ] IP ranges support
 - [ ] CIDR notation support
 - [ ] More output formats
@@ -120,8 +119,11 @@ Options:
   -f, --full-scan                Run Nmap scan with both -sV and -sC
   -p, --port TEXT                Use this port range for Nmap scan instead of
                                  the default
-  --vulners-nmap-scan            Perform an NmapVulners scan
-  --vulners-path TEXT            Path to the nmap_vulners.nse script.
+  --vulners-nmap-scan            Perform an NmapVulners scan. Runs instead of
+                                 the regular Nmap scan and is longer.
+  --vulners-path TEXT            Path to the custom nmap_vulners.nse script.If
+                                 not used, Raccoon uses the built-in script it
+                                 ships with.
   -fr, --follow-redirects        Follow redirects when fuzzing. Default: False
                                  (will not follow redirects)
   --tls-port INTEGER             Use this port for TLS queries. Default: 443
@@ -132,20 +134,22 @@ Options:
   -q, --quiet                    Do not output to stdout
   -o, --outdir TEXT              Directory destination for scan output
   --help                         Show this message and exit.
-
 ```
 
 ### Screenshots
 ![poc2](https://image.ibb.co/iyLreJ/aaaaaaaaaaaaa.png)<br>
 
-![vulnerspoc](https://image.ibb.co/iaOMyU/nmap_vulners_poc.png)<br>
-
 **Web application data including vulnerable S3 bucket:**<br>
 ![somepoc](https://image.ibb.co/m6b3Jz/s3.png)
+
 **[HTB](https://www.hackthebox.eu/) challenge example scan:**<br>
 ![poc](https://image.ibb.co/bGKTRy/bbbbbbb.png)<br>
 
+**Nmap vulners scan results:**<br>
+![vulnerspoc](https://image.ibb.co/iaOMyU/nmap_vulners_poc.png)<br>
+
 **Results folder tree after a scan:**<br>
 ![poc3](https://image.ibb.co/iyaCJd/poc3.png)
+
 ### Contributing
 Any and all contributions, issues, features and tips are welcome.
