@@ -67,8 +67,9 @@ class AmazonS3Handler(Storage):
     def _test_s3_bucket_permissions(self, bucket):
         try:
             bucket_url = [part for part in bucket.no_scheme_url.split("/") if part]
+            bucket_len = len(bucket_url)
 
-            for i in range(len(bucket_url)-1):
+            for i in range(bucket_len-1):
                 url = "/".join(bucket_url[:i+1])
                 if url == BASE_S3_URL or url in self.storage_urls_found:
                     continue

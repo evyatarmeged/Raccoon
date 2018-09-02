@@ -1,15 +1,10 @@
 import random
-import requests
-from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout
-from urllib3.exceptions import LocationParseError, NewConnectionError
-from raccoon_src.utils.exceptions import RequestHandlerException, RequestHandlerConnectionReset
+from fake_useragent import UserAgent
+from requests import request, Session, utils as requests_utils
+from requests.exceptions import ProxyError, TooManyRedirects, ConnectionError, ConnectTimeout, ReadTimeout
+from urllib3.exceptions import NewConnectionError
+from raccoon_src.utils.exceptions import RequestHandlerException
 from raccoon_src.utils.singleton import Singleton
-from fake_useragent.errors import FakeUserAgentError
-
-try:
-    from fake_useragent import UserAgent
-except FakeUserAgentError:
-    pass
 
 
 class RequestHandler(metaclass=Singleton):
@@ -17,7 +12,6 @@ class RequestHandler(metaclass=Singleton):
     A wrapper for request sending and session creating.
     Used to abstract proxy/tor routing to avoid repeating configurations for each module
     """
-
     def __init__(self,
                  proxy_list=None,
                  tor_routing=False,
@@ -30,11 +24,12 @@ class RequestHandler(metaclass=Singleton):
         self.single_proxy = single_proxy
         self.proxies = self._set_instance_proxies()
         self.cookies = cookies
+        self.allowed_methods = {"GET", "HEAD", "POST"}
         self.headers = self._set_headers()
 
     @staticmethod
     def _set_headers():
-        headers = requests.utils.default_headers()
+        headers = requests_utils.default_headers()
         headers["User-Agent"] = UserAgent(verify_ssl=False).random
         return headers
 
@@ -89,18 +84,15 @@ class RequestHandler(metaclass=Singleton):
         proxies = self._get_request_proxies()
 
         try:
-            if method.lower() == "get":
-                return requests.get(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
-            elif method.lower() == "post":
-                return requests.post(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
-            elif method.lower() == "head":
-                return requests.head(proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
+            if method.upper() in self.allowed_methods:
+                kwargs['timeout'] = kwargs['timeout'] if 'timeout' in kwargs else 5
+                return request(method, proxies=proxies, headers=self.headers, cookies=self.cookies, *args, **kwargs)
             else:
                 raise RequestHandlerException("Unsupported method: {}".format(method))
         except ProxyError:
             # TODO: Apply fail over for bad proxies or drop them
             raise RequestHandlerException("Error connecting to proxy")
-        except ConnectTimeout:
+        except (ConnectTimeout, ReadTimeout):
             raise RequestHandlerException("Connection with server timed out")
         except NewConnectionError:
             raise RequestHandlerException("Address cannot be resolved")
@@ -113,7 +105,7 @@ class RequestHandler(metaclass=Singleton):
 
     def get_new_session(self):
         """Returns a new session using the object's proxies and headers"""
-        session = requests.Session()
+        session = Session()
         session.headers = self.headers
         session.proxies = self._get_request_proxies()
         return session
