@@ -9,6 +9,8 @@ from raccoon_src.utils.coloring import COLORED_COMBOS, COLOR
 # Set path for relative access to builtin files.
 MY_PATH = os.path.abspath(os.path.dirname(__file__))
 
+traversal_to_etc_dir = "../../../../../../../etc"  # From sample server
+
 
 class DirectoryTraversal:
 
@@ -31,3 +33,4 @@ class DirectoryTraversal:
 
     def _assert_resource_found(self):
         pass
+

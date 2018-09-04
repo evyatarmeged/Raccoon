@@ -2,10 +2,6 @@
 
   "root: daemon: mysql:": [
     "/etc/passwd", "/etc/passwd%00", "etc/shadow%00", "etc/shadow", "/etc/group"
-  ],
-  "TBD": [
-    "/etc/security/group", "/etc/security/passwd", "/etc/security/user", "/etc/security/environ",
-    "/etc/security/limits", "/etc/at.allow", "/etc/at.deny"
   ]
 
 }
