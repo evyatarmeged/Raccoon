@@ -1,7 +1,21 @@
 {
+  "linux": {
+    "root: daemon: bin: sys:": [
+      "/etc/passwd",
+      "/etc/passwd%00",
+      "etc/shadow%00",
+      "etc/shadow",
+      "/etc/group"
+    ],
+    "USER= LANG= PWD=": ["/proc/self/environ"],
+    "sysfs proc udev": ["/proc/mounts]"
+  },
 
-  "root: daemon: mysql:": [
-    "/etc/passwd", "/etc/passwd%00", "etc/shadow%00", "etc/shadow", "/etc/group"
-  ]
+  "apache": [
+    "/var/log/apache/access.log",  "/var/log/apache2/access.log", "/var/log/apache/error.log",
+    "/var/log/apache2/error.log", "/var/log/httpd/error_log", "/usr/local/apache/log/error_log",
+    "/usr/local/apache2/log/error_log"
+  ],
 
+  "windows": {}
 }
