@@ -44,7 +44,7 @@ https://github.com/evyatarmeged/Raccoon
 
 
 @click.command()
-@click.version_option("0.8.2")
+@click.version_option("0.8.3")
 @click.option("-t", "--target", required=True, help="Target to scan")
 @click.option("-d", "--dns-records", default="A,MX,NS,CNAME,SOA,TXT",
               help="Comma separated DNS records to query. Defaults to: A,MX,NS,CNAME,SOA,TXT")
