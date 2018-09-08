@@ -8,7 +8,7 @@
       "/etc/group"
     ],
     "USER= LANG= PWD=": ["/proc/self/environ"],
-    "sysfs proc udev": ["/proc/mounts]"
+    "sysfs proc udev": ["/proc/mounts"]
   },
 
   "apache": [

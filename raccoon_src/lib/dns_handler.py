@@ -66,9 +66,10 @@ class DNSHandler:
                 path = HelpUtilities.get_output_path("{}/dns_mapping.png".format(host.target))
                 with open(path, "wb") as target_image:
                     target_image.write(page.content)
-            sout_logger.info("{} Successfully fetched DNS mapping for {}".format(
-                COLORED_COMBOS.GOOD, host.target)
-            )
+                sout_logger.info("{} Successfully fetched DNS mapping for {}".format(
+                    COLORED_COMBOS.GOOD, host.target))
+            else:
+                raise RaccoonException
         except RaccoonException:
             sout_logger.info("{} Failed to generate DNS mapping. A connection error occurred.".format(
                 COLORED_COMBOS.BAD))

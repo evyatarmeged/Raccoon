@@ -143,7 +143,9 @@ class HelpUtilities:
                     continue
                 payload["csrfmiddlewaretoken"] = c.__dict__.get("value")
                 break
-            return dnsdumpster_session.post(url, data=payload, headers={"Referer": "https://dnsdumpster.com/"})
+            dnsdumpster_session.post(url, data=payload, headers={"Referer": "https://dnsdumpster.com/"})
+
+            return dnsdumpster_session.get("https://dnsdumpster.com/static/map/{}.png".format(target))
         except ConnectionError:
             raise RaccoonException
 
