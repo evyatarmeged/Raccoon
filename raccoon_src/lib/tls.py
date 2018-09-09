@@ -116,8 +116,8 @@ class TLSHandler(TLSCipherSuiteChecker):
         result, err = await process.communicate()
         try:
             if "server extension \"heartbeat\" (id=15)" in result.decode().strip():
-                self.logger.info("{} Target seems to be vulnerable to Heartbleed - CVE-2014-0160".format(
-                    COLORED_COMBOS.GOOD))
+                self.logger.info("{} Target seems to be vulnerable to Heartbleed - CVE-2014-016. "
+                                 "see http://heartbleed.com/ for more details.".format(COLORED_COMBOS.GOOD))
         except TypeError:  # Type error means no result
             pass
 
