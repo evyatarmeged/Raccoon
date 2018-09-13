@@ -1,14 +1,14 @@
 {
   "linux": {
     "root: daemon: bin: sys:": [
-      "/etc/passwd",
-      "/etc/passwd%00",
+      "etc/passwd",
+      "etc/passwd%00",
       "etc/shadow%00",
       "etc/shadow",
-      "/etc/group"
+      "etc/group"
     ],
-    "USER= LANG= PWD=": ["/proc/self/environ"],
-    "sysfs proc udev": ["/proc/mounts"]
+    "USER= LANG= PWD=": ["proc/self/environ"],
+    "sysfs proc udev": ["proc/mounts"]
   },
 
   "apache": [

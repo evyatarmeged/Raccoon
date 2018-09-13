@@ -16,8 +16,9 @@ MY_PATH = os.path.abspath(os.path.dirname(__file__))
 
 class DirectoryTraversal:
 
-    def __init__(self, host):
+    def __init__(self, host, param=None):
         self.host = host
+        self.target_url = self._determine_target_url(param)
         self.max_traversals = 8
         self.win_traverse = "..\\"
         self.nix_traverse = "../"
@@ -27,14 +28,20 @@ class DirectoryTraversal:
         self.logger = Logger("/home/evya/PycharmProjects/raccoon_warz/raccoon_src/lib/"+log_file)
         with open(os.path.join(MY_PATH, "payloads/traversal.json"), "r") as file:
             self.resources = json.loads(file.read())
-    
+
+    def _determine_target_url(self, param):
+        if param:
+            return "{}/?{}=".format(self.host.target, param)
+        else:
+            return self.host.target
+
     @staticmethod
     def _url_encode(url):
         return urllib.parse.quote_plus(url, safe='', encoding=None, errors=None)
 
     @staticmethod
     def _assert_correct_resource(identifiers, response):
-        return all((word in response for word in identifiers))
+        return all((word in response.text for word in identifiers))
 
     def _generate_sample_404_response(self):
         """
@@ -44,17 +51,18 @@ class DirectoryTraversal:
         false positives.
         """
         # response = self.request_handler.send("GET", url="http://{}/{}".format(self.host.target, uuid.uuid4()))
-        response = requests.get(url="http://{}/{}".format(self.host.target, uuid.uuid4()))
+        response = requests.get(url="http://{}".format(self.target_url + str(uuid.uuid4())))
         return response.text
 
-    def _get_traversed_path(self, path_symbol, url, num):
+    @staticmethod
+    def _get_traversed_path(path_symbol, url, num):
         return path_symbol * num + url
 
     def _get_resource(self, os_path_traversal, file, n):
         uri = self._get_traversed_path(os_path_traversal, file, n)
         print("Traverse depth: "+uri)
         # res = self.request_handler.send("GET", url="{}/{}".format(self.host.target, uri))
-        res = requests.get("http://{}/{}".format(self.host.target, uri))
+        res = requests.get("http://{}{}".format(self.target_url, uri))
         return res
 
     def _scan_apache(self):
@@ -80,11 +88,3 @@ class DirectoryTraversal:
                     if self._assert_correct_resource(identifiers, res):
                         self.logger.info("{} Successfully accessed a sensitive file: {}{}{}".format(
                             COLORED_COMBOS.GOOD, COLOR.RED, res.url, COLOR.RESET))
-
-
-class a:
-    target = "localhost:5000"
-
-
-d = DirectoryTraversal(a)
-d._scan_os()
