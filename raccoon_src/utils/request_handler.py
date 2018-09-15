@@ -102,6 +102,9 @@ class RequestHandler(metaclass=Singleton):
             raise RequestHandlerException("Error connecting to host")
         except TooManyRedirects:
             raise RequestHandlerException("Infinite redirects detected - too many redirects error")
+        except UnicodeDecodeError:
+            # Following issue #19, apparently some sites do not use utf-8 in their uris :<>
+            pass
 
     def get_new_session(self):
         """Returns a new session using the object's proxies and headers"""
