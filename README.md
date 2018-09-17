@@ -70,7 +70,8 @@ You can also clone the GitHub repository for the latest features and changes:<br
 ```
 git clone https://github.com/evyatarmeged/Raccoon.git
 cd Raccoon
-python raccoon_src/main.py
+python setup.py develop
+raccoon [OPTIONS]
 ```
 For docker installation:<br>
 ```
