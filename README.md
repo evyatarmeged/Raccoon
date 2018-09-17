@@ -37,12 +37,13 @@ and modules by files
 
 
 ##### Roadmap and TODOs
+- [ ] Add more WAFs, better detection
+- [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
 - [ ] Support multiple hosts (read from file)
 - [ ] Rate limit evasion
-- [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
 - [ ] IP ranges support
 - [ ] CIDR notation support
-- [ ] More output formats
+- [ ] More output formats (JSON at the very least)
 
 
 ### About
