@@ -87,11 +87,10 @@ and features. It is mandatory that you have it installed before running Raccoon.
 
 ### Usage
 ```
-Usage: raccoon [OPTIONS]
+Usage: raccoon [OPTIONS] TARGET
 
 Options:
   --version                      Show the version and exit.
-  -t, --target TEXT              Target to scan  [required]
   -d, --dns-records TEXT         Comma separated DNS records to query.
                                  Defaults to: A,MX,NS,CNAME,SOA,TXT
   --tor-routing                  Route HTTP traffic through Tor (uses port
