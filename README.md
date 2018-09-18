@@ -91,7 +91,8 @@ and features. It is mandatory that you have it installed before running Raccoon.
 
 ### Usage
 ```
-Usage: raccoon [OPTIONS] [TARGET]
+
+Usage: raccoon [OPTIONS] TARGET
 
 Options:
   --version                      Show the version and exit.

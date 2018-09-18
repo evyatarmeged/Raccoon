@@ -55,14 +55,13 @@ class WebApplicationScanner:
     def _cookie_info(self, jar):
         for cookie in jar:
             key = cookie.__dict__.get("name")
-            value = cookie.__dict__.get("value")
             domain = cookie.__dict__.get("domain")
             secure = cookie.__dict__.get("secure")
             http_only = cookie.has_nonstandard_attr("HttpOnly")
             try:
                 if domain in self.host.target or self.host.target in domain:
                     if not secure or not http_only:
-                        current = "%s Cookie: {%s: %s} -" % (COLORED_COMBOS.GOOD, key, value)
+                        current = "%s Cookie: {%s} -" % (COLORED_COMBOS.GOOD, key)
                         if not secure and not http_only:
                             current += " both secure and HttpOnly flags are not set"
                         elif not secure:
