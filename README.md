@@ -70,14 +70,18 @@ You can also clone the GitHub repository for the latest features and changes:<br
 ```
 git clone https://github.com/evyatarmeged/Raccoon.git
 cd Raccoon
-python raccoon_src/main.py
+python setup.py install # Subsequent changes to the source code will not be reflected in calls to raccoon when this is used
+# Or
+python setup.py develop # Changes to code will be reflected in calls to raccoon. This can be undone by using python setup.py develop --uninstall
+# Finally
+raccoon [OPTIONS] [TARGET]
 ```
 For docker installation:<br>
 ```
 # Build the docker image
 docker build -t evyatarmeged/raccoon .
 # Run a scan, As this a non-root container we need to save the output under the user's home which is /home/raccoon
-docker run --name raccoon evyatarmeged/raccoon:latest -t example.com -o /home/raccoon
+docker run --name raccoon evyatarmeged/raccoon:latest  example.com -o /home/raccoon
 ```
 
 ##### Prerequisites
@@ -87,6 +91,7 @@ and features. It is mandatory that you have it installed before running Raccoon.
 
 ### Usage
 ```
+
 Usage: raccoon [OPTIONS] TARGET
 
 Options:
