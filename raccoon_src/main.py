@@ -5,9 +5,6 @@ import click
 import sys
 import os
 
-# Python imports will be the end of us all
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.exceptions import RaccoonException, HostHandlerException
 from raccoon_src.utils.request_handler import RequestHandler
