@@ -99,19 +99,16 @@ class WAF:
         log_file = HelpUtilities.get_output_path("{}/WAF.txt".format(self.host.target))
         self.logger = Logger(log_file)
 
-    def _waf_detected(self, name):
+    def _waf_detected(self, name, where):
         self.logger.info(
-            "{} Detected WAF presence in web application: {}{}{}".format(
-                COLORED_COMBOS.BAD, COLOR.RED, name, COLOR.RESET))
+            "{} Detected WAF presence in {}: {}{}{}".format(
+                COLORED_COMBOS.BAD, where, COLOR.RED, name, COLOR.RESET))
         self.waf_present = True
 
     def _detect_by_cname(self):
         for waf in self.waf_cname_map:
             if any(waf in str(cname) for cname in self.cnames):
-                self.logger.info("{} Detected WAF presence in CNAME: {}{}{}".format(
-                    COLORED_COMBOS.BAD, COLOR.RED, self.waf_cname_map.get(waf), COLOR.RESET)
-                )
-                self.waf_present = True
+                self._waf_detected(self.waf_cname_map.get(waf), "CNAME record")
 
     async def _detect_by_application(self):
         try:
@@ -128,7 +125,7 @@ class WAF:
             for waf, method in self.waf_app_method_map.items():
                 result = method(response)
                 if result:
-                    self._waf_detected(waf)
+                    self._waf_detected(waf, "web application")
 
         except (ConnectionError, TooManyRedirects) as e:
             raise WAFException("Couldn't get response from server.\n"
