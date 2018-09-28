@@ -2,7 +2,6 @@ import time
 import asyncio
 import threading
 import click
-import sys
 import os
 
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
