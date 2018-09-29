@@ -1,5 +1,6 @@
 import os
 import distutils.spawn
+from platform import system
 from collections import Counter
 from subprocess import PIPE, check_call, CalledProcessError
 from requests.exceptions import ConnectionError
@@ -90,10 +91,19 @@ class HelpUtilities:
         return distutils.spawn.find_executable("openssl")
 
     @classmethod
+    def find_mac_gtimeout_executable(cls):
+        """To add macOS support, the coreutils package needs to be installed using homebrew"""
+        return distutils.spawn.find_executable("gtimeout")
+
+    @classmethod
     def validate_executables(cls):
         if not (cls.find_nmap_executable() and cls.find_openssl_executable()):
             raise RaccoonException("Could not find Nmap or OpenSSL "
                                    "installed. Please install them and run Raccoon again.")
+        if system() == "Darwin":
+            if not cls.find_mac_gtimeout_executable():
+                raise RaccoonException("To support Raccoon with macOS 'gtimeout' must be installed.\n"
+                                       "gtimeout can be installed by running 'brew install coreutils'")
         return
 
     @classmethod

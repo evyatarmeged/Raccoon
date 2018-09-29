@@ -1,9 +1,17 @@
 import re
+from platform import system
 # noinspection PyProtectedMember
 from asyncio.subprocess import PIPE, create_subprocess_exec
 from raccoon_src.utils.help_utils import HelpUtilities
 from raccoon_src.utils.coloring import COLOR, COLORED_COMBOS
 from raccoon_src.utils.logger import Logger
+
+
+# macOS support
+if system() == "Darwin":
+    TIMEOUT = "gtimeout"
+else:
+    TIMEOUT = "timeout"
 
 
 class TLSCipherSuiteChecker:
@@ -55,8 +63,8 @@ class TLSHandler(TLSCipherSuiteChecker):
         self.target = host.target
         self.port = port
         self._versions = ("tls1", "tls1_1", "tls1_2")
-        # OpenSSL likes to hang, Linux timeout to the rescue
-        self._base_script = "timeout 10 openssl s_client -connect {}:{} ".format(self.target, self.port)
+        # OpenSSL likes to hang, hence the timeout call
+        self._base_script = "{} 10 openssl s_client -connect {}:{} ".format(TIMEOUT, self.target, self.port)
         self.begin = "-----BEGIN CERTIFICATE-----"
         self.end = "-----END CERTIFICATE-----"
         self.sni_data = {}
@@ -88,7 +96,7 @@ class TLSHandler(TLSCipherSuiteChecker):
 
     async def _extract_certificate_details(self, data):
         process = await create_subprocess_exec(
-            "timeout", "5", "openssl", "x509", "-text",
+            TIMEOUT, "5", "openssl", "x509", "-text",
             stdin=PIPE,
             stderr=PIPE,
             stdout=PIPE
