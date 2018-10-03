@@ -6,7 +6,7 @@
 ![license](https://img.shields.io/github/license/mashape/apistatus.svg)
 ![os](https://img.shields.io/badge/OS-Linux,%20macOS-yellow.svg)
 ![pythonver](https://img.shields.io/badge/python-3.5%2B-blue.svg)
-![raccoonver](https://img.shields.io/badge/version-0.8.4-lightgrey.svg)
+![raccoonver](https://img.shields.io/badge/version-0.8.5-lightgrey.svg)
 
 ##### Features
 - [x] DNS details
