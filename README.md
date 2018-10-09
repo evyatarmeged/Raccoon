@@ -37,6 +37,8 @@ and modules by files
 
 
 ##### Roadmap and TODOs
+- [ ] Expand, test, and merge the "owasp" branch with more web application attacks and scans ([#28](https://github.com/evyatarmeged/Raccoon/issues/28))
+- [ ] Support more providers for vulnerable storage scan ([#27](https://github.com/evyatarmeged/Raccoon/issues/27))
 - [ ] Add more WAFs, better detection
 - [ ] OWASP vulnerabilities scan (RFI, RCE, XSS, SQLi etc.)
 - [ ] Support multiple hosts (read from file)
@@ -77,7 +79,10 @@ python setup.py develop # Changes to code will be reflected in calls to raccoon.
 # Finally
 raccoon [OPTIONS] [TARGET]
 ```
-For docker installation:<br>
+#### macOS
+To support Raccoon on macOS you need to have gtimeout on your machine.<br>
+gtimeout can be installed by running `brew install coreutils`.
+#### Docker<br>
 ```
 # Build the docker image
 docker build -t evyatarmeged/raccoon .
