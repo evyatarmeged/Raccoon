@@ -82,7 +82,7 @@ https://github.com/evyatarmeged/Raccoon
 #               help="Min and Max number of seconds of delay to be waited between requests\n"
 #                    "Defaults to Min: 0.25, Max: 1. Specified in the format of Min-Max")
 @click.option("-q", "--quiet", is_flag=True, help="Do not output to stdout")
-@click.option("-o", "--outdir", default="Raccoon_scan_results",
+@click.option("-o", "--outdir", default="raccoon_scan_results",
               help="Directory destination for scan output")
 def main(target,
          tor_routing,
