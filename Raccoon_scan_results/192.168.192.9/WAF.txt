@@ -1,0 +1,2 @@
+[1;34m[#][0;0m Trying to detect WAF presence in 192.168.192.9
+[93m[!][0;0m Target does not seem to have an active web server on port 80. No WAF could be detected on an application level.

@@ -1,0 +1,5 @@
+[1;34m[#][0;0m Trying to collect 192.168.1.1 web application data
+[1;32m[v][0;0m Found sitemap.xml
+[1;31m[x][0;0m Found X-XSS-PROTECTION header
+[1;32m[v][0;0m Cookie: {SID} - secure flag not set
+[1;32m[v][0;0m Cookie: {_TESTCOOKIESUPPORT} - secure flag not set

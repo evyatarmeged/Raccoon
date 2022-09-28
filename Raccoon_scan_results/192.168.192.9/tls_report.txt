@@ -1,0 +1,2 @@
+[1;34m[#][0;0m Started collecting TLS data for 192.168.192.9
+[1;31m[x][0;0m Could not obtain any TLS data from target on port 443. Target may not support SSL/TLS or supports it on a different port.
