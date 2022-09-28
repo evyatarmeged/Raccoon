@@ -1,0 +1,2 @@
+[1;34m[#][0;0m Trying to detect WAF presence in 192.168.1.1
+[1;32m[v][0;0m Did not detect WAF presence in target

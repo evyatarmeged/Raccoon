@@ -1,0 +1,2 @@
+[1;32m[v][0;0m Writing DNS query results
+[1;32m[v][0;0m Writing DNS query results

@@ -1,0 +1,192 @@
+Starting Nmap 7.92 ( https://nmap.org ) at 2022-09-23 20:33 WIB
+Nmap scan report for gpon.net (192.168.1.1)
+Host is up (0.67s latency).
+Not shown: 995 closed tcp ports (conn-refused)
+PORT    STATE    SERVICE   VERSION
+21/tcp  open     ftp       vsftpd 2.0.8 or later
+23/tcp  filtered telnet
+53/tcp  open     domain    Unbound
+80/tcp  open     http
+|_http-server-header: <empty>
+| fingerprint-strings: 
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Connection: close
+|     Cache-Control: no-cache,no-store
+|     Pragma: no-cache
+|     Content-Length: 140990
+|     Set-Cookie: SID=5564acfbc6210dd418e165526979177ad6a75c29982fb7dee8f6181b1099c4d1; PATH=/; HttpOnly; SameSite=strict
+|     Set-Cookie: _TESTCOOKIESUPPORT=1; PATH=/; HttpOnly; SameSite=strict
+|     Server: 
+|     Accept-Ranges: bytes
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: frame-ancestors 'self' 'unsafe-inline' 'unsafe-eval' data:
+|     X-Frame-Options: SAMEORIGIN
+|     Content-Type: text/html; charset=utf-8
+|     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/transitional.dtd">
+|     <html xmlns="http://www.w3.org/1999/xhtml">
+|     <head>
+|     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+|     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+|     <link rel="shortcut icon" href="/img/favicon.ico" />
+|     <title>&#7
+|   HTTPOptions: 
+|     HTTP/1.1 400 Bad Request
+|     Connection: close
+|     Content-Type: text/html; charset=iso-8859-1
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data:
+|     Cache-Control: no-cache,no-store
+|     Pragma: no-cache
+|     <html>
+|     <head><title>400 Bad Request</title></head>
+|     <body bgcolor="#FFFFFF" text="#000000" link="#2020ff" vlink="#4040cc">
+|     <h2>400 Bad Request</h2>
+|     Your request has bad syntax or is inherently impossible to satisfy.
+|     <div style="display:none">
+|     <ajax_response_xml_root>
+|     <IF_ERRORSTR>SessionTimeout</IF_ERRORSTR>
+|     <IF_ERRORPARAM>SUCC</IF_ERRORPARAM>
+|     <IF_ERRORTYPE>SUCC</IF_ERRORTYPE>
+|     </ajax_response_xml_root>
+|_    <span>Padding so tha
+|_http-title: &#70;&#54;&#55;&#48;&#76;
+443/tcp open     ssl/https
+|_http-server-header: <empty>
+| fingerprint-strings: 
+|   FourOhFourRequest: 
+|     HTTP/1.0 404 Not Found
+|     Connection: close
+|     Content-Type: text/html; charset=iso-8859-1
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' data:
+|     Cache-Control: no-cache,no-store
+|     Pragma: no-cache
+|     <html>
+|     <head><title>404 Not Found</title></head>
+|     <body bgcolor="#FFFFFF" text="#000000" link="#2020ff" vlink="#4040cc">
+|     <h2>404 Not Found</h2>
+|     <span>The requested URL was not found on this server.</span>
+|     <div style="display:none">
+|     <ajax_response_xml_root>
+|     <IF_ERRORSTR>SessionTimeout</IF_ERRORSTR>
+|     <IF_ERRORPARAM>SUCC</IF_ERRORPARAM>
+|     <IF_ERRORTYPE>SUCC</IF_ERRORTYPE>
+|     </ajax_response_xml_root>
+|     <span>Padding so that MSIE deigns
+|   GetRequest: 
+|     HTTP/1.0 200 OK
+|     Connection: close
+|     Cache-Control: no-cache,no-store
+|     Pragma: no-cache
+|     Content-Length: 140990
+|     Set-Cookie: SID_HTTPS_=9ff97c8f7742ead43ca83c36fdcacab3191ef9f8c519ab5343a212c3bd644874; PATH=/; Secure; HttpOnly; SameSite=strict
+|     Set-Cookie: _TESTCOOKIESUPPORT_HTTPS_=1; PATH=/; Secure; HttpOnly; SameSite=strict
+|     Server: 
+|     Accept-Ranges: bytes
+|     X-Content-Type-Options: nosniff
+|     X-XSS-Protection: 1; mode=block
+|     Content-Security-Policy: frame-ancestors 'self' 'unsafe-inline' 'unsafe-eval' data:
+|     X-Frame-Options: SAMEORIGIN
+|     Content-Type: text/html; charset=utf-8
+|     <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/transitional.dtd">
+|     <html xmlns="http://www.w3.org/1999/xhtml">
+|     <head>
+|     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+|     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+|_    <link rel="shortcut icon" href="/
+|_http-title: &#70;&#54;&#55;&#48;&#76;
+| ssl-cert: Subject: commonName=192.168.1.1/organizationName=ZTE/stateOrProvinceName=JiangSu/countryName=CN
+| Not valid before: 2019-11-15T01:57:17
+|_Not valid after:  2036-04-19T01:57:17
+2 services unrecognized despite returning data. If you know the service/version, please submit the following fingerprints at https://nmap.org/cgi-bin/submit.cgi?new-service :
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port80-TCP:V=7.92%I=7%D=9/23%Time=632DB5B0%P=x86_64-pc-linux-gnu%r(GetR
+SF:equest,3510,"HTTP/1\.0\x20200\x20OK\r\nConnection:\x20close\r\nCache-Co
+SF:ntrol:\x20no-cache,no-store\r\nPragma:\x20no-cache\r\nContent-Length:\x
+SF:20140990\r\nSet-Cookie:\x20SID=5564acfbc6210dd418e165526979177ad6a75c29
+SF:982fb7dee8f6181b1099c4d1;\x20PATH=/;\x20HttpOnly;\x20SameSite=strict\r\
+SF:nSet-Cookie:\x20_TESTCOOKIESUPPORT=1;\x20PATH=/;\x20HttpOnly;\x20SameSi
+SF:te=strict\r\nServer:\x20\r\nAccept-Ranges:\x20bytes\r\nX-Content-Type-O
+SF:ptions:\x20nosniff\r\nX-XSS-Protection:\x201;\x20mode=block\r\nContent-
+SF:Security-Policy:\x20frame-ancestors\x20'self'\x20'unsafe-inline'\x20'un
+SF:safe-eval'\x20data:\r\nX-Frame-Options:\x20SAMEORIGIN\r\nContent-Type:\
+SF:x20text/html;\x20charset=utf-8\r\n\r\n<!DOCTYPE\x20HTML\x20PUBLIC\x20\"
+SF:-//W3C//DTD\x20HTML\x204\.01\x20Transitional//EN\"\x20\"http://www\.w3\
+SF:.org/TR/html4/transitional\.dtd\">\n<html\x20xmlns=\"http://www\.w3\.or
+SF:g/1999/xhtml\">\n<head>\n<meta\x20http-equiv=\"Content-Type\"\x20conten
+SF:t=\"text/html;\x20charset=utf-8\"\x20/>\n<meta\x20http-equiv=\"X-UA-Com
+SF:patible\"\x20content=\"IE=edge\">\n<link\x20rel=\"shortcut\x20icon\"\x2
+SF:0href=\"/img/favicon\.ico\"\x20/>\n<title>&#7")%r(HTTPOptions,5B0,"HTTP
+SF:/1\.1\x20400\x20Bad\x20Request\r\nConnection:\x20close\r\nContent-Type:
+SF:\x20text/html;\x20charset=iso-8859-1\r\nX-Content-Type-Options:\x20nosn
+SF:iff\r\nX-XSS-Protection:\x201;\x20mode=block\r\nContent-Security-Policy
+SF::\x20default-src\x20'self'\x20'unsafe-inline'\x20'unsafe-eval'\x20data:
+SF:\r\nCache-Control:\x20no-cache,no-store\r\nPragma:\x20no-cache\r\n\r\n\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<html>\n\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20<head><title>400\x20Bad\x20Request</title></head>\n
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<body\x20bgcolor=\"#FFFFFF\"\
+SF:x20text=\"#000000\"\x20link=\"#2020ff\"\x20vlink=\"#4040cc\">\n\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20<h2>400\x20Bad\x20Request</h2>\nYour\
+SF:x20request\x20has\x20bad\x20syntax\x20or\x20is\x20inherently\x20impossi
+SF:ble\x20to\x20satisfy\.\n<div\x20style=\"display:none\">\n<ajax_response
+SF:_xml_root>\n<IF_ERRORSTR>SessionTimeout</IF_ERRORSTR>\n<IF_ERRORPARAM>S
+SF:UCC</IF_ERRORPARAM>\n<IF_ERRORTYPE>SUCC</IF_ERRORTYPE>\n</ajax_response
+SF:_xml_root>\n<span>Padding\x20so\x20tha");
+==============NEXT SERVICE FINGERPRINT (SUBMIT INDIVIDUALLY)==============
+SF-Port443-TCP:V=7.92%T=SSL%I=7%D=9/23%Time=632DB5B6%P=x86_64-pc-linux-gnu
+SF:%r(GetRequest,4246,"HTTP/1\.0\x20200\x20OK\r\nConnection:\x20close\r\nC
+SF:ache-Control:\x20no-cache,no-store\r\nPragma:\x20no-cache\r\nContent-Le
+SF:ngth:\x20140990\r\nSet-Cookie:\x20SID_HTTPS_=9ff97c8f7742ead43ca83c36fd
+SF:cacab3191ef9f8c519ab5343a212c3bd644874;\x20PATH=/;\x20Secure;\x20HttpOn
+SF:ly;\x20SameSite=strict\r\nSet-Cookie:\x20_TESTCOOKIESUPPORT_HTTPS_=1;\x
+SF:20PATH=/;\x20Secure;\x20HttpOnly;\x20SameSite=strict\r\nServer:\x20\r\n
+SF:Accept-Ranges:\x20bytes\r\nX-Content-Type-Options:\x20nosniff\r\nX-XSS-
+SF:Protection:\x201;\x20mode=block\r\nContent-Security-Policy:\x20frame-an
+SF:cestors\x20'self'\x20'unsafe-inline'\x20'unsafe-eval'\x20data:\r\nX-Fra
+SF:me-Options:\x20SAMEORIGIN\r\nContent-Type:\x20text/html;\x20charset=utf
+SF:-8\r\n\r\n<!DOCTYPE\x20HTML\x20PUBLIC\x20\"-//W3C//DTD\x20HTML\x204\.01
+SF:\x20Transitional//EN\"\x20\"http://www\.w3\.org/TR/html4/transitional\.
+SF:dtd\">\n<html\x20xmlns=\"http://www\.w3\.org/1999/xhtml\">\n<head>\n<me
+SF:ta\x20http-equiv=\"Content-Type\"\x20content=\"text/html;\x20charset=ut
+SF:f-8\"\x20/>\n<meta\x20http-equiv=\"X-UA-Compatible\"\x20content=\"IE=ed
+SF:ge\">\n<link\x20rel=\"shortcut\x20icon\"\x20href=\"/")%r(FourOhFourRequ
+SF:est,5A3,"HTTP/1\.0\x20404\x20Not\x20Found\r\nConnection:\x20close\r\nCo
+SF:ntent-Type:\x20text/html;\x20charset=iso-8859-1\r\nX-Content-Type-Optio
+SF:ns:\x20nosniff\r\nX-XSS-Protection:\x201;\x20mode=block\r\nContent-Secu
+SF:rity-Policy:\x20default-src\x20'self'\x20'unsafe-inline'\x20'unsafe-eva
+SF:l'\x20data:\r\nCache-Control:\x20no-cache,no-store\r\nPragma:\x20no-cac
+SF:he\r\n\r\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20
+SF:\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<html>\n\x20\x20\x2
+SF:0\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20<head><title>404\x20Not\x20Found</title>
+SF:</head>\n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<body\x20bgcolor=\"#
+SF:FFFFFF\"\x20text=\"#000000\"\x20link=\"#2020ff\"\x20vlink=\"#4040cc\">\
+SF:n\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x
+SF:20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\
+SF:x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<h2>404\x20Not\x20Found</h2>
+SF:\n<span>The\x20requested\x20URL\x20was\x20not\x20found\x20on\x20this\x2
+SF:0server\.</span>\n<div\x20style=\"display:none\">\n<ajax_response_xml_r
+SF:oot>\n<IF_ERRORSTR>SessionTimeout</IF_ERRORSTR>\n<IF_ERRORPARAM>SUCC</I
+SF:F_ERRORPARAM>\n<IF_ERRORTYPE>SUCC</IF_ERRORTYPE>\n</ajax_response_xml_r
+SF:oot>\n<span>Padding\x20so\x20that\x20MSIE\x20deigns");
+Service Info: Host: virtual
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 29.94 seconds
+

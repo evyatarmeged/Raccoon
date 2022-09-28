@@ -1,0 +1,29 @@
+[1;34m[#][0;0m Fuzzing URLs
+[1;34m[#][0;0m Reading from list: /home/hello/.local/lib/python3.10/site-packages/raccoon_src/wordlists/fuzzlist
+	[1;32m[200][0;0m http://192.168.1.1/ecosystem.json
+	[1;32m[200][0;0m http://192.168.1.1/WEB-INF/web.xml
+	[1;32m[200][0;0m http://192.168.1.1/xsql/lib/XSQLConfig.xml
+	[1;32m[200][0;0m http://192.168.1.1/docs/export-demo.xml
+	[1;32m[200][0;0m http://192.168.1.1/.idea/scopes/scope_settings.xml
+	[1;32m[200][0;0m http://192.168.1.1/app/composer.json
+	[1;32m[200][0;0m http://192.168.1.1/nbproject/private/private.xml
+	[1;32m[200][0;0m http://192.168.1.1/.settings/org.eclipse.wst.common.project.facet.core.xml
+	[1;32m[200][0;0m http://192.168.1.1/accounts.xml
+	[1;32m[200][0;0m http://192.168.1.1/xml/common.xml
+	[1;32m[200][0;0m http://192.168.1.1/.fontcustom-manifest.json
+	[1;32m[200][0;0m http://192.168.1.1/app/etc/fpc.xml
+	[1;32m[200][0;0m http://192.168.1.1/nbactions.xml
+	[1;32m[200][0;0m http://192.168.1.1/config.xml
+	[1;32m[200][0;0m http://192.168.1.1/.idea/workspace(5).xml
+	[1;32m[200][0;0m http://192.168.1.1/servlet/Oracle.xml.xsql.XSQLServlet/soapdocs/webapps/soap/WEB-INF/config/soapConfig.xml
+	[1;32m[200][0;0m http://192.168.1.1/console/payments/config.json
+	[1;32m[200][0;0m http://192.168.1.1/server.xml
+	[1;32m[200][0;0m http://192.168.1.1/publication_list.xml
+	[1;32m[200][0;0m http://192.168.1.1/.idea/dataSources.xml
+	[1;32m[200][0;0m http://192.168.1.1/.idea/dataSources.local.xml
+	[1;32m[200][0;0m http://192.168.1.1/.filezilla/sitemanager.xml.xml
+	[1;32m[200][0;0m http://192.168.1.1/phpunit.xml
+	[1;32m[200][0;0m http://192.168.1.1/ServerList.xml
+	[1;32m[200][0;0m http://192.168.1.1/.idea/misc.xml
+	[1;32m[200][0;0m http://192.168.1.1/pom.xml
+[1;34m[#][0;0m Done fuzzing URLs
