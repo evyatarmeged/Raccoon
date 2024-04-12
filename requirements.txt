@@ -1,5 +1,5 @@
 xmltodict==0.11.0
-dnspython==1.15.0
+dnspython==2.6.1
 requests>=2.20.0
 lxml==4.6.5
 beautifulsoup4==4.6.0
