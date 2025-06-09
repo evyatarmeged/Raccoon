@@ -30,7 +30,7 @@ class RequestHandler(metaclass=Singleton):
     @staticmethod
     def _set_headers():
         headers = requests_utils.default_headers()
-        headers["User-Agent"] = UserAgent(verify_ssl=False).random
+        headers["User-Agent"] = UserAgent().random
         return headers
 
     def _set_instance_proxies(self):
