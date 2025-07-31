@@ -1,4 +1,6 @@
 import os
+import struct
+import socket
 import distutils.spawn
 from platform import system
 from collections import Counter
@@ -11,7 +13,84 @@ from raccoon_src.utils.request_handler import RequestHandler
 class HelpUtilities:
 
     PATH = ""
+    
+    @staticmethod
+    def ip_to_int(ip_address):
+        """
 
+        >>> HelpUtilities.ip_to_int("192.168.0.0")
+        3232235520L
+        >>> HelpUtilities.ip_to_int("192.168.255.255")
+        3232301055L
+
+        :param ip_address: a quad dotted ip address
+        :return: an integer (long) representation of that ip address's bits
+        """
+        return struct.unpack('!I', socket.inet_aton(ip_address))[0]
+
+    @staticmethod
+    def int_to_ip(int_value):
+        """
+
+        >>> HelpUtilities.int_to_ip(3232235520)
+        '192.168.0.0'
+        >>> HelpUtilities.int_to_ip(3232301055)
+        '192.168.255.255'
+
+        :param int_value: an integer
+        :return: string quad dotted ip address
+        """
+
+        return socket.inet_ntoa(struct.pack('!I', int_value))
+
+    @staticmethod
+    def iter_ip_range(start_address,end_address):
+        """
+
+        :param start_address:
+        :param end_address:
+        :return:
+        """
+        for i in range(HelpUtilities.ip_to_int(start_address),HelpUtilities.ip_to_int(end_address)+1):
+            yield HelpUtilities.int_to_ip(i)
+
+    @staticmethod
+    def count_ips_in_range(start_address,end_address):
+        """
+        >>> HelpUtilities.count_ips_in_range('192.168.1.10','192.168.255.10')
+        65024L
+
+
+        :param start_address: a quad dotted ip address string
+        :param end_address: a quad dotted ip address string
+        :return:
+        """
+        return HelpUtilities.ip_to_int(end_address)-HelpUtilities.ip_to_int(start_address)
+
+    @staticmethod
+    def iter_ip_blocks(start_address,end_address,num_blocks):
+        """
+        an iterator that divides an ip_range into num_blocks, it yields tuples of (block_start_address,block_end_address)
+        suitable for generating values to pass off to threads or multiprocessing
+
+        >>> list(HelpUtilities.iter_ip_blocks("192.168.0.1","192.168.255.255",3)) # three cores??? o.O
+        [('192.168.0.1', '192.168.85.85'), ('192.168.85.86', '192.168.170.170'), ('192.168.170.171', '192.168.255.255')]
+
+        >>> list(HelpUtilities.iter_ip_blocks('192.168.0.1', '192.168.85.86',80))# 80 cores?        # doctest: +ELLIPSIS
+        [('192.168.0.1', '192.168.1.18'), ('192.168.1.19', '192.168.2.36'), ('192.168.2.37', '192.168.3.54'),...
+
+        :param start_address:  the first address to scan
+        :param end_address: the last address to scan
+        :param num_blocks: the number of blocks to subdivide into
+        :return:  tuple of (block_start_address,block_end_address)
+        """
+        ttl_address_count = HelpUtilities.count_ips_in_range(start_address,end_address)
+        addresses_per_block = ttl_address_count//num_blocks + 1
+        start_address_int =HelpUtilities.ip_to_int(start_address)
+        end_address_int =HelpUtilities.ip_to_int(end_address)
+        for i in range(start_address_int,end_address_int,addresses_per_block):
+            yield (HelpUtilities.int_to_ip(i),HelpUtilities.int_to_ip(i+addresses_per_block-1))
+            
     @classmethod
     def validate_target_is_up(cls, host):
         cmd = "ping -c 1 {}".format(host.target)
